@@ -103,6 +103,15 @@ export function OnboardingWizard({ authProvider }: OnboardingWizardProps) {
     };
 
     const onSubmit = async (data: z.infer<typeof OnboardingInputSchema>) => {
+        // Prevención de submit implícito al pulsar Enter en pasos intermedios
+        const isFinalStep = (isGoogleUser && currentStep === "security") || (!isGoogleUser && currentStep === "measurements");
+        
+        if (!isFinalStep) {
+            // Avanzar de paso si se pulsa Enter y la validación general pasa
+            nextStep();
+            return;
+        }
+
         // Validación adicional: si es usuario Google, la contraseña es OBLIGATORIA
         if (isGoogleUser) {
             if (!data.password || data.password.length < 6) {
