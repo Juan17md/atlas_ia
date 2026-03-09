@@ -111,45 +111,53 @@ export default async function MeasurementHistoryPage({ searchParams }: HistoryPa
                                             </span>
                                         </div>
 
-                                        <div className="bg-neutral-900/30 backdrop-blur-3xl border border-white/5 rounded-4xl overflow-hidden shadow-2xl relative group hover:border-white/10 transition-all">
+                                        <div className="bg-neutral-900/40 backdrop-blur-xl border border-white/10 rounded-4xl overflow-hidden shadow-2xl relative group hover:border-red-500/30 hover:shadow-[0_0_40px_rgba(239,68,68,0.1)] transition-all duration-500">
                                             {/* Glow decorativo interno */}
-                                            <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/5 rounded-full blur-3xl -z-10 group-hover:bg-red-500/10 transition-colors" />
+                                            <div className="absolute top-0 right-0 w-64 h-64 bg-red-600/10 rounded-full blur-[80px] -z-10 group-hover:bg-red-500/20 transition-colors duration-700" />
+                                            <div className="absolute bottom-0 left-0 w-48 h-48 bg-orange-600/5 rounded-full blur-[60px] -z-10 group-hover:bg-orange-500/10 transition-colors duration-700" />
 
                                             {/* Upper row: Weight & Meta */}
                                             {item.weight && (
-                                                <div className="p-6 md:p-8 border-b border-white/5 flex items-center justify-between bg-black/40">
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center border border-white/5">
-                                                            <Scale className="w-6 h-6 text-neutral-400" />
+                                                <div className="p-6 md:p-8 border-b border-white/10 bg-linear-to-r from-red-950/20 to-transparent relative overflow-hidden">
+                                                    <div className="absolute left-0 top-0 w-1 h-full bg-linear-to-b from-red-500 to-transparent" />
+                                                    <div className="flex items-center justify-between relative z-10">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="w-14 h-14 bg-red-500/10 rounded-2xl flex items-center justify-center border border-red-500/20 shadow-inner">
+                                                                <Scale className="w-7 h-7 text-red-400" />
+                                                            </div>
+                                                            <div>
+                                                                <span className="text-[10px] font-black text-red-500/80 uppercase tracking-[0.2em] italic block mb-1">Registro de Masa Corporal</span>
+                                                                <span className="text-base font-bold text-white tracking-wide">Peso Total</span>
+                                                            </div>
                                                         </div>
-                                                        <div>
-                                                            <span className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em] italic block">Registro de Masa Corporal</span>
-                                                            <span className="text-sm font-bold text-neutral-400">Peso Total</span>
+                                                        <div className="text-right">
+                                                            <span className="font-black text-transparent bg-clip-text bg-linear-to-br from-white to-neutral-500 text-6xl md:text-7xl italic tracking-tighter leading-none drop-shadow-sm">
+                                                                {item.weight}
+                                                            </span>
+                                                            <span className="text-sm text-red-500 uppercase font-black ml-2 tracking-[0.3em] italic">KG</span>
                                                         </div>
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <span className="font-black text-white text-5xl md:text-6xl italic tracking-tighter leading-none">
-                                                            {item.weight}
-                                                        </span>
-                                                        <span className="text-xs text-neutral-500 uppercase font-black ml-2 tracking-widest italic">KG</span>
                                                     </div>
                                                 </div>
                                             )}
 
                                             {/* Measurements Grid */}
                                             {loggedMeasurements.length > 0 && (
-                                                <div className="p-6 md:p-8">
-                                                    <div className="flex items-center gap-3 mb-6">
-                                                        <AlignLeft className="w-5 h-5 text-neutral-500" />
-                                                        <span className="text-xs font-black text-neutral-400 uppercase tracking-widest italic">Perímetros (Centímetros)</span>
+                                                <div className="p-6 md:p-10 bg-black/20">
+                                                    <div className="flex items-center gap-3 mb-8">
+                                                        <AlignLeft className="w-5 h-5 text-neutral-400" />
+                                                        <span className="text-sm font-black text-neutral-300 uppercase tracking-[0.2em] italic">Perímetros Corporales</span>
                                                     </div>
-                                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
                                                         {loggedMeasurements.map(key => (
-                                                            <div key={key} className="bg-black/60 border border-white/5 rounded-2xl p-5 flex flex-col justify-between items-start group/card hover:bg-neutral-900/80 hover:border-red-500/30 transition-all shadow-lg">
-                                                                <span className="text-[10px] text-neutral-500 font-black uppercase tracking-wider mb-2 italic">{labels[key] || key}</span>
-                                                                <span className="text-2xl font-black text-white italic group-hover/card:text-red-500 transition-colors uppercase mt-1">
-                                                                    {item[key as keyof typeof item] as React.ReactNode} <span className="text-[10px] text-neutral-600 ml-1">CM</span>
-                                                                </span>
+                                                            <div key={key} className="bg-neutral-900/60 border border-white/5 rounded-[1.25rem] p-5 flex flex-col justify-between items-start group/card hover:bg-neutral-800 hover:border-red-500/40 hover:-translate-y-1 transition-all duration-300 shadow-xl relative overflow-hidden">
+                                                                <div className="absolute inset-0 bg-linear-to-br from-red-500/0 via-transparent to-red-500/0 group-hover/card:to-red-500/5 pointer-events-none transition-colors duration-500" />
+                                                                <span className="text-[10px] text-neutral-500 font-black uppercase tracking-[0.15em] mb-3 italic">{labels[key] || key}</span>
+                                                                <div className="flex items-baseline gap-1 mt-auto">
+                                                                    <span className="text-3xl font-black text-white italic group-hover/card:text-red-400 transition-colors uppercase tracking-tight">
+                                                                        {item[key as keyof typeof item] as React.ReactNode}
+                                                                    </span>
+                                                                    <span className="text-[11px] font-bold text-neutral-600 tracking-widest">CM</span>
+                                                                </div>
                                                             </div>
                                                         ))}
                                                     </div>
@@ -158,15 +166,16 @@ export default async function MeasurementHistoryPage({ searchParams }: HistoryPa
 
                                             {/* prominent Notes Section */}
                                             {item.notes && (
-                                                <div className="p-6 md:p-8 bg-red-600/5 border-t border-red-500/20 relative overflow-hidden">
-                                                    <div className="absolute top-0 left-0 w-1 h-full bg-red-500" />
-                                                    <div className="flex items-start gap-4">
-                                                        <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center shrink-0 border border-red-500/30">
-                                                            <Info className="w-5 h-5 text-red-500" />
+                                                <div className="p-6 md:p-8 bg-red-950/30 border-t border-red-500/20 relative overflow-hidden backdrop-blur-md">
+                                                    <div className="absolute top-0 left-0 w-1.5 h-full bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.8)]" />
+                                                    <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-red-600/10 rounded-full blur-2xl pointer-events-none" />
+                                                    <div className="flex items-start gap-5 relative z-10">
+                                                        <div className="w-12 h-12 bg-red-500/20 rounded-2xl flex items-center justify-center shrink-0 border border-red-500/40 shadow-lg">
+                                                            <Info className="w-6 h-6 text-red-400" />
                                                         </div>
-                                                        <div className="flex-1">
-                                                            <h4 className="text-[10px] font-black text-red-500 uppercase tracking-widest italic mb-2">Nota de Evolución</h4>
-                                                            <p className="text-sm md:text-base text-white/90 font-medium leading-relaxed italic border-l-2 border-white/10 pl-4 py-1">
+                                                        <div className="flex-1 mt-1">
+                                                            <h4 className="text-[11px] font-black text-red-400 uppercase tracking-[0.3em] italic mb-3">Observación del Entrenador</h4>
+                                                            <p className="text-base md:text-lg text-white/90 font-medium leading-relaxed italic border-l-2 border-red-500/30 pl-5 py-2 tracking-wide">
                                                                 "{item.notes}"
                                                             </p>
                                                         </div>
