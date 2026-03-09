@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { Activity, Flame, Scale, TrendingUp, Trophy, Ruler, Users, ArrowLeft, Dumbbell, Sparkles } from "lucide-react";
+import { Activity, Flame, Scale, TrendingUp, Trophy, Ruler, Users, ArrowLeft, Dumbbell, Sparkles, History } from "lucide-react";
 import { getPersonalRecords, getStrengthProgress } from "@/actions/analytics-actions";
 import { getBodyMeasurementsHistory } from "@/actions/measurement-actions";
 import { adminDb } from "@/lib/firebase-admin";
@@ -10,7 +10,6 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { LogMeasurementDialog } from "@/components/profile/log-measurement-dialog";
 import { ClientMotionDiv } from "@/components/ui/client-motion";
-import { MeasurementHistorySheet } from "@/components/profile/measurement-history-sheet";
 
 interface PersonalRecord {
     exercise: string;
@@ -324,7 +323,12 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                         </div>
                     </div>
                     
-                    <MeasurementHistorySheet history={measurementHistory as any} />
+                    <Link href={`/progress/history${isCoach && targetUserId ? `?athleteId=${targetUserId}` : ''}`}>
+                        <Button variant="ghost" className="h-10 px-4 rounded-xl bg-neutral-900/40 border border-white/5 text-neutral-400 hover:text-white hover:bg-white/10 transition-all font-black text-[10px] uppercase tracking-widest italic group shrink-0">
+                            <History className="w-4 h-4 mr-2 text-red-500 group-hover:-rotate-12 transition-transform" />
+                            Historial Completo
+                        </Button>
+                    </Link>
                 </div>
 
                 <div className="p-8 relative z-10">
