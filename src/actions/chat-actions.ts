@@ -2,6 +2,7 @@
 
 import { getGroqClient, getAthleteContext, DEFAULT_AI_MODEL } from "@/lib/ai";
 import { auth } from "@/lib/auth";
+import type { ChatCompletionMessageParam } from "groq-sdk/resources/chat/completions";
 
 export async function chatWithAI(messages: { role: string, content: string }[]) {
     try {
@@ -31,13 +32,18 @@ export async function chatWithAI(messages: { role: string, content: string }[]) 
         ${athleteCtx}`;
         }
 
-        const systemMessage = {
+        const systemMessage: ChatCompletionMessageParam = {
             role: "system",
             content: systemPromptContent
         };
 
+        const typedMessages: ChatCompletionMessageParam[] = [
+            systemMessage,
+            ...messages.map(m => ({ role: m.role as "user" | "assistant" | "system", content: m.content }))
+        ];
+
         const completion = await groq.chat.completions.create({
-            messages: [systemMessage, ...messages] as any,
+            messages: typedMessages,
             model: DEFAULT_AI_MODEL,
             temperature: 0.7,
             max_tokens: 600,

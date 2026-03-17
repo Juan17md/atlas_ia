@@ -48,7 +48,6 @@ export function LogMeasurementDialog({ onLogSuccess, children, initialData, init
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const form = useForm<z.infer<typeof LogSchema>>({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         resolver: zodResolver(LogSchema) as any,
         defaultValues: {
             date: new Date().toISOString().split('T')[0],
@@ -57,14 +56,14 @@ export function LogMeasurementDialog({ onLogSuccess, children, initialData, init
         }
     });
 
-    // Update form values when dialog opens to ensure fresh data
+    // Actualizar valores del formulario cuando se abre el diálogo para asegurar datos frescos
     useEffect(() => {
         if (open) {
             form.reset({
                 date: new Date().toISOString().split('T')[0],
                 weight: initialWeight,
                 ...initialData,
-                notes: "" // Always reset notes to empty
+                notes: "" // Siempre resetear notes a vacío
             });
         }
     }, [open, initialData, initialWeight, form]);
@@ -118,10 +117,10 @@ export function LogMeasurementDialog({ onLogSuccess, children, initialData, init
                                         type="text"
                                         inputMode="decimal"
                                         {...form.register("weight", {
-                                            onChange: (e) => {
+                                            onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
                                                 const val = e.target.value.replace(",", ".");
                                                 if (val === "" || /^\d*\.?\d*$/.test(val)) {
-                                                    form.setValue("weight", val as any);
+                                                    form.setValue("weight", val === "" ? undefined : parseFloat(val));
                                                 } else {
                                                     e.target.value = form.getValues("weight")?.toString() || "";
                                                 }

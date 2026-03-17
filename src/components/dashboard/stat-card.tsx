@@ -44,7 +44,7 @@ export function StatCard({
             whileHover={{ y: -4 }}
             transition={{ duration: 0.3 }}
             className={cn(
-                "p-6 rounded-[2.5rem] bg-neutral-900/40 backdrop-blur-xl border border-white/5 flex flex-col justify-between h-44 group transition-all relative overflow-hidden shadow-2xl shadow-black/40",
+                "p-6 rounded-4xl bg-neutral-900/40 backdrop-blur-xl border border-white/5 flex flex-col justify-between h-44 group transition-all relative overflow-hidden shadow-2xl",
                 "hover:border-white/20 hover:bg-neutral-900/60",
                 className
             )}
@@ -69,7 +69,7 @@ export function StatCard({
             <div className="flex items-center gap-2 mt-auto relative z-10">
                 {TrendIcon && (
                     <div className={cn(
-                        "flex items-center text-[10px] font-black px-2.5 py-1 rounded-full border shadow-sm",
+                        "flex items-center text-[10px] font-black px-2.5 py-1 rounded-full border",
                         trend === "up" ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "bg-red-500/10 text-red-500 border-red-500/20"
                     )}>
                         <TrendIcon className="w-3 h-3 mr-1 shrink-0" />

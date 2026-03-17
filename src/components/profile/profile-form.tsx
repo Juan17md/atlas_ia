@@ -68,7 +68,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
             ...values,
             height: values.height ? Number(values.height) : undefined,
             weight: values.weight ? Number(values.weight) : undefined,
-        } as any); // Use any temporarily to avoid complex Zod/TS intersection issues if they persist
+        });
         setIsSubmitting(false);
         if (res.success) {
             toast.success("Perfil actualizado");

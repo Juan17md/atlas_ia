@@ -86,7 +86,6 @@ export interface Athlete {
     id: string;
     name: string;
     email: string;
-    photoUrl?: string | null;
     image?: string | null;
 }
 
@@ -228,7 +227,7 @@ export interface DashboardUser {
     name?: string | null;
     email?: string | null;
     image?: string | null;
-    role?: "athlete" | "coach" | "admin" | "advanced_athlete";
+    role?: "athlete" | "coach" | "advanced_athlete";
     onboardingCompleted?: boolean;
 }
 

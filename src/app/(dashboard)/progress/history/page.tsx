@@ -176,7 +176,7 @@ export default async function MeasurementHistoryPage({ searchParams }: HistoryPa
                                                         <div className="flex-1 mt-1">
                                                             <h4 className="text-[11px] font-black text-red-400 uppercase tracking-[0.3em] italic mb-3">Observación del Entrenador</h4>
                                                             <p className="text-base md:text-lg text-white/90 font-medium leading-relaxed italic border-l-2 border-red-500/30 pl-5 py-2 tracking-wide">
-                                                                "{item.notes}"
+                                                                &ldquo;{item.notes}&rdquo;
                                                             </p>
                                                         </div>
                                                     </div>

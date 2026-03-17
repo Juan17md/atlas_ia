@@ -7,6 +7,28 @@ import {
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
+// Configuración de Firebase con validación de variables de entorno
+const requiredEnvVars = {
+    NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    NEXT_PUBLIC_FIREBASE_PROJECT_ID: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    NEXT_PUBLIC_FIREBASE_APP_ID: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+};
+
+// Validar que todas las variables requeridas estén presentes
+const missingVars = Object.entries(requiredEnvVars)
+    .filter(([_, value]) => !value)
+    .map(([key]) => key);
+
+if (missingVars.length > 0) {
+    throw new Error(
+        `Variables de entorno de Firebase faltantes: ${missingVars.join(", ")}. ` +
+        `Por favor revise su archivo .env`
+    );
+}
+
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
     authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -34,7 +56,7 @@ if (typeof window !== "undefined" && !getApps().length) {
                 })
             })
         });
-    } catch (e) {
+    } catch {
         // Si ya está inicializado, usar la instancia existente
         db = getFirestore(app);
     }
@@ -56,7 +78,7 @@ import {
 } from "firebase/firestore";
 import { z } from "zod";
 
-const createConverter = <T extends z.ZodType>(schema: T): FirestoreDataConverter<z.infer<T>> => ({
+const createConverter = <T extends z.ZodType>(_schema: T): FirestoreDataConverter<z.infer<T>> => ({
     toFirestore: (data: WithFieldValue<z.infer<T>>): DocumentData => {
         return data as DocumentData;
     },
@@ -78,7 +100,7 @@ const createConverter = <T extends z.ZodType>(schema: T): FirestoreDataConverter
 });
 
 // Función helper para obtener colecciones tipadas
-export const getCollection = <T extends z.ZodType>(collectionName: string, schema: T) => {
+export const getCollection = <T extends z.ZodType>(collectionName: string, _schema: T) => {
     return collection(db, collectionName) as CollectionReference<z.infer<T>>;
 }
 

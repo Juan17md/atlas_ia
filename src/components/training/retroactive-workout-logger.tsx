@@ -19,7 +19,7 @@ import {
     Zap,
     RefreshCw,
 } from "lucide-react";
-import { logRetroactiveWorkout, RetroactiveWorkoutData, getWorkoutLogByDate } from "@/actions/training-actions";
+import { logRetroactiveWorkout, RetroactiveWorkoutData, getWorkoutLogByDate, TrainingLogDbData } from "@/actions/training-actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -132,7 +132,7 @@ export function RetroactiveWorkoutLogger({ routineDay, routineId, routineName: i
                 if (!isMounted) return;
 
                 if (res.success && res.log) {
-                    const log = res.log;
+                    const log: TrainingLogDbData = res.log;
                     setExistingLogId(log.id);
                     setExistingSessionId(log.sessionId);
                     setRoutineNameState(log.routineName || "");

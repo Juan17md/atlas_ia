@@ -50,7 +50,7 @@ export async function updateProfile(data: UpdateProfileInput, targetUserId?: str
         // REGLA .cursorrules: Usar .set(..., { merge: true })
         await userRef.set({
             ...validation.data,
-            // @ts-ignore - Usamos el campo de Firebase Admin para asegurar precisión de tiempo
+            // @ts-expect-error - Usamos el campo de Firebase Admin para asegurar precisión de tiempo
             updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         }, { merge: true });
 
@@ -62,11 +62,12 @@ export async function updateProfile(data: UpdateProfileInput, targetUserId?: str
         revalidatePath("/dashboard");
 
         return { success: true };
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error(">>> [updateProfile] Error CRÍTICO en Firestore:", error);
+        const errorMessage = error instanceof Error ? error.message : "Error desconocido";
         return {
             success: false,
-            error: `Error de servidor: ${error.message || "No se pudo actualizar la base de datos"}`
+            error: `Error de servidor: ${errorMessage || "No se pudo actualizar la base de datos"}`
         };
     }
 }

@@ -5,6 +5,12 @@ import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { format } from "date-fns";
 
+interface RoutineDay {
+    id?: string;
+    name?: string;
+    exercises?: unknown[];
+}
+
 interface AssignmentInput {
     athleteId: string;
     routineId: string; // The Template Routine ID
@@ -139,8 +145,9 @@ export async function assignRoutineDay(data: AssignmentInput, confirmReplace: bo
 
         // Fetch routine details for denormalization (optional, but good for calendar display)
         const routineSnap = await adminDb.collection("routines").doc(routineCopyId).get();
-        const routineData = routineSnap.data();
-        const dayName = routineData?.schedule?.find((d: any) => d.id === data.dayId)?.name || "Día de Rutina";
+        const routineDoc = routineSnap.data();
+        const routineData = routineDoc as { name?: string; schedule?: RoutineDay[] } | undefined;
+        const dayName = routineData?.schedule?.find((d) => d.id === data.dayId)?.name || "Día de Rutina";
 
         await assignmentsRef.add({
             routineId: routineCopyId,
@@ -184,34 +191,49 @@ export async function assignRoutineWeek(data: BatchAssignmentInput, confirmRepla
         const routineCopyId = await getRoutineCopyId(data.athleteId, data.routineId, session.user.id);
         const assignmentsRef = adminDb.collection("users").doc(data.athleteId).collection("assignments");
         const routineSnap = await adminDb.collection("routines").doc(routineCopyId).get();
-        const routineData = routineSnap.data();
+        const routineData = routineSnap.data() as { name?: string; schedule?: RoutineDay[] } | undefined;
 
-        const batch = adminDb.batch();
+        const BATCH_LIMIT = 500; // Límite de Firestore
 
-        // If replacing, delete conflicts
+        // If replacing, delete conflicts first
         if (conflictCheck.hasConflicts && confirmReplace) {
+            const deleteBatch = adminDb.batch();
             for (const conflict of conflictCheck.conflicts) {
-                batch.delete(assignmentsRef.doc(conflict.id!));
+                deleteBatch.delete(assignmentsRef.doc(conflict.id!));
             }
+            await deleteBatch.commit();
         }
 
-        // Add new assignments
-        for (const day of data.days) {
-            const dayName = routineData?.schedule?.find((d: any) => d.id === day.dayId)?.name || "Día de Rutina";
-            const docRef = assignmentsRef.doc(); // Auto ID
-            batch.set(docRef, {
-                routineId: routineCopyId,
-                originalRoutineId: data.routineId, // To track origin
-                dayId: day.dayId,
-                date: day.date,
-                routineName: routineData?.name,
-                dayName: dayName,
-                assignedBy: session.user.id,
-                createdAt: new Date(),
-            });
+        // Add new assignments - dividir en batches si es necesario
+        const days = data.days;
+        const deleteCount = conflictCheck.hasConflicts && confirmReplace ? conflictCheck.conflicts.length : 0;
+        
+        // Calcular máximo de asignaciones que podemos hacer
+        const maxAssignments = Math.min(days.length, BATCH_LIMIT - deleteCount);
+        const daysToAssign = days.slice(0, maxAssignments);
+
+        if (daysToAssign.length > 0) {
+            const writeBatch = adminDb.batch();
+            for (const day of daysToAssign) {
+                const dayName = routineData?.schedule?.find((d) => d.id === day.dayId)?.name || "Día de Rutina";
+                const docRef = assignmentsRef.doc();
+                writeBatch.set(docRef, {
+                    routineId: routineCopyId,
+                    originalRoutineId: data.routineId,
+                    dayId: day.dayId,
+                    date: day.date,
+                    routineName: routineData?.name,
+                    dayName: dayName,
+                    assignedBy: session.user.id,
+                    createdAt: new Date(),
+                });
+            }
+            await writeBatch.commit();
         }
 
-        await batch.commit();
+        if (days.length > maxAssignments) {
+            console.warn(`Se asignaron solo ${maxAssignments} de ${days.length} días debido al límite de batch`);
+        }
         revalidatePath(`/athletes/${data.athleteId}`);
         return { success: true };
 

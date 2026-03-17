@@ -2,9 +2,8 @@ import { getTrainingLogs } from "@/actions/training-actions";
 import { TrainingHistoryList } from "@/components/training/training-history-list";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { ArrowLeft, Calendar, Dumbbell, Flame, Zap, Activity, TrendingUp } from "lucide-react";
+import { ArrowLeft, Calendar, Zap, Activity, TrendingUp } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { ClientMotionDiv } from "@/components/ui/client-motion";
 
 import type { TrainingSetData, TrainingExerciseData, TrainingLogData } from "@/types";

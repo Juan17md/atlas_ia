@@ -13,19 +13,19 @@ const getAdminApp = () => {
 
     try {
         let cleanedKey = key.trim();
-        // Remove enclosing single quotes
+        // Eliminar comillas simples envolventes
         if (cleanedKey.startsWith("'") && cleanedKey.endsWith("'")) {
             cleanedKey = cleanedKey.slice(1, -1);
         }
-        // Remove enclosing double quotes
+        // Eliminar comillas dobles envolventes
         else if (cleanedKey.startsWith('"') && cleanedKey.endsWith('"')) {
             cleanedKey = cleanedKey.slice(1, -1);
         }
 
-        // Try to parse
+        // Intentar parsear
         const serviceAccount = JSON.parse(cleanedKey);
 
-        // Fix private_key newlines if needed (Firebase expects \n, usually present as literal \\n string in JSON)
+        // Corregir saltos de línea en private_key (Firebase espera \n, usualmente presente como \\n en JSON)
         if (serviceAccount.private_key) {
             serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
         }
@@ -38,8 +38,8 @@ const getAdminApp = () => {
         });
     } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : "Error desconocido";
-        console.error(">>> [Firebase Admin] ❌ CRITICAL ERROR parsing service account key:", errorMessage);
-        // Do not fallback to unauthenticated app; throw to stop execution and force fix.
+        console.error(">>> [Firebase Admin] ❌ ERROR CRÍTICO al parsear credenciales de Firebase:", errorMessage);
+        // No fallback a app no autenticada; lanzar error para forzar corrección.
         throw new Error("Failed to initialize Firebase Admin: " + errorMessage);
     }
 };
@@ -62,29 +62,32 @@ export const createAdminConverter = <T extends admin.firestore.DocumentData>() =
 });
 
 /**
- * Utility to serialize Firestore data (convert Timestamps to strings)
+ * Utilidad para serializar datos de Firestore (convierte Timestamps a strings)
  */
-export const serializeFirestoreData = (data: any): any => {
+export const serializeFirestoreData = (data: unknown): unknown => {
     if (!data) return data;
 
-    // Handle Firestore Timestamp (admin and client have different structures but both usually have toDate)
-    if (data && typeof data === "object" && (data.toDate || "_seconds" in data)) {
-        try {
-            const date = data.toDate ? data.toDate() : new Date(data._seconds * 1000);
-            return date.toISOString();
-        } catch (e) {
-            return data;
+    // Manejar Firestore Timestamp (admin y cliente tienen estructuras diferentes pero ambos suelen tener toDate)
+    if (data && typeof data === "object") {
+        const obj = data as Record<string, unknown>;
+        if (obj.toDate || "_seconds" in obj) {
+            try {
+                const date = obj.toDate ? (obj.toDate as () => Date)() : new Date((obj._seconds as number) * 1000);
+                return date.toISOString();
+            } catch {
+                return data;
+            }
         }
     }
 
-    // Handle Arrays
+    // Manejar Arrays
     if (Array.isArray(data)) {
         return data.map(item => serializeFirestoreData(item));
     }
 
-    // Handle Objects
+    // Manejar Objetos
     if (typeof data === "object" && data !== null) {
-        const serialized: Record<string, any> = {};
+        const serialized: Record<string, unknown> = {};
         for (const [key, value] of Object.entries(data)) {
             serialized[key] = serializeFirestoreData(value);
         }

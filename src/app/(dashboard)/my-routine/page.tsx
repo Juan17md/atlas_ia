@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, Clock, Dumbbell, Play, AlertCircle, ClipboardList, Moon, Info, Sparkles, Activity, Pencil } from "lucide-react";
+import { CalendarDays, Clock, Dumbbell, Play, Moon, Info, Sparkles, Activity, Pencil } from "lucide-react";
 import Link from "next/link";
 import { getRoutines } from "@/actions/routine-actions";
 import { differenceInCalendarWeeks } from "date-fns";
@@ -27,7 +27,7 @@ interface ActiveRoutine {
     name: string;
     description?: string;
     createdAt?: string;
-    startDate?: any;
+    startDate?: Date;
     schedule: ScheduleDay[];
 }
 

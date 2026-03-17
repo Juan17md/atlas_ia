@@ -21,7 +21,7 @@ export default async function StrengthPage({ searchParams }: StrengthPageProps) 
 
     if (isCoach) {
         const result = await getAllAthletes();
-        const athletes = (result.athletes as any[]) || [];
+        const athletes = result.athletes || [];
         const params = await searchParams;
         const requestedId = params?.athleteId as string;
 

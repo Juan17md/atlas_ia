@@ -57,7 +57,7 @@ export function ProgressChart({ completed = 0, target = 3 }: { completed?: numbe
                         ))}
                         <Label
                             content={({ viewBox }) => {
-                                const { cx, cy } = viewBox as any;
+                                const { cx, cy } = viewBox as { cx: number; cy: number };
                                 return (
                                     <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle">
                                         <tspan x={cx} y={cy - 5} className="fill-white text-3xl font-black tracking-tighter">
@@ -73,7 +73,7 @@ export function ProgressChart({ completed = 0, target = 3 }: { completed?: numbe
                     </Pie>
                 </PieChart>
             </ResponsiveContainer>
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 translate-y-10 text-[10px] font-black text-neutral-500 text-center uppercase tracking-widest bg-neutral-900 px-3 py-1 rounded-full border border-white/5">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 translate-y-10 text-[10px] font-black text-neutral-500 text-center uppercase tracking-widest bg-neutral-900/60 backdrop-blur-sm px-3 py-1 rounded-full border border-white/5">
                 Semanal ({completed}/{target})
             </div>
         </motion.div>

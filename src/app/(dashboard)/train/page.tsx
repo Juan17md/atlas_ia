@@ -120,7 +120,7 @@ export default async function TrainPage(props: {
         );
     }
 
-    // If it's a weekend and there's no coach assignment, it's a rest day
+    // Si es fin de semana y no hay asignación de coach, es día de descanso
     if (isWeekend && !assignment) {
         return <RestDayView dayName={dayName} />;
     }
@@ -129,16 +129,16 @@ export default async function TrainPage(props: {
     let activeDayId: string | undefined;
 
     if (assignment) {
-        // Cast via unknown to bypass "no overlap" error
+        // Cast a través de unknown para evitar error de "no overlap" de tipos
         const assigned = assignment as unknown as { routineId: string; dayId: string };
-        // Load the assigned routine
+        // Cargar la rutina asignada
         const routineRes = await getRoutine(assigned.routineId);
         if (routineRes.success && routineRes.routine) {
             routine = routineRes.routine;
             activeDayId = assigned.dayId;
         }
     } else {
-        // Fallback: Check general active routine (legacy/simple mode)
+        // Fallback: Verificar rutina activa general (modo legacy/simple)
         const { routine: activeRoutine } = await getActiveRoutine();
         routine = activeRoutine;
     }
@@ -176,33 +176,33 @@ export default async function TrainPage(props: {
         );
     }
 
-    // Filter the routine to only show the relevant day
+    // Filtrar la rutina para mostrar solo el día relevante
     let workoutRoutine = routine as unknown as WorkoutRoutine;
     let selectedDay;
 
     if (activeDayId) {
         selectedDay = workoutRoutine.schedule.find(d => d.id === activeDayId);
     } else {
-        // Try to find a day that matches current weekday (case insensitive)
+        // Intentar encontrar un día que coincida con el día actual (insensible a mayúsculas)
         selectedDay = workoutRoutine.schedule.find(d =>
             d.name.toLowerCase().trim() === dayName.toLowerCase().trim()
         );
 
-        // If not found by name, fallback to schedule[0] (existing behavior) but at least we tried
+        // Si no se encuentra por nombre, usar schedule[0] (comportamiento existente) pero al menos lo intentamos
         if (!selectedDay) {
             selectedDay = workoutRoutine.schedule[0];
         }
     }
 
     if (selectedDay) {
-        // If the selected day is a rest day, show rest view
-        if ((selectedDay as any).isRest) {
+        // Si el día seleccionado es de descanso, mostrar vista de descanso
+        if ("isRest" in selectedDay && selectedDay.isRest) {
             return <RestDayView dayName={dayName} />;
         }
 
         workoutRoutine = {
             ...workoutRoutine,
-            schedule: [selectedDay as any]
+            schedule: [selectedDay]
         };
     }
 

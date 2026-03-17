@@ -95,7 +95,7 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
             <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="md:col-span-2 p-6 bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-4xl shadow-2xl shadow-black/40"
+                className="md:col-span-2 p-6 bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-4xl shadow-2xl"
             >
                 <div className="flex items-center justify-between mb-8 px-2">
                     <div className="space-y-1">
@@ -129,21 +129,21 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
                             }
                         }}
                         modifiersClassNames={{
-                            assigned: "before:content-[''] before:absolute before:top-1 before:right-1 before:w-1.5 before:h-1.5 before:bg-red-500/40 before:rounded-full",
-                            recorded: "bg-emerald-500/20 text-emerald-400 font-black hover:bg-emerald-500/30 border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.1)]",
-                            training: "after:content-[''] after:absolute after:bottom-1.5 after:w-1 after:h-1 after:bg-red-500 after:rounded-full",
-                            rest: "opacity-30"
+                            assigned: "before:content-[''] before:absolute before:top-2 before:right-2 before:w-1 before:h-1 before:bg-red-500/60 before:rounded-full before:shadow-[0_0_8px_rgba(239,68,68,0.5)]",
+                            recorded: "bg-emerald-500/20 text-emerald-400 font-black hover:bg-emerald-500/30 border border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.15)] rounded-2xl",
+                            training: "after:content-[''] after:absolute after:bottom-2 after:w-1 after:h-1 after:bg-red-600 after:rounded-full after:shadow-[0_0_6px_rgba(220,38,38,0.8)]",
+                            rest: "opacity-20 grayscale"
                         }}
                         locale={es}
                         className="w-full"
                         classNames={{
-                            month_caption: "flex justify-center pt-1 relative items-center capitalize text-white font-black tracking-tight mb-4",
+                            month_caption: "flex justify-center pt-2 relative items-center capitalize text-white font-black tracking-tight mb-6",
                             month_grid: "w-full border-collapse",
-                            weekday: "text-neutral-600 rounded-md w-full font-black text-[0.65rem] text-center capitalize tracking-widest",
-                            day: "h-10 sm:h-14 w-full text-center text-sm p-0.5 m-0 relative flex items-center justify-center",
-                            day_button: "h-9 w-9 sm:h-12 sm:w-12 p-0 font-bold aria-selected:opacity-100 hover:bg-white/5 rounded-2xl transition-all flex items-center justify-center relative",
-                            selected: "bg-white !text-black hover:bg-neutral-200 hover:!text-black shadow-xl scale-105 z-20",
-                            today: "bg-red-500/10 text-red-500 border border-red-500/20 font-black",
+                            weekday: "text-neutral-500/80 rounded-md w-full font-black text-[0.7rem] text-center capitalize tracking-[0.15em] pb-4",
+                            day: "h-12 sm:h-16 w-full text-center text-sm p-1.5 m-0 relative flex items-center justify-center text-white",
+                            day_button: "h-10 w-10 sm:h-12 sm:w-12 p-0 font-bold text-inherit hover:bg-white/10 rounded-2xl transition-all duration-300 flex items-center justify-center relative cursor-pointer group",
+                            selected: "bg-white !text-black shadow-[0_0_30px_rgba(255,255,255,0.5)] scale-110 z-30 font-black rounded-2xl ring-4 ring-white/20",
+                            today: "bg-red-500/10 text-red-500 border border-red-500/30 font-black rounded-2xl",
                         }}
                     />
                 </div>
@@ -152,7 +152,7 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
             <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-4xl p-6 flex flex-col h-full shadow-2xl shadow-black/40"
+                className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-4xl p-6 flex flex-col h-full shadow-2xl"
             >
                 <div className="space-y-4 mb-8">
                     <div className="flex justify-between items-start">
@@ -197,10 +197,10 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: idx * 0.1 }}
                                         className={cn(
-                                            "p-5 rounded-3xl border transition-all group relative overflow-hidden",
+                                            "p-6 rounded-[2rem] border transition-all group relative overflow-hidden backdrop-blur-md",
                                             isRecordedDay
-                                                ? "bg-emerald-500/5 border-emerald-500/10"
-                                                : "bg-neutral-950/50 border-white/5 hover:border-red-500/40"
+                                                ? "bg-emerald-500/10 border-emerald-500/20 shadow-[0_20px_40px_-15px_rgba(16,185,129,0.1)]"
+                                                : "bg-neutral-900/60 border-white/5 hover:border-red-500/40 hover:bg-neutral-900/80 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]"
                                         )}
                                     >
                                         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
@@ -230,10 +230,10 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     className={cn(
-                                        "p-5 rounded-3xl border transition-all group relative overflow-hidden",
+                                        "p-6 rounded-[2rem] border transition-all group relative overflow-hidden backdrop-blur-md",
                                         isRecordedDay
-                                            ? "bg-emerald-500/5 border-emerald-500/10"
-                                            : "bg-neutral-950/50 border-white/5 hover:border-red-500/40"
+                                            ? "bg-emerald-500/10 border-emerald-500/20 shadow-[0_20px_40px_-15px_rgba(16,185,129,0.1)]"
+                                            : "bg-neutral-900/60 border-white/5 hover:border-red-500/40 hover:bg-neutral-900/80 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]"
                                     )}
                                 >
                                     <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">

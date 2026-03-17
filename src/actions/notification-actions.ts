@@ -4,6 +4,26 @@ import { adminDb } from "@/lib/firebase-admin";
 import { auth } from "@/lib/auth";
 import { unstable_cache } from "next/cache";
 
+interface TrainingSet {
+    reps?: number;
+    weight?: number;
+    rpe?: number;
+    completed?: boolean;
+}
+
+interface TrainingExercise {
+    sets?: TrainingSet[];
+}
+
+interface TrainingLog {
+    id?: string;
+    athleteId?: string;
+    athleteName?: string;
+    date?: { toDate: () => Date };
+    routineName?: string;
+    exercises?: TrainingExercise[];
+}
+
 // Caché para notificaciones del coach (revalida cada 2 minutos)
 const getCachedCoachNotifications = unstable_cache(
     async () => {
@@ -30,27 +50,27 @@ const getCachedCoachNotifications = unstable_cache(
         }
 
         // Agrupar logs por atleta para calcular progreso real
-        const athleteLogs = new Map<string, any[]>();
+        const athleteLogs = new Map<string, TrainingLog[]>();
         logsSnapshot.docs.forEach(doc => {
-            const data = doc.data();
+            const data = doc.data() as TrainingLog;
             const uid = data.athleteId;
-            if (!athleteLogs.has(uid)) athleteLogs.set(uid, []);
-            athleteLogs.get(uid)!.push({ id: doc.id, ...data });
+            if (uid && !athleteLogs.has(uid)) athleteLogs.set(uid, []);
+            if (uid) athleteLogs.get(uid)!.push({ id: doc.id, ...data });
         });
 
         // Solo generar notificaciones de los últimos 5 logs completados
         const recentDocs = logsSnapshot.docs.slice(0, 5);
 
         const notifications = recentDocs.map(doc => {
-            const data = doc.data();
-            const date = data.date.toDate();
-            const athleteName = athleteNames.get(data.athleteId) || data.athleteName || "Sin nombre";
+            const data = doc.data() as TrainingLog;
+            const date = data.date?.toDate();
+            const athleteName = data.athleteId ? (athleteNames.get(data.athleteId) || data.athleteName || "Sin nombre") : "Sin nombre";
             const routineName = data.routineName || "Rutina";
 
             // Calcular volumen de esta sesión
             let currentVolume = 0;
-            data.exercises?.forEach((ex: any) => {
-                ex.sets?.forEach((s: any) => {
+            data.exercises?.forEach((ex: TrainingExercise) => {
+                ex.sets?.forEach((s: TrainingSet) => {
                     if (s.completed && s.weight && s.reps) {
                         currentVolume += (s.weight * s.reps);
                     }
@@ -58,14 +78,14 @@ const getCachedCoachNotifications = unstable_cache(
             });
 
             // Buscar sesión anterior del mismo atleta para comparar
-            const sameLogs = athleteLogs.get(data.athleteId) || [];
-            const prevLog = sameLogs.find((l: any) => l.id !== doc.id);
+            const sameLogs = athleteLogs.get(data.athleteId!) || [];
+            const prevLog = sameLogs.find((l: TrainingLog) => l.id !== doc.id);
             let progressMsg = `Volumen total: ${Math.round(currentVolume).toLocaleString()} kg.`;
 
             if (prevLog) {
                 let prevVolume = 0;
-                prevLog.exercises?.forEach((ex: any) => {
-                    ex.sets?.forEach((s: any) => {
+                prevLog.exercises?.forEach((ex: TrainingExercise) => {
+                    ex.sets?.forEach((s: TrainingSet) => {
                         if (s.completed && s.weight && s.reps) {
                             prevVolume += (s.weight * s.reps);
                         }
@@ -83,7 +103,7 @@ const getCachedCoachNotifications = unstable_cache(
                 id: doc.id,
                 title: "Sesión Completada",
                 message: `${athleteName} completó "${routineName}". ${progressMsg}`,
-                time: date.toISOString(),
+                time: date?.toISOString() || new Date().toISOString(),
                 type: "ia_analysis",
                 read: false,
                 athleteId: data.athleteId

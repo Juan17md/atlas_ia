@@ -129,13 +129,13 @@ export function AthleteDashboardUI({ user, activityData, weeklyCompleted, weekly
                     </div>
                 </motion.div>
 
-                {/* Progress & Next Routine */}
+                    {/* Progress & Next Routine */}
                 <div className="space-y-8">
                     <motion.div
                         initial={{ opacity: 0, x: 20 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
-                        className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-4xl p-8 shadow-2xl shadow-black/40"
+                        className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-4xl p-8 shadow-2xl"
                     >
                         <div className="mb-px">
                             <h3 className="text-xl font-black text-white uppercase tracking-tight">Objetivo</h3>
@@ -148,7 +148,7 @@ export function AthleteDashboardUI({ user, activityData, weeklyCompleted, weekly
                         initial={{ opacity: 0, scale: 0.95 }}
                         whileInView={{ opacity: 1, scale: 1 }}
                         viewport={{ once: true }}
-                        className="bg-neutral-900 border border-white/5 rounded-4xl overflow-hidden group hover:border-red-500/30 transition-all duration-500 shadow-2xl relative"
+                        className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-4xl overflow-hidden group hover:border-red-500/30 transition-all duration-500 shadow-2xl relative"
                     >
                         <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:bg-red-600/20 transition-all duration-700" />
 
@@ -388,7 +388,7 @@ export function CoachDashboardUI({ user, stats, activities }: CoachDashboardUIPr
                         initial={{ opacity: 0, x: 20 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
-                        className="bg-neutral-900 border border-white/5 rounded-4xl p-8 shadow-2xl relative overflow-hidden group"
+                        className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-4xl p-8 shadow-2xl relative overflow-hidden group"
                     >
                         <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:bg-red-600/20 transition-all duration-700" />
 
@@ -397,17 +397,17 @@ export function CoachDashboardUI({ user, stats, activities }: CoachDashboardUIPr
 
                         <div className="space-y-3 relative z-10">
                             <Link href="/routines" className="block">
-                                <Button className="w-full justify-start h-14 rounded-2xl border border-white/5 bg-neutral-950/50 hover:bg-neutral-800 text-white font-black uppercase tracking-[0.2em] text-[10px] transition-all hover:translate-x-1">
+                                <Button className="w-full justify-start h-14 rounded-2xl border border-white/5 bg-neutral-900/50 hover:bg-neutral-800 text-white font-black uppercase tracking-[0.2em] text-[10px] transition-all hover:translate-x-1">
                                     <FileText className="w-4 h-4 mr-3 text-red-500" /> Nueva Rutina
                                 </Button>
                             </Link>
                             <Link href="/exercises" className="block">
-                                <Button className="w-full justify-start h-14 rounded-2xl border border-white/5 bg-neutral-950/50 hover:bg-neutral-800 text-white font-black uppercase tracking-[0.2em] text-[10px] transition-all hover:translate-x-1">
+                                <Button className="w-full justify-start h-14 rounded-2xl border border-white/5 bg-neutral-900/50 hover:bg-neutral-800 text-white font-black uppercase tracking-[0.2em] text-[10px] transition-all hover:translate-x-1">
                                     <Plus className="w-4 h-4 mr-3 text-red-500" /> Cargar Ejercicio
                                 </Button>
                             </Link>
                             <Link href="/athletes" className="block">
-                                <Button className="w-full justify-start h-14 rounded-2xl border border-white/5 bg-neutral-950/50 hover:bg-neutral-800 text-white font-black uppercase tracking-[0.2em] text-[10px] transition-all hover:translate-x-1">
+                                <Button className="w-full justify-start h-14 rounded-2xl border border-white/5 bg-neutral-900/50 hover:bg-neutral-800 text-white font-black uppercase tracking-[0.2em] text-[10px] transition-all hover:translate-x-1">
                                     <UserPlus className="w-4 h-4 mr-3 text-red-500" /> Alta Atleta
                                 </Button>
                             </Link>

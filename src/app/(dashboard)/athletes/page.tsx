@@ -1,12 +1,12 @@
 import { getAllAthletes } from "@/actions/coach-actions";
 import { Button } from "@/components/ui/button";
-import { Search, Users, ChevronRight, Zap } from "lucide-react";
+import { Search, Users, Zap } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { ClientMotionDiv } from "@/components/ui/client-motion";
 import { AthleteCard } from "@/components/athletes/athlete-card";
+import type { Athlete } from "@/types";
 
 export default async function AthletesPage() {
     const session = await auth();
@@ -69,7 +69,7 @@ export default async function AthletesPage() {
                 </ClientMotionDiv>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {athletes.map((athlete: any) => (
+                    {athletes.map((athlete: Athlete) => (
                         <AthleteCard key={athlete.id} athlete={athlete} />
                     ))}
                 </div>

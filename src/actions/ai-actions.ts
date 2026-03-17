@@ -3,6 +3,10 @@
 import { adminDb } from "@/lib/firebase-admin";
 import { auth } from "@/lib/auth";
 import { getGroqClient, getAthleteContext, DEFAULT_AI_MODEL } from "@/lib/ai";
+import { RoutineDaySchema } from "@/lib/schemas";
+import { z } from "zod";
+
+type RoutineSchedule = z.infer<typeof RoutineDaySchema>[];
 
 export async function generateWarmup(muscleGroups: string[]) {
     const session = await auth();
@@ -14,7 +18,7 @@ export async function generateWarmup(muscleGroups: string[]) {
 
         const prompt = `
             Genera una rutina de calentamiento específica y rápida (5-10 min) para preparar los siguientes grupos musculares: ${muscleGroups.join(", ")}.
-            
+
             La respuesta DEBE ser un objeto JSON con esta estructura:
             {
                 "warmupRoutine": [
@@ -37,9 +41,24 @@ export async function generateWarmup(muscleGroups: string[]) {
         });
 
         const content = completion.choices[0]?.message?.content;
-        if (!content) return { success: false, error: "Error de IA" };
+        if (!content) {
+            console.error("IA no generó contenido en generateWarmup");
+            return { success: false, error: "La IA no generó una respuesta válida" };
+        }
 
-        const result = JSON.parse(content);
+        let result;
+        try {
+            result = JSON.parse(content);
+        } catch (parseError) {
+            console.error("Error parseando JSON de IA en generateWarmup:", parseError);
+            return { success: false, error: "Error al procesar la respuesta de la IA" };
+        }
+
+        if (!result.warmupRoutine || !Array.isArray(result.warmupRoutine)) {
+            console.error("Respuesta inválida de IA en generateWarmup:", result);
+            return { success: false, error: "La IA generó una respuesta con formato incorrecto" };
+        }
+
         return { success: true, data: result.warmupRoutine };
 
     } catch (error) {
@@ -60,10 +79,10 @@ export async function suggestSubstitute(exerciseName: string, reason: "busy" | "
 
         const prompt = `
             Soy un atleta en medio de mi entrenamiento. Tenía que hacer "${exerciseName}" pero no puedo porque: ${reasonText}.
-            
+
             Sugiéreme 3 alternativas biomecánicamente equivalentes (mismo patrón de movimiento y músculo objetivo).
             IMPORTANTE: Si tengo lesiones, NO sugieras ejercicios que puedan agravarlas.
-            
+
             Respuesta JSON estricta:
             {
                 "alternatives": [
@@ -84,9 +103,24 @@ export async function suggestSubstitute(exerciseName: string, reason: "busy" | "
         });
 
         const content = completion.choices[0]?.message?.content;
-        if (!content) return { success: false, error: "Error de IA" };
+        if (!content) {
+            console.error("IA no generó contenido en suggestSubstitute");
+            return { success: false, error: "La IA no generó una respuesta válida" };
+        }
 
-        const result = JSON.parse(content);
+        let result;
+        try {
+            result = JSON.parse(content);
+        } catch (parseError) {
+            console.error("Error parseando JSON de IA en suggestSubstitute:", parseError);
+            return { success: false, error: "Error al procesar la respuesta de la IA" };
+        }
+
+        if (!result.alternatives || !Array.isArray(result.alternatives)) {
+            console.error("Respuesta inválida de IA en suggestSubstitute:", result);
+            return { success: false, error: "La IA generó una respuesta con formato incorrecto" };
+        }
+
         return { success: true, data: result.alternatives };
 
     } catch (error) {
@@ -230,8 +264,28 @@ export async function chatWithCoachAI(message: string, context?: { exerciseName?
     }
 }
 
+interface RoutineData {
+    name?: string;
+    description?: string;
+    schedule?: Array<{
+        id?: string;
+        name?: string;
+        exercises?: Array<{
+            exerciseId?: string;
+            exerciseName?: string;
+            notes?: string;
+            sets?: Array<{
+                type?: string;
+                reps?: string;
+                rpeTarget?: number;
+                restSeconds?: number;
+            }>;
+            order?: number;
+        }>;
+    }>;
+}
 
-export async function analyzeRoutineSafety(routineData: any, athleteId: string) {
+export async function analyzeRoutineSafety(routineData: RoutineData, athleteId: string) {
     const session = await auth();
     // Verify coach role or self (if athlete wants to check their own routine safety? Maybe only coach feature for now)
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
@@ -344,7 +398,7 @@ export async function generateExerciseDetails(exerciseName: string) {
     }
 }
 
-export async function generateRoutineDescription(schedule: any) {
+export async function generateRoutineDescription(schedule: RoutineSchedule) {
     const session = await auth();
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
 

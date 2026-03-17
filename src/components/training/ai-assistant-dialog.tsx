@@ -54,7 +54,7 @@ export function AIAssistantDialog({
         if (!subExercise) return toast.error("Selecciona un ejercicio");
         setLoading(true);
         try {
-            const res = await suggestSubstitute(subExercise, subReason as any);
+            const res = await suggestSubstitute(subExercise, subReason as "busy" | "pain" | "equipment");
             if (res.success) {
                 setSubstituteResult(res.data);
             } else {

@@ -80,11 +80,30 @@ export async function completeOnboarding(data: z.infer<typeof OnboardingInputSch
         return { success: false, error: "Datos inválidos" };
     }
 
-    const { password, confirmPassword, ...profileData } = validation.data;
+    const { password, ...profileData } = validation.data;
 
     try {
-        // Si el usuario proporcionó una contraseña (para usuarios de Google), la actualizamos en Auth
+        // Si el usuario proporcionó una contraseña (para usuarios de Google), la validamos y actualizamos en Auth
         if (password && password.length >= 6) {
+            // Validar complejidad de contraseña
+            const hasUpperCase = /[A-Z]/.test(password);
+            const hasLowerCase = /[a-z]/.test(password);
+            const hasNumber = /\d/.test(password);
+            const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+            
+            const complexityScore = [hasUpperCase, hasLowerCase, hasNumber, hasSpecialChar].filter(Boolean).length;
+            
+            // Validar: mínimo 6 caracteres Y al menos 2 de los 4 criterios de complejidad
+            // O mínimo 8 caracteres sin requisitos de complejidad
+            const isValidPassword = password.length >= 8 || complexityScore >= 2;
+            
+            if (!isValidPassword) {
+                return { 
+                    success: false, 
+                    error: "La contraseña debe tener al menos 8 caracteres, o 6 caracteres con al menos 2 de: mayúscula, número, carácter especial" 
+                };
+            }
+
             try {
                 await adminAuth.updateUser(session.user.id, {
                     password: password
@@ -123,7 +142,7 @@ export async function completeOnboarding(data: z.infer<typeof OnboardingInputSch
                     weight: profileData.weight, // Incluir peso en el log
                     // Nota: Height es más estático, pero weight es clave para el gráfico
                 };
-                await adminDb.collection("body_measurements").add(initialLog);
+                await adminDb.collection("body_measurements").doc(session.user.id).set(initialLog, { merge: true });
             } catch (logError) {
                 console.error("Error guardando log inicial de medidas:", logError);
                 // No fallamos todo el onboarding si esto falla, es secundario

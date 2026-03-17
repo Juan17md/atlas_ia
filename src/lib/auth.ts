@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { auth as firebaseAuth } from "@/lib/firebase"; // Client Auth for password checking
-import { adminDb } from "@/lib/firebase-admin"; // Admin Firestore for data
+import { auth as firebaseAuth } from "@/lib/firebase"; // Auth de cliente para validar contraseña
+import { adminDb } from "@/lib/firebase-admin"; // Firestore de admin para datos
 import { signInWithEmailAndPassword, AuthError } from "firebase/auth";
 import { z } from "zod";
 import { authConfig } from "./auth.config";
@@ -25,14 +25,19 @@ interface IdentityToolkitResponse {
 }
 
 /**
+ * Tipo de rol de usuario - unificado en un solo lugar
+ */
+export type UserRole = "athlete" | "coach" | "advanced_athlete";
+
+/**
  * Tipo de usuario para autenticación (compatible con NextAuth)
  */
 interface AuthUser {
     id: string;
     email: string;
     name: string;
-    image?: string | null;
-    role: "athlete" | "coach";
+    image: string | null;
+    role: UserRole;
     emailVerified?: Date | null;
     onboardingCompleted: boolean;
     authProvider: "google" | "password";
@@ -40,7 +45,7 @@ interface AuthUser {
 
 /**
  * Obtiene un usuario de Firestore por email (Admin SDK)
- */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function getUserByEmail(email: string): Promise<AuthUser | null> {
     try {
         const querySnapshot = await adminDb.collection("users")
@@ -53,11 +58,11 @@ async function getUserByEmail(email: string): Promise<AuthUser | null> {
         const d = doc.data();
         return {
             id: doc.id,
-            name: d.name,
+            name: d.name || "Usuario",
             email: d.email,
-            image: d.image,
-            role: d.role,
-            onboardingCompleted: d.onboardingCompleted,
+            image: d.image || null,
+            role: d.role || "athlete",
+            onboardingCompleted: d.onboardingCompleted ?? false,
             authProvider: d.authProvider || "password",
         } as AuthUser;
     } catch (error) {
@@ -82,7 +87,7 @@ async function getUserById(id: string): Promise<AuthUser | null> {
             email: d.email,
             image: d.image || null,
             role: d.role || "athlete",
-            onboardingCompleted: d.onboardingCompleted || false,
+            onboardingCompleted: d.onboardingCompleted ?? false,
             authProvider: d.authProvider || "password",
         } as AuthUser;
     } catch (error) {
@@ -103,7 +108,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 idToken: { label: "Identity Token", type: "text" },
             },
             async authorize(credentials) {
-                // Estrategia 1: Login con Token de Firebase (Google Auth client-side)
+                // Estrategia 1: Login con Token de Firebase (Google Auth del lado del cliente)
                 if (credentials?.idToken) {
                     try {
                         const idToken = credentials.idToken as string;
@@ -129,7 +134,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                         const userId = firebaseUser.localId;
                         const userEmail = firebaseUser.email;
                         const userName = firebaseUser.displayName || "Usuario";
-                        const userImage = firebaseUser.photoUrl || "";
+                        const userImage = firebaseUser.photoUrl || null;
 
                         // Buscar usuario en Firestore
                         const existingUser = await getUserById(userId);
@@ -151,7 +156,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                                 name: userName,
                                 email: userEmail,
                                 image: userImage,
-                                authProvider: existingUser.authProvider || "google" as const,
+                                authProvider: existingUser.authProvider || "google",
                             };
                         } else {
                             // Usuario nuevo: Lo creamos con todos los campos necesarios
@@ -194,7 +199,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 const { email, password } = parsedCredentials.data;
 
                 try {
-                    // Autenticar con Firebase Client SDK (para validar password)
+                    // Autenticar con Firebase Client SDK (para validar contraseña)
                     const userCredential = await signInWithEmailAndPassword(firebaseAuth, email, password);
                     const firebaseUser = userCredential.user;
 
@@ -202,6 +207,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     const userData = await getUserById(firebaseUser.uid);
 
                     // Cerrar sesión de Firebase Auth (NextAuth maneja la sesión)
+                    // Importante: cerrar después de obtener datos para evitar race conditions
                     await firebaseAuth.signOut();
 
                     if (userData) {
@@ -213,7 +219,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                         id: firebaseUser.uid,
                         email: firebaseUser.email || email,
                         name: firebaseUser.displayName || email,
-                        image: firebaseUser.photoURL,
+                        image: firebaseUser.photoURL || null,
                         emailVerified: firebaseUser.emailVerified ? new Date() : null,
                         role: "athlete",
                         onboardingCompleted: false,

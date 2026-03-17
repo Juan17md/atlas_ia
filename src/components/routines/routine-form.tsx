@@ -190,7 +190,6 @@ export function RoutineForm() {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const { register, control, handleSubmit, formState: { errors } } = useForm<FormValues>({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         resolver: zodResolver(FormSchema) as any,
         defaultValues: {
             name: "",

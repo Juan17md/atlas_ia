@@ -16,15 +16,16 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import type { ExerciseListItem } from "@/types";
 
 interface ExerciseListProps {
-    exercises: any[];
+    exercises: ExerciseListItem[];
 }
 
 export function ExerciseList({ exercises }: ExerciseListProps) {
     const [searchTerm, setSearchTerm] = useState("");
     const [filterGroup, setFilterGroup] = useState<string | null>(null);
-    const [editingExercise, setEditingExercise] = useState<any>(null);
+    const [editingExercise, setEditingExercise] = useState<ExerciseListItem | null>(null);
     const router = useRouter();
 
     const filteredExercises = useMemo(() => {

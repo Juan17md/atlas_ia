@@ -78,9 +78,9 @@ export async function getCoachAthletes() {
 
         const athletes = snapshot.docs.map(doc => ({
             id: doc.id,
-            name: doc.data().name,
-            email: doc.data().email,
-            image: doc.data().image || doc.data().photoUrl || null
+            name: doc.data().name || "Usuario",
+            email: doc.data().email || "",
+            image: doc.data().image || null
         }));
 
         return { success: true, athletes };
@@ -103,9 +103,9 @@ export async function getAllUsers() {
         const users = snapshot.docs.map(doc => ({
             id: doc.id,
             name: doc.data().name || "Usuario",
-            email: doc.data().email,
+            email: doc.data().email || "",
             role: doc.data().role || "athlete",
-            image: doc.data().image || doc.data().photoUrl || null,
+            image: doc.data().image || null,
         }));
 
         return { success: true, users };
@@ -144,5 +144,26 @@ export async function updateUserRole(userId: string, newRole: string) {
     } catch (error) {
         console.error("Error updating user role:", error);
         return { success: false, error: "Error al actualizar el rol" };
+    }
+}
+
+export async function deleteUser(userId: string) {
+    const session = await auth();
+    if (!session?.user?.id || session.user.role !== "coach") {
+        return { success: false, error: "No autorizado" };
+    }
+
+    if (userId === session.user.id) {
+        return { success: false, error: "No puedes eliminarte a ti mismo" };
+    }
+
+    try {
+        await adminDb.collection("users").doc(userId).delete();
+
+        revalidatePath("/users");
+        return { success: true };
+    } catch (error) {
+        console.error("Error deleting user:", error);
+        return { success: false, error: "Error al eliminar el usuario" };
     }
 }

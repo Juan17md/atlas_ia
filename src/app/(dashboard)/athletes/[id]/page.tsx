@@ -9,18 +9,18 @@ import { getTrainingLogs } from "@/actions/training-actions";
 import { getAthleteRoutine, getCoachRoutines } from "@/actions/routine-actions";
 import { ActivityChart } from "@/components/dashboard/activity-chart";
 import { ProgressChart } from "@/components/dashboard/progress-chart";
-import { StatCard } from "@/components/dashboard/stat-card";
 import { TrainingHistoryList } from "@/components/training/training-history-list";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AssignRoutineModal } from "@/components/routines/assign-routine-modal";
-import { ArrowLeft, Dumbbell, TrendingUp, Trophy, Target, Calendar, Flame, Activity, ShieldAlert, Heart } from "lucide-react";
+import { ArrowLeft, Dumbbell, Trophy, Target, Calendar, Activity, ShieldAlert, Heart } from "lucide-react";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CoachAIAnalysis } from "@/components/dashboard/coach-ai-analysis";
 import { ScheduleCalendar } from "@/components/dashboard/schedule-calendar";
 import { EditHealthDialog } from "@/components/dashboard/edit-health-dialog";
 import { ClientMotionDiv } from "@/components/ui/client-motion";
+import { AthleteStatsCards } from "@/components/dashboard/athlete-stats-cards";
 
 interface Athlete {
     id: string;
@@ -226,39 +226,11 @@ export default async function AthleteDetailsPage({ params }: PageProps) {
                     <CoachAIAnalysis athleteId={athlete.id} />
 
                     {/* KPIs */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <StatCard
-                            title="Sesiones"
-                            value={weeklyCompleted?.toString() || "0"}
-                            label="Esta semana"
-                            trend="neutral"
-                            icon={Dumbbell}
-                            color="red"
-                        />
-                        <StatCard
-                            title="Volumen"
-                            value={`${Math.round(weeklyVolume / 1000)}k`}
-                            label="Kg semanal"
-                            trend="neutral"
-                            icon={TrendingUp}
-                        />
-                        <StatCard
-                            title="Récords"
-                            value={prs?.length?.toString() || "0"}
-                            label="Personales"
-                            trend={(prs?.length || 0) > 0 ? "up" : "neutral"}
-                            trendValue={(prs?.length || 0) > 0 ? "New" : undefined}
-                            icon={Trophy}
-                            color="yellow"
-                        />
-                        <StatCard
-                            title="Racha"
-                            value="—"
-                            label="Días seguidos"
-                            trend="neutral"
-                            icon={Flame}
-                        />
-                    </div>
+                    <AthleteStatsCards
+                        weeklyCompleted={weeklyCompleted || 0}
+                        weeklyVolume={weeklyVolume}
+                        prsLength={prs?.length || 0}
+                    />
 
                     {/* Charts */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

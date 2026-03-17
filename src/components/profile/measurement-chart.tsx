@@ -22,7 +22,7 @@ export function MeasurementChart({ data, metrics, title }: MeasurementChartProps
         return data.map(item => ({
             ...item,
             formattedDate: format(new Date(item.date), "d MMM", { locale: es })
-        })).reverse(); // Show chronological order
+        })).reverse(); // Mostrar orden cronológico
     }, [data]);
 
     if (!data || data.length === 0) {

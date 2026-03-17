@@ -1,12 +1,13 @@
 "use server";
 
 import { z } from "zod";
-import { RoutineSchema, RoutineDaySchema, RoutineExerciseSchema, RoutineSetSchema } from "@/lib/schemas";
+import { RoutineSchema } from "@/lib/schemas";
+import { Routine } from "@/types";
 import { adminDb, serializeFirestoreData } from "@/lib/firebase-admin";
 import { auth } from "@/lib/auth";
 import { getGroqClient, DEFAULT_AI_MODEL } from "@/lib/ai";
 import { getExercises } from "./exercise-actions";
-import { unstable_cache, revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 // Schema for generating a routine with AI
 const GenerateRoutineSchema = z.object({
@@ -28,7 +29,7 @@ export async function getRoutines() {
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
 
     try {
-        let snapshots: FirebaseFirestore.QuerySnapshot[] = [];
+        const snapshots: FirebaseFirestore.QuerySnapshot[] = [];
         if (session.user.role === "coach") {
             const snap = await adminDb.collection("routines").where("coachId", "==", session.user.id).get();
             snapshots.push(snap);
@@ -54,8 +55,16 @@ export async function getRoutines() {
             return serializeFirestoreData({ id: doc.id, ...doc.data() });
         }));
 
-        const routines = Array.from(new Map(routinesRaw.map(r => [r.id, r])).values());
+        console.log(">>> [GET ROUTINES] Total routines fetched:", routinesRaw.length);
+        
+        // Filtrar rutinas: que no tengan deletedAt y que estén activas
+        // Nota: para coaches mostramos todo lo que no esté borrado suavemente
+        const routines = Array.from(new Map((routinesRaw as Routine[]).map(r => [r.id, r])).values())
+            .filter(r => !r.deletedAt && r.active !== false);
 
+        console.log(">>> [GET ROUTINES] Routines after filter:", routines.length);
+        console.log(">>> [GET ROUTINES] Active IDs:", routines.map(r => r.id).join(", "));
+        
         return { success: true, routines };
     } catch (error) {
         console.error("Error fetching routines:", error);
@@ -98,6 +107,7 @@ export async function getCoachRoutines() {
     try {
         const snapshot = await adminDb.collection("routines")
             .where("coachId", "==", session.user.id)
+            .where("deletedAt", "==", null)
             .get();
 
         const routines = snapshot.docs.map(doc => {
@@ -126,7 +136,18 @@ export async function assignRoutineToAthlete(athleteId: string, routineId: strin
             return { success: false, error: "Rutina no encontrada o sin permisos" };
         }
 
-        // 2. Deactivate previous active routines for this athlete
+        // 2. Check if this routine is already assigned to this athlete
+        const existingAssignment = await adminDb.collection("routines")
+            .where("athleteId", "==", athleteId)
+            .where("originalRoutineId", "==", routineId)
+            .where("active", "==", true)
+            .get();
+
+        if (!existingAssignment.empty) {
+            return { success: false, error: "Esta rutina ya está asignada actualmente al atleta" };
+        }
+
+        // 3. Deactivate previous active routines for this athlete
         const batch = adminDb.batch();
         const oldRoutines = await adminDb.collection("routines")
             .where("athleteId", "==", athleteId)
@@ -186,7 +207,7 @@ export async function assignRoutineToAthlete(athleteId: string, routineId: strin
         const today = new Date();
         const dayOfWeek = today.getDay(); // 0 (Dom) a 6 (Sab)
         const daysUntilMonday = (dayOfWeek === 0) ? 1 : (8 - dayOfWeek);
-        const nextMonday = new Date(today);
+        const nextMonday = new Date(today.getTime()); // Clonar la fecha
         nextMonday.setDate(today.getDate() + daysUntilMonday);
         nextMonday.setHours(0, 0, 0, 0);
 
@@ -263,7 +284,6 @@ export async function getRoutine(id: string) {
         const data = docSnap.data();
         const isOwner = data?.athleteId === session.user.id;
         const isCoachOfAthlete = (session.user.role as string) === "coach" && data?.coachId === session.user.id;
-        const isAdvancedAthleteOwner = (session.user.role as string) === "advanced_athlete" && isOwner;
 
         if (!isOwner && !isCoachOfAthlete && (session.user.role as string) !== "coach") {
             return { success: false, error: "No autorizado" };
@@ -322,6 +342,26 @@ export async function updateRoutine(id: string, data: Partial<RoutineInput>) {
     }
 
     try {
+        // Verificar que el usuario es propietario de la rutina
+        const docSnap = await adminDb.collection("routines").doc(id).get();
+        if (!docSnap.exists) {
+            return { success: false, error: "Rutina no encontrada" };
+        }
+        
+        const routineData = docSnap.data();
+        const isOwner = routineData?.coachId === session.user.id;
+        const isAssignedAthlete = routineData?.athleteId === session.user.id;
+        
+        // Coaches pueden editar sus rutinas, atletas avanzados sus propias rutinas
+        if (!isOwner && (role === "coach" || role !== "advanced_athlete")) {
+            return { success: false, error: "No autorizado: no eres el propietario de esta rutina" };
+        }
+        
+        // Atletas pueden editar sus rutinas asignadas solo si son advanced_athlete
+        if (!isOwner && !isAssignedAthlete) {
+            return { success: false, error: "No autorizado" };
+        }
+
         await adminDb.collection("routines").doc(id).update({
             ...data,
             updatedAt: new Date(),
@@ -329,27 +369,67 @@ export async function updateRoutine(id: string, data: Partial<RoutineInput>) {
         revalidatePath("/routines");
         return { success: true };
     } catch (error) {
-        return { success: false, error: "Error al actualizar" };
+        return { success: false, error: "Error al actualizar" }
     }
 }
 
-// Delete Routine
+// Delete Routine (Soft Delete)
 export async function deleteRoutine(id: string) {
     const session = await auth();
+    const userId = session?.user?.id;
     const role = session?.user?.role as string;
-    if (!session?.user?.id || (role !== "coach" && role !== "advanced_athlete")) {
+    
+    console.log(`>>> [DELETE ROUTINE] User ${userId} (${role}) attempting to delete: ${id}`);
+    
+    if (!userId || (role !== "coach" && role !== "advanced_athlete")) {
         return { success: false, error: "No autorizado" };
     }
 
     try {
-        await adminDb.collection("routines").doc(id).delete();
+        const docRef = adminDb.collection("routines").doc(id);
+        const docSnap = await docRef.get();
+        if (!docSnap.exists) {
+            console.log(">>> [DELETE ROUTINE] Routine not found:", id);
+            return { success: false, error: "Rutina no encontrada" };
+        }
+        
+        const routineData = docSnap.data();
+        
+        // Verificar que es el propietario (coachId) o el atleta asignado (si es advanced_athlete)
+        const isCoachOwner = routineData?.coachId === userId;
+        const isAthleteOwner = routineData?.athleteId === userId && role === "advanced_athlete";
+
+        if (!isCoachOwner && !isAthleteOwner) {
+            console.log(">>> [DELETE ROUTINE] Unauthorized access to routine:", id);
+            return { success: false, error: "No tienes permisos para eliminar esta rutina" };
+        }
+
+        console.log(">>> [DELETE ROUTINE] Marking routine as deleted and inactive...");
+        
+        // Si es una rutina del coach (plantilla), la eliminamos físicamente para limpiar la DB
+        // ya que los duplicados están causando confusión.
+        if (isCoachOwner && !routineData?.athleteId) {
+            console.log(">>> [DELETE ROUTINE] Hard deleting coach template:", id);
+            await docRef.delete();
+        } else {
+            // Borrado suave para rutinas de atletas (historial)
+            await docRef.update({
+                deletedAt: new Date(),
+                active: false,
+                updatedAt: new Date(),
+            });
+        }
+        
+        console.log(">>> [DELETE ROUTINE] Successfully processed deletion for id:", id);
+        
         revalidatePath("/routines");
         revalidatePath("/dashboard");
         revalidateTag("routines", "default");
-        revalidateTag("coach-stats", "default");
+        
         return { success: true };
-    } catch (error) {
-        return { success: false, error: "Error al eliminar" };
+    } catch (error: any) {
+        console.error(">>> [DELETE ROUTINE] Error:", error);
+        return { success: false, error: "Error al eliminar la rutina: " + (error.message || "Unknown error") };
     }
 }
 

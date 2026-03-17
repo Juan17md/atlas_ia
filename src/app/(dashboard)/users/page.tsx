@@ -14,6 +14,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { UserRoleSelect } from "@/components/users/user-role-select";
+import { DeleteUserButton } from "@/components/users/delete-user-button";
 import { ClientMotionDiv } from "@/components/ui/client-motion";
 
 export default async function UsersManagementPage() {
@@ -77,13 +78,14 @@ export default async function UsersManagementPage() {
                             <TableHead className="text-neutral-500 font-black uppercase tracking-[0.2em] text-[10px] py-6 pl-10">Perfil</TableHead>
                             <TableHead className="text-neutral-500 font-black uppercase tracking-[0.2em] text-[10px] py-6">Identificador</TableHead>
                             <TableHead className="text-neutral-500 font-black uppercase tracking-[0.2em] text-[10px] py-6">Rango Actual</TableHead>
-                            <TableHead className="text-neutral-500 font-black uppercase tracking-[0.2em] text-[10px] py-6 pr-10 text-right">Modificar Permisos</TableHead>
+                            <TableHead className="text-neutral-500 font-black uppercase tracking-[0.2em] text-[10px] py-6 text-right">Modificar Permisos</TableHead>
+                            <TableHead className="text-neutral-500 font-black uppercase tracking-[0.2em] text-[10px] py-6 text-right pr-10">Acciones</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {!users || users.length === 0 ? (
                             <TableRow className="hover:bg-transparent">
-                                <TableCell colSpan={4} className="h-64 text-center">
+                                <TableCell colSpan={5} className="h-64 text-center">
                                     <div className="flex flex-col items-center justify-center text-neutral-600">
                                         <div className="w-16 h-16 rounded-2xl bg-neutral-900/50 flex items-center justify-center mb-6">
                                             <Users className="w-8 h-8 opacity-20" />
@@ -134,8 +136,13 @@ export default async function UsersManagementPage() {
                                         </Badge>
                                     </TableCell>
                                     <TableCell className="py-6 pr-10 text-right">
-                                        <div className="flex justify-end items-center opacity-60 group-hover:opacity-100 transition-opacity duration-300 scale-90 group-hover:scale-100 origin-right">
+                                        <div className="flex justify-end items-center gap-2 opacity-60 group-hover:opacity-100 transition-opacity duration-300 scale-90 group-hover:scale-100 origin-right">
                                             <UserRoleSelect userId={user.id} currentRole={user.role} />
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="py-6 pr-10 text-right">
+                                        <div className="flex justify-end items-center opacity-60 group-hover:opacity-100 transition-opacity duration-300">
+                                            <DeleteUserButton userId={user.id} userName={user.name || "Usuario"} />
                                         </div>
                                     </TableCell>
                                 </TableRow>

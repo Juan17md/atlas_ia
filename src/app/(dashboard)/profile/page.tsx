@@ -47,12 +47,35 @@ export default async function ProfilePage() {
     };
 
     // Fetch measurement history if athlete
-    let historyData: any[] = [];
+    let historyData: Array<{
+        id: string;
+        date: Date;
+        weight?: number;
+        chest?: number;
+        waist?: number;
+        hips?: number;
+        shoulders?: number;
+        neck?: number;
+        glutes?: number;
+        bicepsLeft?: number;
+        bicepsRight?: number;
+        forearmsLeft?: number;
+        forearmsRight?: number;
+        quadsLeft?: number;
+        quadsRight?: number;
+        calvesLeft?: number;
+        calvesRight?: number;
+    }> = [];
     const isCoach = session.user.role === "coach";
 
     if (!isCoach) {
         const historyResult = await getBodyMeasurementsHistory(session.user.id);
-        historyData = (historyResult.success ? historyResult.data : []) as any[];
+        const rawData = historyResult.success && historyResult.data ? historyResult.data : [];
+        // Convertir strings a Dates para el componente MeasurementChart
+        historyData = rawData.map(item => ({
+            ...item,
+            date: new Date(item.date)
+        }));
     }
 
     return (

@@ -24,7 +24,7 @@ export function MeasurementsChart({ data, unit, title, color = "#ef4444" }: Meas
         const maxVal = Math.max(...values);
         const range = maxVal - minVal || 1;
 
-        // Normalizar puntos al rango 0-100 para SVG altura
+        // Normalizar puntos al rango 0-100 para altura del SVG
         const normalizedPoints = data.map((d, i) => {
             const x = (i / (data.length - 1)) * 100;
             const y = 100 - ((d.value - minVal) / range) * 80 - 10; // Margen 10%

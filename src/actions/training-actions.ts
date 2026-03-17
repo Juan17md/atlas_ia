@@ -4,9 +4,23 @@ import { adminDb, serializeFirestoreData } from "@/lib/firebase-admin";
 import { auth } from "@/lib/auth";
 import { z } from "zod";
 import { TrainingLogSchema } from "@/lib/schemas";
-import { unstable_cache, revalidateTag, revalidatePath } from "next/cache";
+import { TrainingLogData } from "@/types/api";
+import { revalidateTag, revalidatePath } from "next/cache";
 
 // --- TIPOS LOCALES ---
+
+interface FirestoreSetData {
+    sessionId: string;
+    athleteId: string;
+    exerciseId: string;
+    weight: number;
+    reps: number;
+    rpe?: number;
+    rest?: number;
+    completed: boolean;
+    timestamp: number;
+    createdAt: Date;
+}
 
 export interface RoutineSet {
     reps?: number;
@@ -74,7 +88,7 @@ export async function getTrainingLogs(userId?: string) {
             .get();
 
         const logs = snapshot.docs.map(doc => {
-            return serializeFirestoreData({ id: doc.id, ...doc.data() });
+            return serializeFirestoreData({ id: doc.id, ...doc.data() }) as TrainingLogData;
         });
 
         return { success: true, logs };
@@ -418,7 +432,7 @@ export async function getLastSessionExerciseData(exerciseId: string) {
 
         if (setsSnapshot.empty) return { success: true, sets: [] };
 
-        const sets: any[] = setsSnapshot.docs.map(doc => ({ ...doc.data(), createdAt: doc.data().createdAt.toDate() }));
+        const sets: FirestoreSetData[] = setsSnapshot.docs.map(doc => ({ ...doc.data(), createdAt: doc.data().createdAt.toDate() })) as FirestoreSetData[];
 
         // La última sesión es la del primer set devuelto (están ordenados por fecha desc)
         const lastSessionId = sets[0].sessionId;
@@ -428,8 +442,8 @@ export async function getLastSessionExerciseData(exerciseId: string) {
         // Aunque createdAt desc significa que el último set hecho aparece primero. 
         // Normalmente queremos mostrarlos en orden de ejecución (ascendente).
         const lastSessionSets = sets
-            .filter((s: any) => s.sessionId === lastSessionId)
-            .sort((a: any, b: any) => a.timestamp - b.timestamp); // Ordenar cronólogicamente
+            .filter((s) => s.sessionId === lastSessionId)
+            .sort((a, b) => a.timestamp - b.timestamp); // Ordenar cronólogicamente
 
         return { success: true, sets: lastSessionSets };
     } catch (error) {
@@ -452,13 +466,13 @@ export async function getProgressionSuggestion(exerciseId: string): Promise<{ su
 
         if (setsSnapshot.empty) return { success: true, suggestion: undefined };
 
-        const sets: any[] = setsSnapshot.docs.map(doc => ({ ...doc.data(), createdAt: doc.data().createdAt.toDate() }));
+        const sets: FirestoreSetData[] = setsSnapshot.docs.map(doc => ({ ...doc.data(), createdAt: doc.data().createdAt.toDate() })) as FirestoreSetData[];
         const lastSessionId = sets[0].sessionId;
-        const lastSessionSets = sets.filter((s: any) => s.sessionId === lastSessionId);
+        const lastSessionSets = sets.filter((s) => s.sessionId === lastSessionId);
 
         if (lastSessionSets.length === 0) return { success: true };
 
-        lastSessionSets.sort((a: any, b: any) => {
+        lastSessionSets.sort((a, b) => {
             if (b.weight !== a.weight) return b.weight - a.weight;
             return b.reps - a.reps;
         });
@@ -543,6 +557,37 @@ const RetroactiveWorkoutSchema = z.object({
 
 export type RetroactiveWorkoutData = z.infer<typeof RetroactiveWorkoutSchema>;
 
+export interface TrainingLogDbData {
+    id?: string;
+    athleteId: string;
+    routineId: string | null;
+    dayId: string | null;
+    routineName: string;
+    date: Date;
+    durationMinutes: number;
+    sessionRpe: number;
+    sessionNotes: string;
+    status: string;
+    isRetroactive: boolean;
+    startTime: Date;
+    endTime: Date;
+    sessionId?: string;
+    exercises: Array<{
+        exerciseId: string;
+        exerciseName: string;
+        feedback: string;
+        sets: Array<{
+            weight: number;
+            reps: number;
+            rpe: number | null;
+            completed: boolean;
+        }>;
+    }>;
+    updatedAt: Date;
+    createdAt?: Date;
+    [key: string]: unknown;
+}
+
 export async function logRetroactiveWorkout(data: RetroactiveWorkoutData) {
     const session = await auth();
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
@@ -558,7 +603,7 @@ export async function logRetroactiveWorkout(data: RetroactiveWorkoutData) {
     try {
         const workoutDate = new Date(validated.date);
 
-        const logData: any = {
+        const logData: TrainingLogDbData = {
             athleteId: session.user.id,
             routineId: validated.routineId || null,
             dayId: validated.dayId || null,
@@ -586,7 +631,7 @@ export async function logRetroactiveWorkout(data: RetroactiveWorkoutData) {
         };
 
         const batch = adminDb.batch();
-        let currentSessionId = validated.sessionId || `retro_${Date.now()}_${session.user.id.slice(0, 6)}`;
+        const currentSessionId = validated.sessionId || `retro_${Date.now()}_${session.user.id.slice(0, 6)}`;
         logData.sessionId = currentSessionId;
 
         if (validated.id) {
@@ -649,9 +694,9 @@ export async function logRetroactiveWorkout(data: RetroactiveWorkoutData) {
 }
 
 // Obtener registro completado para la fecha de hoy/especificada
-export async function getWorkoutLogByDate(dateStr: string) {
+export async function getWorkoutLogByDate(dateStr: string): Promise<{ success: boolean; log: TrainingLogDbData | null; error?: string }> {
     const session = await auth();
-    if (!session?.user?.id) return { success: false, error: "No autorizado" };
+    if (!session?.user?.id) return { success: false, error: "No autorizado", log: null };
 
     try {
         // "YYYY-MM-DD" a componentes locales para evitar desfase UTC
@@ -682,10 +727,10 @@ export async function getWorkoutLogByDate(dateStr: string) {
 
         return {
             success: true,
-            log: serializeFirestoreData({ id: doc.id, ...doc.data() })
+            log: serializeFirestoreData({ id: doc.id, ...doc.data() }) as TrainingLogDbData
         };
     } catch (error) {
         console.error("Error fetching log by date:", error);
-        return { success: false, error: "Error al buscar entrenamiento por fecha" };
+        return { success: false, error: "Error al buscar entrenamiento por fecha", log: null };
     }
 }

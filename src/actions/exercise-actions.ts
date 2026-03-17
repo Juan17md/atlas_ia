@@ -4,6 +4,7 @@ import { z } from "zod";
 import { ExerciseSchema } from "@/lib/schemas";
 import { adminDb, serializeFirestoreData } from "@/lib/firebase-admin";
 import { auth } from "@/lib/auth";
+import { ExerciseListItem } from "@/types/api";
 import { revalidatePath, revalidateTag } from "next/cache";
 
 // Input schema for creating/updating exercises (excludes system fields)
@@ -45,7 +46,7 @@ export async function getExercises() {
         }
 
         const exercises = snapshot.docs.map(doc => {
-            return serializeFirestoreData({ id: doc.id, ...doc.data() });
+            return serializeFirestoreData({ id: doc.id, ...doc.data() }) as ExerciseListItem;
         });
 
         return { success: true, exercises };
@@ -169,6 +170,35 @@ export async function deleteExercise(id: string) {
 
         if (!isCreator && !isAdvancedWithAccess) {
             return { success: false, error: "No tienes permiso para eliminar este ejercicio" };
+        }
+
+        // Verificar si el ejercicio está siendo usado en rutinas activas
+        const exerciseName = docSnap.data()?.name;
+        const routinesUsingExercise = await adminDb.collection("routines")
+            .where("active", "==", true)
+            .get();
+        
+        const usedInRoutines: string[] = [];
+        for (const routineDoc of routinesUsingExercise.docs) {
+            const routineData = routineDoc.data();
+            const schedule = routineData.schedule || [];
+            for (const day of schedule) {
+                const exercises = day.exercises || [];
+                for (const ex of exercises) {
+                    if (ex.exerciseId === id || ex.exerciseName === exerciseName) {
+                        usedInRoutines.push(routineDoc.data().name || routineDoc.id);
+                        break;
+                    }
+                }
+                if (usedInRoutines.includes(routineDoc.data().name || routineDoc.id)) break;
+            }
+        }
+
+        if (usedInRoutines.length > 0) {
+            return { 
+                success: false, 
+                error: `El ejercicio está siendo usado en las siguientes rutinas activas: ${usedInRoutines.join(", ")}. Elimina el ejercicio de las rutinas primero.` 
+            };
         }
 
         await docRef.delete();

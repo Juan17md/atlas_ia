@@ -11,7 +11,7 @@ interface Athlete {
     id: string;
     name: string;
     email: string;
-    image?: string;
+    image?: string | null;
     goal?: string;
     createdAt?: string;
 }
@@ -54,7 +54,7 @@ export function AthleteCard({ athlete }: AthleteCardProps) {
                             <div className="relative">
                                 <div className="absolute inset-0 bg-red-600/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                 <Avatar className="h-16 w-16 border-2 border-white/5 group-hover:border-red-600/50 transition-all duration-500 rounded-2xl relative z-10">
-                                    <AvatarImage src={athlete.image} className="object-cover" />
+                                    <AvatarImage src={athlete.image || undefined} className="object-cover" />
                                     <AvatarFallback className="bg-neutral-950 text-white font-black text-xl italic">
                                         {athlete.name?.substring(0, 2).toUpperCase() || "UN"}
                                     </AvatarFallback>

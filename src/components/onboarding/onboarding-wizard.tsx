@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Path } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { OnboardingInputSchema } from "@/lib/schemas";
@@ -49,7 +49,6 @@ export function OnboardingWizard({ authProvider }: OnboardingWizardProps) {
     const { data: session, update } = useSession();
 
     const form = useForm<z.infer<typeof OnboardingInputSchema>>({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         resolver: zodResolver(OnboardingInputSchema) as any,
         defaultValues: {
             age: 25,
@@ -253,7 +252,7 @@ export function OnboardingWizard({ authProvider }: OnboardingWizardProps) {
                                             </div>
                                             <div className="space-y-2">
                                                 <Label className="uppercase text-xs font-bold text-neutral-500">Género</Label>
-                                                <Select onValueChange={(v: string) => setValue("gender", v as any)} defaultValue={formData.gender}>
+                                                <Select onValueChange={(v: string) => setValue("gender", v as "male" | "female")} defaultValue={formData.gender}>
                                                     <SelectTrigger className="bg-black/50 border-neutral-800 h-[52px] rounded-xl text-white">
                                                         <SelectValue placeholder="Selecciona" />
                                                     </SelectTrigger>
@@ -301,7 +300,7 @@ export function OnboardingWizard({ authProvider }: OnboardingWizardProps) {
                                                     {['beginner', 'intermediate', 'advanced'].map((level) => (
                                                         <div
                                                             key={level}
-                                                            onClick={() => setValue("experienceLevel", level as any)}
+                                                            onClick={() => setValue("experienceLevel", level as "beginner" | "intermediate" | "advanced")}
                                                             className={cn(
                                                                 "flex flex-col items-center justify-center p-4 rounded-2xl border-2 cursor-pointer transition-all hover:bg-neutral-800",
                                                                 formData.experienceLevel === level
@@ -455,7 +454,7 @@ export function OnboardingWizard({ authProvider }: OnboardingWizardProps) {
                                                     <Input
                                                         type="number"
                                                         inputMode="decimal"
-                                                        {...register(m.id as any)}
+                                                        {...register(m.id as Path<z.infer<typeof OnboardingInputSchema>>)}
                                                         placeholder="0"
                                                         className="bg-black/50 border-neutral-800 h-[52px] rounded-xl text-white"
                                                     />

@@ -6,16 +6,9 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { BodyMeasurementLogSchema } from "@/lib/schemas";
 
-const MeasurementInput = BodyMeasurementLogSchema.omit({
-    id: true,
-    userId: true,
-    createdAt: true,
-    date: true // We can set this from existing date or use current
-}).extend({
-    date: z.string().optional() // Allow string date from form
-});
+type BodyMeasurementInput = Partial<Omit<z.input<typeof BodyMeasurementLogSchema>, "date">> & { date?: Date | string };
 
-export async function logBodyMeasurements(data: z.infer<typeof MeasurementInput>, targetUserId?: string) {
+export async function logBodyMeasurements(data: BodyMeasurementInput, targetUserId?: string) {
     const session = await auth();
     if (!session?.user?.id) {
         return { success: false, error: "No autorizado" };
@@ -36,39 +29,47 @@ export async function logBodyMeasurements(data: z.infer<typeof MeasurementInput>
     }
 
     try {
-        // Fetch target user data (not necessarily the current user)
+        // Obtener datos del usuario objetivo (no necesariamente el usuario actual)
         const userSnapshot = await adminDb.collection("users").doc(userId).get();
         const userData = userSnapshot.data();
-        const height = userData?.height; // cms
+        const height = userData?.height; // centímetros
         const gender = userData?.gender || "male";
 
-        // ... rest of the logic using userId ...
+        // ... resto de la lógica usando userId ...
 
-        // Calculate Body Fat if possible (Official US Navy Metric Method)
+        // Calcular porcentaje de grasa corporal si es posible (Método Oficial US Navy)
         let calculatedBodyFat: number | undefined = undefined;
+        let bodyFatWarning: string | undefined = undefined;
 
         if (height && data.waist && data.neck) {
-            // Formula Navy (Metric Version)
-            // Men: BF = 495 / (1.0324 - 0.19077 * log10(waist - neck) + 0.15456 * log10(height)) - 450
-            // Women: BF = 495 / (1.29579 - 0.35004 * log10(waist + hip - neck) + 0.22100 * log10(height)) - 450
+            // Fórmula Navy (Versión Métrica)
+            // Hombres: BF = 495 / (1.0324 - 0.19077 * log10(cintura - cuello) + 0.15456 * log10(altura)) - 450
+            // Mujeres: BF = 495 / (1.29579 - 0.35004 * log10(cintura + cadera - cuello) + 0.22100 * log10(altura)) - 450
 
             const log10 = Math.log10;
             const h = height;
             const w = data.waist;
             const n = data.neck;
 
-            if (gender === "male" || (gender !== "female")) { // Default to male if unknown
+            // Validar medidas fisiológicamente posibles
+            if (w <= n) {
+                bodyFatWarning = "La cintura debe ser mayor que el cuello para calcular grasa corporal";
+            } else if (gender === "male" || (gender !== "female")) { // Por defecto usar masculino si se desconoce
                 const diff = w - n;
-                if (diff > 0) {
+                if (diff > 0 && h > 0) {
                     const denom = 1.0324 - 0.19077 * log10(diff) + 0.15456 * log10(h);
-                    calculatedBodyFat = (495 / denom) - 450;
+                    if (denom !== 0 && !isNaN(denom)) {
+                        calculatedBodyFat = (495 / denom) - 450;
+                    }
                 }
             } else if (gender === "female" && data.hips) {
                 const hip = data.hips;
                 const diff = (w + hip) - n;
-                if (diff > 0) {
+                if (diff > 0 && h > 0) {
                     const denom = 1.29579 - 0.35004 * log10(diff) + 0.22100 * log10(h);
-                    calculatedBodyFat = (495 / denom) - 450;
+                    if (denom !== 0 && !isNaN(denom)) {
+                        calculatedBodyFat = (495 / denom) - 450;
+                    }
                 }
             }
         }
@@ -87,19 +88,21 @@ export async function logBodyMeasurements(data: z.infer<typeof MeasurementInput>
             bodyFat: calculatedBodyFat ?? undefined,
         };
 
-        // Ensure date is a Date object for Firestore
+        // Asegurar que date sea un objeto Date para Firestore
         if (typeof logData.date === 'string') {
             logData.date = new Date(logData.date);
         }
 
         const docRef = await adminDb.collection("body_measurements").add(logData);
 
-        // Clean data for profile (remove non-measurement fields)
-        const { date, notes, ...measurementFields } = data;
+        // Limpiar datos para perfil (eliminar campos que no son de medidas)
+        const { date: _date, notes: _notes, ...measurementFields } = data;
 
-        const updateData: any = {
+        type MeasurementFields = typeof measurementFields;
+
+        const updateData: Record<string, unknown> = {
             measurements: {
-                ...userData?.measurements, // Mantener campos existentes si no se enviaron
+                ...userData?.measurements,
                 ...measurementFields,
                 weight: data.weight,
                 updatedAt: new Date()
@@ -109,7 +112,7 @@ export async function logBodyMeasurements(data: z.infer<typeof MeasurementInput>
 
         if (calculatedBodyFat) {
             updateData.bodyFat = calculatedBodyFat;
-            updateData.measurements.bodyFat = calculatedBodyFat;
+            (updateData.measurements as Record<string, unknown>).bodyFat = calculatedBodyFat;
         }
 
         await adminDb.collection("users").doc(userId).update(updateData);
@@ -121,7 +124,12 @@ export async function logBodyMeasurements(data: z.infer<typeof MeasurementInput>
             revalidatePath(`/progress?athleteId=${targetUserId}`);
         }
 
-        return { success: true, id: docRef.id };
+        return { 
+            success: true, 
+            id: docRef.id,
+            bodyFat: calculatedBodyFat,
+            warning: bodyFatWarning
+        };
     } catch (error) {
         console.error("Error logging measurements:", error);
         return { success: false, error: "Error al guardar medidas" };
@@ -136,7 +144,7 @@ export async function getBodyMeasurementsHistory(userId?: string) {
 
     const targetId = userId || session.user.id;
 
-    // Verify access if querying another user (must be coach)
+    // Verificar acceso si se consultan datos de otro usuario (debe ser coach)
     if (userId && userId !== session.user.id && session.user.role !== "coach") {
         return { success: false, error: "No autorizado para ver estos datos" };
     }

@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Plus, Search, Dumbbell, Trash2, Tag } from "lucide-react";
 import { createExercise, deleteExercise } from "@/actions/exercise-actions";
+import { revalidatePath } from "next/cache";
 import { toast } from "sonner";
 
 interface Exercise {
@@ -30,7 +31,7 @@ export function ExercisesManager({ initialExercises }: ExercisesManagerProps) {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Form state
+    // Estado del formulario
     const [newName, setNewName] = useState("");
     const [newMuscle, setNewMuscle] = useState("");
 
@@ -59,9 +60,7 @@ export function ExercisesManager({ initialExercises }: ExercisesManagerProps) {
                 setIsDialogOpen(false);
                 setNewName("");
                 setNewMuscle("");
-                // En una app real haríamos revalidate o update optimista. 
-                // Aquí deberíamos recargar la ruta, pero para MVP basta con esperar el refresh del server action
-                window.location.reload();
+                revalidatePath("/exercises");
             } else {
                 toast.error(result.error);
             }

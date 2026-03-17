@@ -18,7 +18,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
-// Schema for form (same logic as server input)
+// Schema para formulario (misma lógica que el schema del servidor)
 const FormSchema = ExerciseSchema.omit({
     id: true,
     coachId: true,
@@ -50,7 +50,7 @@ const SPECIFIC_MUSCLES_BY_GROUP: Record<string, string[]> = {
 };
 
 interface ExerciseFormDialogProps {
-    exercise?: any; // If present, edit mode
+    exercise?: any; // Si está presente, es modo edición
     trigger?: React.ReactNode;
     open?: boolean;
     onOpenChange?: (open: boolean) => void;

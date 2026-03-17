@@ -100,7 +100,7 @@ export function MediaUpload({
         }
     };
 
-    // Manejar drag & drop
+    // Manejar arrastrar y soltar
     const handleDrag = (e: React.DragEvent) => {
         e.preventDefault();
         e.stopPropagation();
@@ -135,7 +135,7 @@ export function MediaUpload({
         }
     };
 
-    // Determinar el tipo de contenido actual para mostrar preview
+    // Determinar el tipo de contenido actual para mostrar vista previa
     const currentMediaType = previewInfo?.type || (value ? (value.match(/\.(mp4|webm|mov|m4v)$/i) ? "video" : "image") : null);
 
     return (
