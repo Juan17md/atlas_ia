@@ -26,7 +26,7 @@ export function ProgressChart({ completed = 0, target = 3 }: { completed?: numbe
             transition={{ duration: 0.6, type: "spring", bounce: 0.4 }}
             className="h-[220px] w-full relative"
         >
-            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+             <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} aspect={undefined}>
                 <PieChart>
                     <defs>
                         <linearGradient id="progressGradient" x1="0" y1="0" x2="0" y2="1">

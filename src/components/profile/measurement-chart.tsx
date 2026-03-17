@@ -64,8 +64,8 @@ export function MeasurementChart({ data, metrics, title }: MeasurementChartProps
             </div>
 
             <div className="p-8 relative z-10">
-                <div className="h-[280px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
+                 <div className="h-[280px] w-full">
+                     <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} aspect={undefined}>
                         <LineChart data={formattedData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#262626" vertical={false} strokeOpacity={0.2} />
                             <XAxis
