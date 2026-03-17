@@ -72,23 +72,29 @@ service cloud.firestore {
     // ----------------------------------------
     // USERS (Perfiles de usuarios)
     // ----------------------------------------
-    // - Cualquier autenticado puede leer (para búsqueda de coaches/atletas)
-    // - Solo el propietario puede crear/editar su perfil
+    // - Solo se pueden leer campos públicos (name, role, photoUrl/image)
+    // - El propietario puede leer/escribir todos sus campos
+    // - Los coaches pueden leer datos básicos de sus atletas
     // - Nadie puede eliminar (solo admin desde consola)
     match /users/{userId} {
-      allow read: if isAuthenticated();
+      // Permitir lectura completa solo al propietario
+      allow read: if isAuthenticated() && isOwner(userId);
       
-      allow create: if isAuthenticated() 
+      // Permitir lectura de campos públicos a coaches (para ver sus atletas)
+      allow read: if isCoach() && 
+                     request.resource.data.keys().hasOnly(['name', 'role', 'photoUrl', 'image', 'goal']);
+
+      allow create: if isAuthenticated()
                     && isOwner(userId)
                     && hasField('role')
                     && request.resource.data.role in ['coach', 'athlete', 'advanced_athlete'];
-      
-      allow update: if isAuthenticated() 
+
+      allow update: if isAuthenticated()
                     && isOwner(userId)
                     // No permitir cambiar el rol una vez establecido
-                    && (!('role' in request.resource.data) || 
+                    && (!('role' in request.resource.data) ||
                         request.resource.data.role == resource.data.role);
-      
+
       allow delete: if false;
     }
 

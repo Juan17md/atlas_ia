@@ -162,12 +162,15 @@ export async function checkCompletedWorkoutToday() {
     if (!session?.user?.id) return { success: false, completed: false };
 
     try {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        // Calcular inicio y fin del día en zona horaria local para evitar problemas de UTC
+        const now = new Date();
+        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
 
         const snapshot = await adminDb.collection("training_logs")
             .where("athleteId", "==", session.user.id)
-            .where("date", ">=", today)
+            .where("date", ">=", startOfDay)
+            .where("date", "<", endOfDay)
             .get();
 
         const isCompleted = snapshot.docs.some(doc => {
