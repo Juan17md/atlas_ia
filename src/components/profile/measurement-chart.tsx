@@ -18,23 +18,36 @@ interface MeasurementChartProps {
 }
 
 const CustomizedLabel = (props: any) => {
-    const { x, y, stroke, value } = props;
+    const { x, y, value, color } = props;
     if (value === null || value === undefined) return null;
     return (
-        <text
-            x={x}
-            y={y}
-            dy={-12}
-            fill={stroke}
-            fontSize={11}
-            fontWeight={900}
-            textAnchor="middle"
-            stroke="rgba(0, 0, 0, 0.85)"
-            strokeWidth={4}
-            paintOrder="stroke fill"
-        >
-            {value}
-        </text>
+        <g>
+            <text
+                x={x}
+                y={y}
+                dy={-12}
+                fill="transparent"
+                stroke="rgba(0, 0, 0, 0.9)"
+                strokeWidth={5}
+                strokeLinejoin="round"
+                fontSize={11}
+                fontWeight={900}
+                textAnchor="middle"
+            >
+                {value}
+            </text>
+            <text
+                x={x}
+                y={y}
+                dy={-12}
+                fill={color}
+                fontSize={11}
+                fontWeight={900}
+                textAnchor="middle"
+            >
+                {value}
+            </text>
+        </g>
     );
 };
 
@@ -143,7 +156,7 @@ export function MeasurementChart({ data, metrics, title }: MeasurementChartProps
                                     strokeWidth={4}
                                     dot={{ r: 4, fill: "#000", stroke: m.color, strokeWidth: 2 }}
                                     activeDot={{ r: 6, fill: m.color, stroke: "#fff", strokeWidth: 2 }}
-                                    label={<CustomizedLabel />}
+                                    label={(props) => <CustomizedLabel {...props} color={m.color} />}
                                     name={m.label}
                                     animationDuration={1500}
                                 />
