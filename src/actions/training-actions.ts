@@ -6,6 +6,7 @@ import { z } from "zod";
 import { TrainingLogSchema } from "@/lib/schemas";
 import { TrainingLogData } from "@/types/api";
 import { revalidateTag, revalidatePath } from "next/cache";
+import { obtenerAhoraLocal, obtenerFechaISOLocal, inicioDelDia, finDelDia } from "@/lib/fecha-utils";
 
 // --- TIPOS LOCALES ---
 
@@ -105,7 +106,9 @@ export async function logWorkoutSession(data: WorkoutSessionData) {
 
     try {
         const sessionId = `session_${Date.now()}_${session.user.id.slice(0, 6)}`;
-        const workoutDate = new Date();
+        // Usar fecha local del usuario para evitar desfase UTC en Vercel
+        const fechaHoyStr = obtenerFechaISOLocal();
+        const workoutDate = inicioDelDia(fechaHoyStr);
 
         const batch = adminDb.batch();
 
@@ -162,15 +165,15 @@ export async function checkCompletedWorkoutToday() {
     if (!session?.user?.id) return { success: false, completed: false };
 
     try {
-        // Calcular inicio y fin del día en zona horaria local para evitar problemas de UTC
-        const now = new Date();
-        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+        // Usar fecha del usuario (no UTC del servidor) para calcular el rango del día
+        const hoyStr = obtenerFechaISOLocal();
+        const startOfDay = inicioDelDia(hoyStr);
+        const endOfDay = finDelDia(hoyStr);
 
         const snapshot = await adminDb.collection("training_logs")
             .where("athleteId", "==", session.user.id)
             .where("date", ">=", startOfDay)
-            .where("date", "<", endOfDay)
+            .where("date", "<=", endOfDay)
             .get();
 
         const isCompleted = snapshot.docs.some(doc => {
@@ -392,6 +395,10 @@ export async function finishWorkoutSession(
             });
         }
 
+        // Usar fecha local del usuario para evitar desfase UTC en Vercel
+        const fechaHoyStr = obtenerFechaISOLocal();
+        const fechaHoy = inicioDelDia(fechaHoyStr);
+
         await adminDb.collection("training_logs").add({
             athleteId: session.user.id,
             sessionId: sessionId,
@@ -399,7 +406,7 @@ export async function finishWorkoutSession(
             totalVolume: calculatedVolume || totalVolume,
             totalSets: actualSets || totalSets,
             status: "completed",
-            date: new Date(),
+            date: fechaHoy,
             endTime: new Date(),
             createdAt: new Date(),
             exercises: Array.from(exerciseMap.values())
@@ -604,7 +611,8 @@ export async function logRetroactiveWorkout(data: RetroactiveWorkoutData) {
     const validated = validation.data;
 
     try {
-        const workoutDate = new Date(validated.date);
+        // Usar UTC consistente para la fecha del entrenamiento retroactivo
+        const workoutDate = inicioDelDia(validated.date);
 
         const logData: TrainingLogDbData = {
             athleteId: session.user.id,
@@ -702,17 +710,9 @@ export async function getWorkoutLogByDate(dateStr: string): Promise<{ success: b
     if (!session?.user?.id) return { success: false, error: "No autorizado", log: null };
 
     try {
-        // "YYYY-MM-DD" a componentes locales para evitar desfase UTC
-        const [year, month, day] = dateStr.split("-").map(Number);
-        const targetDate = new Date();
-        targetDate.setFullYear(year, month - 1, day);
-        targetDate.setHours(0, 0, 0, 0);
-
-        // Ajustar el inicio y fin del día
-        const startOfDay = new Date(targetDate);
-
-        const endOfDay = new Date(targetDate);
-        endOfDay.setHours(23, 59, 59, 999);
+        // Usar UTC consistente para queries de Firestore
+        const startOfDay = inicioDelDia(dateStr);
+        const endOfDay = finDelDia(dateStr);
 
         const snapshot = await adminDb.collection("training_logs")
             .where("athleteId", "==", session.user.id)

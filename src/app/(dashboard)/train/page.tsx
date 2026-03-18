@@ -10,6 +10,7 @@ import { redirect } from "next/navigation";
 import { AlertCircle, Dumbbell, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { obtenerAhoraLocal, obtenerFechaISOLocal } from "@/lib/fecha-utils";
 
 // Tipo inline para compatibilidad con WorkoutSession
 type WorkoutRoutine = {
@@ -40,8 +41,8 @@ export default async function TrainPage(props: {
     const isAssignedConfirmed = searchParams.assigned === 'true';
     const isAdvanced = session.user.role === 'advanced_athlete';
 
-    // Detect if today is a weekend day (Saturday = 6, Sunday = 0)
-    const todayDate = new Date();
+    // Usar fecha local del usuario (no UTC del servidor de Vercel)
+    const todayDate = obtenerAhoraLocal();
     const dayOfWeek = todayDate.getDay();
     const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
     const rawDayName = todayDate.toLocaleDateString('es-ES', { weekday: 'long' });
@@ -68,7 +69,7 @@ export default async function TrainPage(props: {
     }
 
     // 1. Check for a specific assignment for TODAY
-    const todayISO = todayDate.toISOString().split('T')[0];
+    const todayISO = obtenerFechaISOLocal();
     const { assignment } = await getTodayAssignment(session.user.id, todayISO);
 
     // Si es atleta avanzado y no ha elegido todavía, le mostramos el Triage

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { RetroactiveWorkoutLogger } from "./retroactive-workout-logger";
 import { cn } from "@/lib/utils";
+import { fechaLocalAString } from "@/lib/fecha-utils";
 import { Calendar, Lock, Dumbbell, ChevronRight } from "lucide-react";
 
 // --- Interfaces ---
@@ -60,7 +61,7 @@ function getDateForWeekday(dayIndex: number): string {
     const diff = dayIndex - currentAdjusted;
     const targetDate = new Date(today);
     targetDate.setDate(today.getDate() + diff);
-    return targetDate.toISOString().split("T")[0];
+    return fechaLocalAString(targetDate);
 }
 
 // --- Componente Principal ---

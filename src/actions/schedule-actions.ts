@@ -3,7 +3,7 @@
 import { adminDb, serializeFirestoreData } from "@/lib/firebase-admin";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
-import { format } from "date-fns";
+import { inicioDelDia, finDelDia, fechaAString } from "@/lib/fecha-utils";
 
 interface RoutineDay {
     id?: string;
@@ -290,11 +290,9 @@ export async function getTodayAssignment(athleteId: string, date: string) {
 
 export async function getRecordedWorkoutDays(athleteId: string, start: string, end: string) {
     try {
-        // start y end son YYYY-MM-DD
-        // Firestore date objects comparison
-        const startDate = new Date(start);
-        const endDate = new Date(end);
-        endDate.setHours(23, 59, 59, 999);
+        // start y end son YYYY-MM-DD — usar UTC consistente para queries
+        const startDate = inicioDelDia(start);
+        const endDate = finDelDia(end);
 
         const snapshot = await adminDb.collection("training_logs")
             .where("athleteId", "==", athleteId)
@@ -305,12 +303,12 @@ export async function getRecordedWorkoutDays(athleteId: string, start: string, e
         const dates = snapshot.docs
             .map(doc => {
                 const data = doc.data();
-                // Considerar completado si el status es 'completed' O si no tiene status (logs antiguos)
                 // Ignorar explícitamente los que están 'in_progress'
                 if (data.status === 'in_progress') return null;
 
                 const logDate = data.date.toDate();
-                return format(logDate, "yyyy-MM-dd");
+                // Usar zona horaria del usuario para convertir a string
+                return fechaAString(logDate);
             })
             .filter((d): d is string => d !== null);
 

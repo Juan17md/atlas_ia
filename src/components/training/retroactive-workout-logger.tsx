@@ -23,6 +23,7 @@ import { logRetroactiveWorkout, RetroactiveWorkoutData, getWorkoutLogByDate, Tra
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { fechaLocalAString } from "@/lib/fecha-utils";
 import { ExerciseSelector } from "@/components/routines/exercise-selector";
 import { getExercises } from "@/actions/exercise-actions";
 
@@ -86,8 +87,7 @@ export function RetroactiveWorkoutLogger({ routineDay, routineId, routineName: i
     });
     const [date, setDate] = useState(() => {
         if (defaultDate) return defaultDate;
-        const now = new Date();
-        return now.toISOString().split("T")[0];
+        return fechaLocalAString(new Date());
     });
     const [durationMinutes, setDurationMinutes] = useState("60");
     const [sessionRpe, setSessionRpe] = useState(7);
@@ -422,7 +422,7 @@ export function RetroactiveWorkoutLogger({ routineDay, routineId, routineName: i
                                     type="date"
                                     value={date}
                                     onChange={(e) => setDate(e.target.value)}
-                                    max={new Date().toISOString().split("T")[0]}
+                                    max={fechaLocalAString(new Date())}
                                     className="h-12 bg-neutral-950 border-neutral-800 text-white font-bold rounded-xl text-left pl-10 focus:ring-1 focus:ring-white/20 scheme-dark text-sm uppercase"
                                 />
                             </div>
