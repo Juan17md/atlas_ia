@@ -229,42 +229,6 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
                                     <p className="text-xs text-neutral-500 font-medium">Escucha a tu cuerpo hoy.</p>
                                 </div>
                             </motion.div>
-                        ) : selectedDayAssignments.length > 0 ? (
-                            <div className="space-y-3">
-                                {selectedDayAssignments.map((assignment, idx) => (
-                                    <motion.div
-                                        key={assignment.id}
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: idx * 0.1 }}
-                                        className={cn(
-                                            "p-6 rounded-[2rem] border transition-all group relative overflow-hidden backdrop-blur-md",
-                                            isRecordedDay
-                                                ? "bg-emerald-500/10 border-emerald-500/20 shadow-[0_20px_40px_-15px_rgba(16,185,129,0.1)]"
-                                                : "bg-neutral-900/60 border-white/5 hover:border-red-500/40 hover:bg-neutral-900/80 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]"
-                                        )}
-                                    >
-                                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                                            <Dumbbell className="w-12 h-12 text-white" />
-                                        </div>
-                                        <div className="flex justify-between items-center mb-3 relative z-10">
-                                            <Badge variant="outline" className={cn(
-                                                "text-[8px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-md",
-                                                isRecordedDay ? "border-emerald-500/20 text-emerald-500" : "border-red-500/20 text-red-500"
-                                            )}>
-                                                {isRecordedDay ? "Finalizado" : "Asignado"}
-                                            </Badge>
-                                            <ChevronRight className="w-4 h-4 text-neutral-700 group-hover:text-red-500 transition-all" />
-                                        </div>
-                                        <h4 className="font-black text-white text-lg tracking-tight relative z-10 group-hover:text-red-500 transition-colors">
-                                            {assignment.routineName}
-                                        </h4>
-                                        <p className="text-xs text-neutral-500 font-bold mt-1 uppercase tracking-widest relative z-10">
-                                            {assignment.dayName}
-                                        </p>
-                                    </motion.div>
-                                ))}
-                            </div>
                         ) : isRecordedDay ? (
                             <div className="space-y-3">
                                 {loadingLogs ? (
@@ -343,6 +307,34 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
                                         </div>
                                     </motion.div>
                                 )}
+                            </div>
+                        ) : selectedDayAssignments.length > 0 ? (
+                            <div className="space-y-3">
+                                {selectedDayAssignments.map((assignment, idx) => (
+                                    <motion.div
+                                        key={assignment.id}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: idx * 0.1 }}
+                                        className="p-6 rounded-[2rem] border transition-all group relative overflow-hidden backdrop-blur-md bg-neutral-900/60 border-white/5 hover:border-red-500/40 hover:bg-neutral-900/80 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]"
+                                    >
+                                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                            <Dumbbell className="w-12 h-12 text-white" />
+                                        </div>
+                                        <div className="flex justify-between items-center mb-3 relative z-10">
+                                            <Badge variant="outline" className="text-[8px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-md border-red-500/20 text-red-500">
+                                                Asignado
+                                            </Badge>
+                                            <ChevronRight className="w-4 h-4 text-neutral-700 group-hover:text-red-500 transition-all" />
+                                        </div>
+                                        <h4 className="font-black text-white text-lg tracking-tight relative z-10 group-hover:text-red-500 transition-colors">
+                                            {assignment.routineName}
+                                        </h4>
+                                        <p className="text-xs text-neutral-500 font-bold mt-1 uppercase tracking-widest relative z-10">
+                                            {assignment.dayName}
+                                        </p>
+                                    </motion.div>
+                                ))}
                             </div>
                         ) : selectedDayInfo && !selectedDayInfo.isRest ? (
                             <div className="space-y-3">
