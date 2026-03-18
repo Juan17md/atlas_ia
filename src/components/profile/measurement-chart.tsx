@@ -17,6 +17,27 @@ interface MeasurementChartProps {
     title: string;
 }
 
+const CustomizedLabel = (props: any) => {
+    const { x, y, stroke, value } = props;
+    if (value === null || value === undefined) return null;
+    return (
+        <text
+            x={x}
+            y={y}
+            dy={-12}
+            fill={stroke}
+            fontSize={11}
+            fontWeight={900}
+            textAnchor="middle"
+            stroke="rgba(0, 0, 0, 0.85)"
+            strokeWidth={4}
+            paintOrder="stroke fill"
+        >
+            {value}
+        </text>
+    );
+};
+
 export function MeasurementChart({ data, metrics, title }: MeasurementChartProps) {
     const formattedData = useMemo(() => {
         return data.map(item => ({
@@ -122,7 +143,7 @@ export function MeasurementChart({ data, metrics, title }: MeasurementChartProps
                                     strokeWidth={4}
                                     dot={{ r: 4, fill: "#000", stroke: m.color, strokeWidth: 2 }}
                                     activeDot={{ r: 6, fill: m.color, stroke: "#fff", strokeWidth: 2 }}
-                                    label={{ fill: m.color, fontSize: 10, fontWeight: 900, position: 'top', dy: -12 }}
+                                    label={<CustomizedLabel />}
                                     name={m.label}
                                     animationDuration={1500}
                                 />
