@@ -22,7 +22,7 @@ export function MeasurementChart({ data, metrics, title }: MeasurementChartProps
         return data.map(item => ({
             ...item,
             formattedDate: format(new Date(item.date), "d MMM", { locale: es })
-        })).reverse(); // Mostrar orden cronológico
+        })); // Mostrar orden cronológico de izquierda a derecha
     }, [data]);
 
     if (!data || data.length === 0) {
@@ -63,10 +63,10 @@ export function MeasurementChart({ data, metrics, title }: MeasurementChartProps
                 </div>
             </div>
 
-            <div className="p-8 relative z-10">
-                 <div className="h-[280px] w-full">
+            <div className="p-8 relative z-10 w-full overflow-x-auto custom-scrollbar">
+                 <div className="h-[350px] w-full min-w-[500px]">
                      <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} aspect={undefined}>
-                        <LineChart data={formattedData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                        <LineChart data={formattedData} margin={{ top: 25, right: 20, left: -20, bottom: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#262626" vertical={false} strokeOpacity={0.2} />
                             <XAxis
                                 dataKey="formattedDate"
@@ -122,6 +122,7 @@ export function MeasurementChart({ data, metrics, title }: MeasurementChartProps
                                     strokeWidth={4}
                                     dot={{ r: 4, fill: "#000", stroke: m.color, strokeWidth: 2 }}
                                     activeDot={{ r: 6, fill: m.color, stroke: "#fff", strokeWidth: 2 }}
+                                    label={{ fill: m.color, fontSize: 10, fontWeight: 900, position: 'top', dy: -12 }}
                                     name={m.label}
                                     animationDuration={1500}
                                 />

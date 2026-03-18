@@ -167,7 +167,7 @@ export default async function ProfilePage() {
                             </div>
                         </ClientMotionDiv>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        <div className="grid grid-cols-1 gap-12">
                             <MeasurementChart
                                 title="Masa Crítica (KG)"
                                 data={historyData}
