@@ -20,28 +20,32 @@ interface MeasurementChartProps {
 const CustomizedLabel = (props: any) => {
     const { x, y, value, color } = props;
     if (value === null || value === undefined) return null;
+    
+    // Ancho del "pill" basado en heurística simple (2 o 3 caracteres)
+    const strVal = String(value);
+    const pillWidth = strVal.length > 2 ? 30 : 24;
+    const pillHeight = 16;
+    const rx = pillWidth / 2;
+    const ry = y - pillHeight - 6;
+
     return (
         <g>
+            <rect 
+                x={x - rx} 
+                y={ry} 
+                width={pillWidth} 
+                height={pillHeight} 
+                fill="rgba(0,0,0,0.7)" 
+                rx={4} 
+                stroke={color}
+                strokeWidth={1.5}
+            />
             <text
                 x={x}
-                y={y}
-                dy={-12}
-                fill="transparent"
-                stroke="rgba(0, 0, 0, 0.9)"
-                strokeWidth={5}
-                strokeLinejoin="round"
-                fontSize={11}
-                fontWeight={900}
-                textAnchor="middle"
-            >
-                {value}
-            </text>
-            <text
-                x={x}
-                y={y}
-                dy={-12}
+                y={ry + pillHeight / 2}
+                dy={3.5}
                 fill={color}
-                fontSize={11}
+                fontSize={9}
                 fontWeight={900}
                 textAnchor="middle"
             >
