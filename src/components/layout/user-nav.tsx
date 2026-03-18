@@ -17,14 +17,25 @@ interface UserNavProps {
     user?: any;
 }
 
+const ROLE_CONFIG: Record<string, { label: string; color: string }> = {
+    coach: { label: "Entrenador", color: "text-blue-400 border-blue-400/30 bg-blue-400/10" },
+    advanced_athlete: { label: "Atleta Avanzado", color: "text-amber-400 border-amber-400/30 bg-amber-400/10" },
+    athlete: { label: "Atleta", color: "text-neutral-400 border-neutral-400/30 bg-neutral-400/10" },
+};
+
 export function UserNav({ user }: UserNavProps) {
+    const userRoleKey = (user?.role || "athlete").toLowerCase();
+    const roleInfo = ROLE_CONFIG[userRoleKey] || ROLE_CONFIG.athlete;
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <div className="flex items-center gap-3 sm:pl-2 cursor-pointer hover:opacity-80 transition-opacity">
-                    <div className="text-right hidden sm:block">
+                    <div className="hidden sm:flex flex-col items-end text-right">
                         <p className="text-sm font-semibold text-white leading-none">{user?.name || "Usuario"}</p>
-                        <p className="text-xs text-neutral-400 mt-1 capitalize">{user?.role || "Atleta"}</p>
+                        <div className={`mt-1.5 inline-flex items-center px-2 py-0.5 rounded-full border text-[9px] uppercase font-black tracking-widest ${roleInfo.color}`}>
+                            {roleInfo.label}
+                        </div>
                     </div>
                     <OptimizedAvatar
                         src={user?.image}
