@@ -148,11 +148,12 @@ export async function logWorkoutSession(data: WorkoutSessionData) {
 
         await batch.commit();
 
-        revalidatePath("/train");
         revalidateTag("training-logs", "default");
         revalidateTag("weekly-activity", "default");
         revalidateTag("coach-stats", "default");
         revalidateTag("recent-activity", "default");
+        revalidatePath("/train");
+        revalidatePath("/dashboard");
         return { success: true };
     } catch (error) {
         console.error("Error logging session:", error);
@@ -238,6 +239,7 @@ export async function completeWorkout(logId: string) {
         revalidateTag("recent-activity", "default");
         revalidatePath("/train");
         revalidatePath("/history");
+        revalidatePath("/dashboard");
 
         return { success: true };
     } catch (error) {
@@ -417,6 +419,7 @@ export async function finishWorkoutSession(
         revalidateTag("coach-stats", "default");
         revalidateTag("recent-activity", "default");
         revalidatePath("/train");
+        revalidatePath("/dashboard");
 
         return { success: true };
     } catch (error) {
@@ -696,6 +699,7 @@ export async function logRetroactiveWorkout(data: RetroactiveWorkoutData) {
         revalidateTag("recent-activity", "default");
         revalidatePath("/train");
         revalidatePath("/history");
+        revalidatePath("/dashboard");
 
         return { success: true };
     } catch (error) {

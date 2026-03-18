@@ -265,47 +265,6 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
                                     </motion.div>
                                 ))}
                             </div>
-                        ) : selectedDayInfo && !selectedDayInfo.isRest ? (
-                            <div className="space-y-3">
-                                <motion.div
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    className={cn(
-                                        "p-6 rounded-[2rem] border transition-all group relative overflow-hidden backdrop-blur-md",
-                                        isRecordedDay
-                                            ? "bg-emerald-500/10 border-emerald-500/20 shadow-[0_20px_40px_-15px_rgba(16,185,129,0.1)]"
-                                            : "bg-neutral-900/60 border-white/5 hover:border-red-500/40 hover:bg-neutral-900/80 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]"
-                                    )}
-                                >
-                                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                                        <Dumbbell className="w-12 h-12 text-white" />
-                                    </div>
-                                    <div className="flex justify-between items-center mb-3 relative z-10">
-                                        <Badge variant="outline" className={cn(
-                                            "text-[8px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-md",
-                                            isRecordedDay ? "border-emerald-500/20 text-emerald-500" : "border-red-500/20 text-red-500"
-                                        )}>
-                                            {isRecordedDay ? "Finalizado" : "Rutina Activa"}
-                                        </Badge>
-                                        <ChevronRight className="w-4 h-4 text-neutral-700 group-hover:text-red-500 transition-all" />
-                                    </div>
-                                    <h4 className="font-black text-white text-lg tracking-tight relative z-10 group-hover:text-red-500 transition-colors">
-                                        {selectedDayInfo.name}
-                                    </h4>
-
-                                    {/* Exercise List Preview */}
-                                    {selectedDayInfo.exercises && selectedDayInfo.exercises.length > 0 && (
-                                        <div className="mt-4 pt-4 border-t border-white/5 space-y-2 relative z-10">
-                                            {selectedDayInfo.exercises.map((ex: any, i: number) => (
-                                                <div key={i} className="flex items-start gap-3 text-base">
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-red-500/50 mt-2.5 shrink-0" />
-                                                    <span className="text-neutral-300 font-medium leading-relaxed wrap-break-word">{ex.exerciseName}</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </motion.div>
-                            </div>
                         ) : isRecordedDay ? (
                             <div className="space-y-3">
                                 {loadingLogs ? (
@@ -384,6 +343,47 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
                                         </div>
                                     </motion.div>
                                 )}
+                            </div>
+                        ) : selectedDayInfo && !selectedDayInfo.isRest ? (
+                            <div className="space-y-3">
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className={cn(
+                                        "p-6 rounded-[2rem] border transition-all group relative overflow-hidden backdrop-blur-md",
+                                        isRecordedDay
+                                            ? "bg-emerald-500/10 border-emerald-500/20 shadow-[0_20px_40px_-15px_rgba(16,185,129,0.1)]"
+                                            : "bg-neutral-900/60 border-white/5 hover:border-red-500/40 hover:bg-neutral-900/80 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]"
+                                    )}
+                                >
+                                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                        <Dumbbell className="w-12 h-12 text-white" />
+                                    </div>
+                                    <div className="flex justify-between items-center mb-3 relative z-10">
+                                        <Badge variant="outline" className={cn(
+                                            "text-[8px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-md",
+                                            isRecordedDay ? "border-emerald-500/20 text-emerald-500" : "border-red-500/20 text-red-500"
+                                        )}>
+                                            {isRecordedDay ? "Finalizado" : "Rutina Activa"}
+                                        </Badge>
+                                        <ChevronRight className="w-4 h-4 text-neutral-700 group-hover:text-red-500 transition-all" />
+                                    </div>
+                                    <h4 className="font-black text-white text-lg tracking-tight relative z-10 group-hover:text-red-500 transition-colors">
+                                        {selectedDayInfo.name}
+                                    </h4>
+
+                                    {/* Exercise List Preview */}
+                                    {selectedDayInfo.exercises && selectedDayInfo.exercises.length > 0 && (
+                                        <div className="mt-4 pt-4 border-t border-white/5 space-y-2 relative z-10">
+                                            {selectedDayInfo.exercises.map((ex: any, i: number) => (
+                                                <div key={i} className="flex items-start gap-3 text-base">
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-red-500/50 mt-2.5 shrink-0" />
+                                                    <span className="text-neutral-300 font-medium leading-relaxed wrap-break-word">{ex.exerciseName}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </motion.div>
                             </div>
                         ) : (
                             <div className="h-full flex flex-col items-center justify-center py-20 opacity-30 grayscale">
