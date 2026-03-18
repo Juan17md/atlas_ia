@@ -74,6 +74,19 @@ export function finDelDia(fechaStr: string): Date {
 }
 
 /**
+ * Convierte un string "YYYY-MM-DD" a mediodía UTC (12:00:00) como Date.
+ * Usar para GUARDAR fechas en Firestore. El mediodía es una hora "segura"
+ * que al convertir a cualquier zona horaria razonable (UTC-12 a UTC+12)
+ * siempre mantiene el mismo día calendario.
+ *
+ * NO usar para queries de rango — usar inicioDelDia/finDelDia para eso.
+ */
+export function mediodiaUTC(fechaStr: string): Date {
+    const [anio, mes, dia] = fechaStr.split("-").map(Number);
+    return new Date(Date.UTC(anio, mes - 1, dia, 12, 0, 0, 0));
+}
+
+/**
  * Convierte un Firestore Timestamp (o Date) a string "YYYY-MM-DD"
  * en la zona horaria del usuario. Reemplaza `format(date, "yyyy-MM-dd")`
  * que usa la TZ del servidor.

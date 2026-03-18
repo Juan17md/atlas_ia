@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Calendar } from "@/components/ui/calendar";
-import { getAthleteAssignments, getRecordedWorkoutDays } from "@/actions/schedule-actions";
+import { getAthleteAssignments, getRecordedWorkoutDays, getLogsPorFecha } from "@/actions/schedule-actions";
 import { startOfMonth, endOfMonth, format, parseISO, isSameDay } from "date-fns";
 import { es } from "date-fns/locale";
-import { Loader2, Dumbbell, CheckCircle2, Moon, Calendar as CalendarIcon, ChevronRight } from "lucide-react";
+import { Loader2, Dumbbell, CheckCircle2, Moon, Calendar as CalendarIcon, ChevronRight, Clock, Flame } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { fechaLocalAString } from "@/lib/fecha-utils";
 import { motion, AnimatePresence } from "framer-motion";
 
 /**
@@ -29,10 +30,25 @@ interface Assignment {
     completed?: boolean;
 }
 
+interface LogDelDia {
+    id: string;
+    routineName: string;
+    durationMinutes: number;
+    sessionRpe: number | null;
+    isRetroactive: boolean;
+    exercises: {
+        exerciseName: string;
+        exerciseId: string;
+        sets: { weight: number; reps: number; rpe: number | null; completed: boolean }[];
+    }[];
+}
+
 export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: string, activeRoutine?: any }) {
     const [date, setDate] = useState<Date | undefined>(new Date());
     const [assignments, setAssignments] = useState<Assignment[]>([]);
     const [recordedDays, setRecordedDays] = useState<Date[]>([]);
+    const [logsDelDia, setLogsDelDia] = useState<LogDelDia[]>([]);
+    const [loadingLogs, setLoadingLogs] = useState(false);
     const [month, setMonth] = useState<Date>(new Date());
     const [loading, setLoading] = useState(false);
 
@@ -89,6 +105,31 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
     const isRecordedDay = date
         ? recordedDays.some(rd => isSameDay(rd, date))
         : false;
+
+    // Cargar logs reales cuando se selecciona un día grabado
+    const cargarLogsDelDia = useCallback(async (selectedDate: Date) => {
+        const fechaStr = fechaLocalAString(selectedDate);
+        setLoadingLogs(true);
+        try {
+            const res = await getLogsPorFecha(athleteId, fechaStr);
+            if (res.success && res.logs) {
+                setLogsDelDia(res.logs);
+            } else {
+                setLogsDelDia([]);
+            }
+        } catch {
+            setLogsDelDia([]);
+        }
+        setLoadingLogs(false);
+    }, [athleteId]);
+
+    useEffect(() => {
+        if (date && isRecordedDay) {
+            cargarLogsDelDia(date);
+        } else {
+            setLogsDelDia([]);
+        }
+    }, [date, isRecordedDay, cargarLogsDelDia]);
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -266,20 +307,84 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
                                 </motion.div>
                             </div>
                         ) : isRecordedDay ? (
-                            <motion.div
-                                key="extra"
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                className="p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-4xl flex flex-col items-center gap-4 text-center mt-4"
-                            >
-                                <div className="h-16 w-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20">
-                                    <CheckCircle2 className="h-8 w-8 text-emerald-500" />
-                                </div>
-                                <div className="space-y-1">
-                                    <h4 className="font-black text-white uppercase tracking-tight">Sesión Extra</h4>
-                                    <p className="text-xs text-neutral-500 font-medium italic">Fuera de programación.</p>
-                                </div>
-                            </motion.div>
+                            <div className="space-y-3">
+                                {loadingLogs ? (
+                                    <div className="flex items-center justify-center py-12">
+                                        <Loader2 className="w-6 h-6 animate-spin text-emerald-500" />
+                                    </div>
+                                ) : logsDelDia.length > 0 ? (
+                                    logsDelDia.map((log, logIdx) => (
+                                        <motion.div
+                                            key={log.id}
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: logIdx * 0.1 }}
+                                            className="p-6 rounded-[2rem] border bg-emerald-500/10 border-emerald-500/20 shadow-[0_20px_40px_-15px_rgba(16,185,129,0.1)] relative overflow-hidden backdrop-blur-md"
+                                        >
+                                            <div className="absolute top-0 right-0 p-4 opacity-10">
+                                                <Dumbbell className="w-12 h-12 text-emerald-400" />
+                                            </div>
+                                            <div className="flex justify-between items-center mb-3 relative z-10">
+                                                <Badge variant="outline" className="text-[8px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-md border-emerald-500/20 text-emerald-500">
+                                                    Finalizado
+                                                </Badge>
+                                                <div className="flex items-center gap-3">
+                                                    {log.durationMinutes > 0 && (
+                                                        <span className="text-[10px] text-emerald-400/70 font-bold flex items-center gap-1">
+                                                            <Clock className="w-3 h-3" />
+                                                            {log.durationMinutes} min
+                                                        </span>
+                                                    )}
+                                                    {log.sessionRpe && (
+                                                        <span className="text-[10px] text-orange-400/70 font-bold flex items-center gap-1">
+                                                            <Flame className="w-3 h-3" />
+                                                            RPE {log.sessionRpe}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <h4 className="font-black text-white text-lg tracking-tight relative z-10">
+                                                {log.routineName}
+                                            </h4>
+
+                                            {log.exercises.length > 0 && (
+                                                <div className="mt-4 pt-4 border-t border-emerald-500/10 space-y-2.5 relative z-10">
+                                                    {log.exercises.map((ex, i) => (
+                                                        <div key={i} className="flex items-start gap-3 text-base">
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/50 mt-2.5 shrink-0" />
+                                                            <div className="flex-1">
+                                                                <span className="text-neutral-300 font-medium leading-relaxed">{ex.exerciseName}</span>
+                                                                <div className="flex flex-wrap gap-1.5 mt-1">
+                                                                    {ex.sets.filter(s => s.completed).map((s, si) => (
+                                                                        <span key={si} className="text-[10px] text-emerald-400/60 font-bold bg-emerald-500/5 px-1.5 py-0.5 rounded-md">
+                                                                            {s.weight}kg×{s.reps}
+                                                                        </span>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </motion.div>
+                                    ))
+                                ) : (
+                                    <motion.div
+                                        key="extra-fallback"
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        className="p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-4xl flex flex-col items-center gap-4 text-center mt-4"
+                                    >
+                                        <div className="h-16 w-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20">
+                                            <CheckCircle2 className="h-8 w-8 text-emerald-500" />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <h4 className="font-black text-white uppercase tracking-tight">Sesión Completada</h4>
+                                            <p className="text-xs text-neutral-500 font-medium italic">Sin detalles disponibles.</p>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </div>
                         ) : (
                             <div className="h-full flex flex-col items-center justify-center py-20 opacity-30 grayscale">
                                 <Dumbbell className="h-12 w-12 mb-4" />

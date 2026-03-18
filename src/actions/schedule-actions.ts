@@ -321,3 +321,50 @@ export async function getRecordedWorkoutDays(athleteId: string, start: string, e
         return { success: false, error: "Error al cargar días registrados" };
     }
 }
+
+/**
+ * Obtiene los detalles de los training_logs completados para una fecha específica.
+ * Retorna nombre de la rutina, duración, RPE, y ejercicios con sets.
+ */
+export async function getLogsPorFecha(athleteId: string, fechaStr: string) {
+    try {
+        const startDate = inicioDelDia(fechaStr);
+        const endDate = finDelDia(fechaStr);
+
+        const snapshot = await adminDb.collection("training_logs")
+            .where("athleteId", "==", athleteId)
+            .where("date", ">=", startDate)
+            .where("date", "<=", endDate)
+            .get();
+
+        const logs = snapshot.docs
+            .map(doc => {
+                const data = doc.data();
+                if (data.status === 'in_progress') return null;
+
+                return {
+                    id: doc.id,
+                    routineName: data.routineName || "Entrenamiento",
+                    durationMinutes: data.durationMinutes || 0,
+                    sessionRpe: data.sessionRpe || null,
+                    isRetroactive: data.isRetroactive || false,
+                    exercises: (data.exercises || []).map((ex: { exerciseName?: string; exerciseId?: string; sets?: { weight?: number; reps?: number; rpe?: number; completed?: boolean }[] }) => ({
+                        exerciseName: ex.exerciseName || "Sin nombre",
+                        exerciseId: ex.exerciseId || "",
+                        sets: (ex.sets || []).map((s: { weight?: number; reps?: number; rpe?: number; completed?: boolean }) => ({
+                            weight: s.weight || 0,
+                            reps: s.reps || 0,
+                            rpe: s.rpe || null,
+                            completed: s.completed !== false,
+                        })),
+                    })),
+                };
+            })
+            .filter((l): l is NonNullable<typeof l> => l !== null);
+
+        return { success: true, logs };
+    } catch (error) {
+        console.error("Error fetching logs por fecha:", error);
+        return { success: false, error: "Error al cargar logs", logs: [] };
+    }
+}

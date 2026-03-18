@@ -6,7 +6,7 @@ import { z } from "zod";
 import { TrainingLogSchema } from "@/lib/schemas";
 import { TrainingLogData } from "@/types/api";
 import { revalidateTag, revalidatePath } from "next/cache";
-import { obtenerAhoraLocal, obtenerFechaISOLocal, inicioDelDia, finDelDia } from "@/lib/fecha-utils";
+import { obtenerAhoraLocal, obtenerFechaISOLocal, inicioDelDia, finDelDia, mediodiaUTC } from "@/lib/fecha-utils";
 
 // --- TIPOS LOCALES ---
 
@@ -106,9 +106,9 @@ export async function logWorkoutSession(data: WorkoutSessionData) {
 
     try {
         const sessionId = `session_${Date.now()}_${session.user.id.slice(0, 6)}`;
-        // Usar fecha local del usuario para evitar desfase UTC en Vercel
+        // Usar mediodía UTC para que la conversión TZ no cambie el día
         const fechaHoyStr = obtenerFechaISOLocal();
-        const workoutDate = inicioDelDia(fechaHoyStr);
+        const workoutDate = mediodiaUTC(fechaHoyStr);
 
         const batch = adminDb.batch();
 
@@ -395,9 +395,9 @@ export async function finishWorkoutSession(
             });
         }
 
-        // Usar fecha local del usuario para evitar desfase UTC en Vercel
+        // Usar mediodía UTC para que la conversión TZ no cambie el día
         const fechaHoyStr = obtenerFechaISOLocal();
-        const fechaHoy = inicioDelDia(fechaHoyStr);
+        const fechaHoy = mediodiaUTC(fechaHoyStr);
 
         await adminDb.collection("training_logs").add({
             athleteId: session.user.id,
@@ -611,8 +611,8 @@ export async function logRetroactiveWorkout(data: RetroactiveWorkoutData) {
     const validated = validation.data;
 
     try {
-        // Usar UTC consistente para la fecha del entrenamiento retroactivo
-        const workoutDate = inicioDelDia(validated.date);
+        // Usar mediodía UTC para que la conversión TZ no cambie el día
+        const workoutDate = mediodiaUTC(validated.date);
 
         const logData: TrainingLogDbData = {
             athleteId: session.user.id,
