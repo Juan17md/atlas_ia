@@ -6,7 +6,7 @@
 
 ---
 
-**Project:** GymIA
+**Project:** Atlas IA
 **Generated:** 2026-03-09 17:32:12
 **Category:** Fitness/Gym App
 

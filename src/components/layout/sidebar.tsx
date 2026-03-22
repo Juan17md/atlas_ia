@@ -16,6 +16,7 @@ import {
     History
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Isotipo } from "@/components/ui/isotipo";
 
 interface SidebarProps {
     role?: string;
@@ -70,15 +71,15 @@ export function Sidebar({ role }: SidebarProps) {
             {/* Logo Section */}
             <div className="p-8 relative z-10">
                 <Link href="/dashboard" className="flex items-center gap-4 group transition-all">
-                    <div className="relative">
-                        <div className="h-12 w-12 bg-white rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.1)] group-hover:scale-110 transition-transform duration-500">
-                            <Target className="h-7 w-7 text-black" />
-                        </div>
-                        <div className="absolute -inset-1 bg-white/20 rounded-2xl blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </div>
-                    <div className="flex flex-col">
-                        <span className="text-2xl font-black text-white tracking-tighter italic leading-none">GymIA</span>
-                    </div>
+<div className="relative">
+    <div className="h-12 w-12 bg-white rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.1)] group-hover:scale-110 transition-transform duration-500">
+        <Isotipo />
+    </div>
+    <div className="absolute -inset-1 bg-white/20 rounded-2xl blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
+</div>
+<div className="flex flex-col">
+    <span className="text-2xl font-black text-white tracking-tighter italic leading-none">Atlas IA</span>
+</div>
                 </Link>
             </div>
 

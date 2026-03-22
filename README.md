@@ -1,4 +1,4 @@
-# GymIA - Ecosistema de Entrenamiento Inteligente
+# Atlas IA - Ecosistema de Entrenamiento Inteligente
 
 Un ecosistema de entrenamiento avanzado potenciado por inteligencia artificial, diseñado para conectar entrenadores y atletas con herramientas de última generación. Optimizado para dispositivos móviles y construido con un enfoque en rendimiento, diseño y escalabilidad.
 
@@ -14,7 +14,7 @@ Un ecosistema de entrenamiento avanzado potenciado por inteligencia artificial, 
 
 ## 🎯 Visión del Proyecto
 
-GymIA nace de la necesidad de modernizar la interacción entre entrenadores y atletas, proporcionando una plataforma integral que combina tecnología de vanguardia con metodologías de entrenamiento comprobadas. El sistema permite una personalización avanzada basada en datos reales, optimizando cada sesión de entrenamiento para maximizar resultados.
+Atlas IA nace de la necesidad de modernizar la interacción entre entrenadores y atletas, proporcionando una plataforma integral que combina tecnología de vanguardia con metodologías de entrenamiento comprobadas. El sistema permite una personalización avanzada basada en datos reales, optimizando cada sesión de entrenamiento para maximizar resultados.
 
 ## 🚀 Características Principales
 
@@ -110,8 +110,8 @@ GymIA/
 
 1. **Clonar el repositorio**
    ```bash
-   git clone <tu-repositorio-url>
-   cd GymIA
+    git clone <tu-repositorio-url>
+    cd Atlas-IA
    ```
 
 2. **Instalar dependencias**

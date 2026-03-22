@@ -26,18 +26,18 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: "GymIA - Tu Entrenador Personal Inteligente",
-    template: "%s | GymIA"
+    default: "Atlas IA - Tu Entrenador Personal Inteligente",
+    template: "%s | Atlas IA"
   },
   description: "Gestiona rutinas, seguimiento de progreso y entrenamientos personalizados con inteligencia artificial.",
   keywords: ["gimnasio", "entrenamiento", "fitness", "rutinas", "IA", "progreso"],
-  authors: [{ name: "GymIA Team" }],
-  creator: "GymIA",
+  authors: [{ name: "Atlas IA Team" }],
+  creator: "Atlas IA",
   openGraph: {
     type: "website",
     locale: "es_ES",
-    siteName: "GymIA",
-    title: "GymIA - Tu Entrenador Personal Inteligente",
+    siteName: "Atlas IA",
+    title: "Atlas IA - Tu Entrenador Personal Inteligente",
     description: "Gestiona rutinas, seguimiento de progreso y entrenamientos personalizados con IA.",
   },
   robots: {

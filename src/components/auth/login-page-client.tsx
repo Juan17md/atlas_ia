@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { AuthLoginForm } from "@/components/forms/auth-login-form";
 import { AuthRegisterForm } from "@/components/forms/auth-register-form";
-import { Dumbbell } from "lucide-react";
+import { Isotipo } from "@/components/ui/isotipo";
 import { motion, AnimatePresence } from "framer-motion";
 
 /**
@@ -88,7 +88,7 @@ export function LoginPageClient() {
                             whileTap={{ scale: 0.98 }}
                             className="relative mb-6 rounded-full bg-gradient-to-b from-white to-neutral-300 p-[18px] shadow-[0_0_50px_-12px_rgba(255,255,255,0.4)]"
                         >
-                            <Dumbbell className="h-8 w-8 text-black shrink-0 relative z-10" />
+                            <Isotipo className="h-8 w-8 shrink-0 relative z-10 drop-shadow-md brightness-0" />
                             <div className="absolute inset-0 rounded-full border border-white/40 shadow-[inset_0_2px_10px_rgba(255,255,255,0.8)] pointer-events-none" />
                         </motion.div>
 
@@ -137,7 +137,7 @@ export function LoginPageClient() {
                                 {/* ── Toggle login/registro ── */}
                                 <div className="mt-8 text-center px-4">
                                     <p className="mb-4 text-[11px] font-bold uppercase tracking-[0.2em] text-neutral-500">
-                                        {isLogin ? "¿No tienes cuenta en GymIA?" : "¿Ya posees credenciales?"}
+                                        {isLogin ? "¿No tienes cuenta en Atlas IA?" : "¿Ya posees credenciales?"}
                                     </p>
                                     <button
                                         onClick={() => setIsLogin(!isLogin)}
@@ -208,7 +208,7 @@ export function LoginPageClient() {
                         <div className="absolute left-0 top-0 bottom-0 w-1 bg-linear-to-b from-red-500 to-red-900 rounded-l-2xl" />
 
                         <p className="relative z-10 text-neutral-400 text-lg 2xl:text-xl font-medium tracking-wide leading-relaxed">
-                            <span className="text-white font-bold">GymIA</span> combina inteligencia artificial de vanguardia con tus métricas físicas.
+                            <span className="text-white font-bold">Atlas IA</span> combina inteligencia artificial de vanguardia con tus métricas físicas.
                             <br /><span className="mt-2 block text-sm uppercase tracking-widest text-red-400 font-bold">Analiza. Adapta. Supera.</span>
                         </p>
                     </div>
