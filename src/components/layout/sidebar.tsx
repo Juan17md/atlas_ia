@@ -180,6 +180,13 @@ export function Sidebar({ role }: SidebarProps) {
                     </nav>
                 </div>
             </div>
+
+            {/* Designed by */}
+            <div className="p-6 relative z-10 border-t border-white/5">
+                <p className="text-[10px] text-neutral-600 text-center uppercase tracking-widest">
+                    Designed by <span className="text-white font-black italic">Juan17md</span>
+                </p>
+            </div>
         </aside>
     );
 }

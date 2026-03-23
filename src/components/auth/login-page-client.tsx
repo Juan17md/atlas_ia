@@ -149,6 +149,12 @@ export function LoginPageClient() {
                                         </span>
                                     </button>
                                 </div>
+
+                                <div className="mt-8 text-center">
+                                    <p className="text-[10px] text-neutral-600 uppercase tracking-widest">
+                                        Designed by <span className="text-white font-black italic">Juan17md</span>
+                                    </p>
+                                </div>
                             </motion.div>
                         </AnimatePresence>
                     </div>
