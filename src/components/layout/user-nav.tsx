@@ -17,7 +17,7 @@ interface UserNavProps {
     user?: any;
 }
 
-const ROLE_CONFIG: Record<string, { label: string; color: string }> = {
+export const ROLE_CONFIG: Record<string, { label: string; color: string }> = {
     coach: { label: "Entrenador", color: "text-blue-400 border-blue-400/30 bg-blue-400/10" },
     advanced_athlete: { label: "Atleta Avanzado", color: "text-amber-400 border-amber-400/30 bg-amber-400/10" },
     athlete: { label: "Atleta", color: "text-neutral-400 border-neutral-400/30 bg-neutral-400/10" },
