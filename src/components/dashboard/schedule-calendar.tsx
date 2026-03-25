@@ -140,7 +140,7 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
             >
                 <div className="flex items-center justify-between mb-8 px-2">
                     <div className="space-y-1">
-                        <h3 className="text-xl font-black text-white uppercase tracking-tight flex items-center gap-3">
+                        <h3 className="text-lg md:text-xl font-black text-white uppercase tracking-tight flex items-center gap-3">
                             <div className="p-2 rounded-xl bg-red-500/10 border border-red-500/20">
                                 <CalendarIcon className="w-5 h-5 text-red-500" />
                             </div>
@@ -151,7 +151,7 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
                     {loading && <Loader2 className="w-4 h-4 animate-spin text-red-500" />}
                 </div>
 
-                <div className="bg-neutral-950/30 rounded-4xl p-4 border border-white/5 shadow-inner">
+                <div className="bg-neutral-950/30 rounded-3xl md:rounded-4xl p-2 sm:p-4 border border-white/5 shadow-inner">
                     <Calendar
                         mode="single"
                         selected={date}
@@ -178,11 +178,11 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
                         locale={es}
                         className="w-full"
                         classNames={{
-                            month_caption: "flex justify-center pt-2 relative items-center capitalize text-white font-black tracking-tight mb-6",
+                            month_caption: "flex justify-center pt-2 relative items-center capitalize text-white text-base sm:text-lg font-black tracking-tight mb-6",
                             month_grid: "w-full border-collapse",
-                            weekday: "text-neutral-500/80 rounded-md w-full font-black text-[0.7rem] text-center capitalize tracking-[0.15em] pb-4",
-                            day: "h-12 sm:h-16 w-full text-center text-sm p-1.5 m-0 relative flex items-center justify-center text-white",
-                            day_button: "h-10 w-10 sm:h-12 sm:w-12 p-0 font-bold text-inherit hover:bg-white/10 rounded-2xl transition-all duration-300 flex items-center justify-center relative cursor-pointer group",
+                            weekday: "text-neutral-500/80 rounded-md w-full font-black text-[0.75rem] sm:text-[0.8rem] text-center capitalize tracking-[0.15em] pb-4",
+                            day: "h-14 sm:h-16 w-full text-center text-sm p-1.5 m-0 relative flex items-center justify-center text-white",
+                            day_button: "h-11 w-11 sm:h-12 sm:w-12 p-0 font-bold text-inherit hover:bg-white/10 rounded-2xl transition-all duration-300 flex items-center justify-center relative cursor-pointer group",
                             selected: "bg-white !text-black shadow-[0_0_30px_rgba(255,255,255,0.5)] scale-110 z-30 font-black rounded-2xl ring-4 ring-white/20",
                             today: "bg-red-500/10 text-red-500 border border-red-500/30 font-black rounded-2xl",
                         }}
@@ -242,7 +242,7 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
                                             initial={{ opacity: 0, y: 10 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             transition={{ delay: logIdx * 0.1 }}
-                                            className="p-6 rounded-[2rem] border bg-emerald-500/10 border-emerald-500/20 shadow-[0_20px_40px_-15px_rgba(16,185,129,0.1)] relative overflow-hidden backdrop-blur-md"
+                                            className="p-6 rounded-4xl border bg-emerald-500/10 border-emerald-500/20 shadow-[0_20px_40px_-15px_rgba(16,185,129,0.1)] relative overflow-hidden backdrop-blur-md"
                                         >
                                             <div className="absolute top-0 right-0 p-4 opacity-10">
                                                 <Dumbbell className="w-12 h-12 text-emerald-400" />
@@ -316,7 +316,7 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: idx * 0.1 }}
-                                        className="p-6 rounded-[2rem] border transition-all group relative overflow-hidden backdrop-blur-md bg-neutral-900/60 border-white/5 hover:border-red-500/40 hover:bg-neutral-900/80 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]"
+                                        className="p-6 rounded-4xl border transition-all group relative overflow-hidden backdrop-blur-md bg-neutral-900/60 border-white/5 hover:border-red-500/40 hover:bg-neutral-900/80 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]"
                                     >
                                         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                                             <Dumbbell className="w-12 h-12 text-white" />
@@ -342,7 +342,7 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     className={cn(
-                                        "p-6 rounded-[2rem] border transition-all group relative overflow-hidden backdrop-blur-md",
+                                        "p-6 rounded-4xl border transition-all group relative overflow-hidden backdrop-blur-md",
                                         isRecordedDay
                                             ? "bg-emerald-500/10 border-emerald-500/20 shadow-[0_20px_40px_-15px_rgba(16,185,129,0.1)]"
                                             : "bg-neutral-900/60 border-white/5 hover:border-red-500/40 hover:bg-neutral-900/80 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]"
