@@ -15,7 +15,7 @@ export function LoginPageClient() {
     const [isLogin, setIsLogin] = useState(true);
 
     return (
-        <div className="relative flex min-h-[100dvh] w-full flex-col lg:flex-row bg-[#030303] overflow-hidden font-sans">
+        <div className="relative flex min-h-dvh w-full flex-col lg:flex-row bg-[#030303] overflow-hidden font-sans">
 
             {/* =========================================
                 BACKGROUND: LIQUID AURORA (Global)
@@ -74,19 +74,19 @@ export function LoginPageClient() {
                     }}
                 />
 
-                <div className="flex w-full flex-col items-center pt-[10dvh] pb-8 px-5 md:px-8 lg:justify-center lg:pt-0 lg:pb-0 lg:px-12 relative z-10 min-h-[100dvh] lg:min-h-full">
+                <div className="flex w-full flex-col items-center pt-[5dvh] pb-8 px-5 md:px-8 lg:justify-center lg:pt-0 lg:pb-0 lg:px-12 relative z-10 min-h-dvh lg:min-h-full">
 
                     {/* ── Header / Logo ── */}
                     <motion.header
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                        className="flex w-full flex-col items-center mb-8 lg:mb-12 cursor-default"
+                        className="flex w-full flex-col items-center mb-6 lg:mb-12 cursor-default"
                     >
                         <motion.div
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.98 }}
-                            className="relative mb-6 rounded-full bg-gradient-to-b from-white to-neutral-300 p-[18px] shadow-[0_0_50px_-12px_rgba(255,255,255,0.4)]"
+                            className="relative mb-4 rounded-full bg-linear-to-b from-white to-neutral-300 p-[18px] shadow-[0_0_50px_-12px_rgba(255,255,255,0.4)]"
                         >
                             <Isotipo className="h-8 w-8 shrink-0 relative z-10 drop-shadow-md brightness-0" />
                             <div className="absolute inset-0 rounded-full border border-white/40 shadow-[inset_0_2px_10px_rgba(255,255,255,0.8)] pointer-events-none" />

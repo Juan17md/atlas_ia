@@ -75,18 +75,18 @@ export function AuthRegisterForm() {
 
     /** Clases reutilizables para inputs */
     const inputClass =
-        "h-[52px] rounded-xl border border-white/[0.06] bg-black/40 px-4 text-[15px] font-medium text-white shadow-inner transition-all placeholder:text-neutral-600 focus-visible:ring-1 focus-visible:ring-red-500/50 focus-visible:border-red-500/30";
+        "h-[48px] rounded-xl border border-white/[0.06] bg-black/40 px-4 text-[14px] font-medium text-white shadow-inner transition-all placeholder:text-neutral-600 focus-visible:ring-1 focus-visible:ring-red-500/50 focus-visible:border-red-500/30";
     const inputPasswordClass =
-        "h-[52px] rounded-xl border border-white/[0.06] bg-black/40 pl-4 pr-12 text-[15px] font-medium text-white shadow-inner transition-all placeholder:text-neutral-600 focus-visible:ring-1 focus-visible:ring-red-500/50 focus-visible:border-red-500/30";
+        "h-[48px] rounded-xl border border-white/[0.06] bg-black/40 pl-4 pr-12 text-[14px] font-medium text-white shadow-inner transition-all placeholder:text-neutral-600 focus-visible:ring-1 focus-visible:ring-red-500/50 focus-visible:border-red-500/30";
     const labelClass =
-        "ml-1 text-xs font-bold uppercase tracking-[0.2em] text-neutral-400";
-    const errorClass = "ml-1 text-xs font-semibold text-red-500";
+        "ml-1 text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400";
+    const errorClass = "ml-1 text-[10px] font-semibold text-red-500";
 
     return (
         <div className="w-full space-y-5">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
                 {/* Nombre */}
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                     <Label htmlFor="reg-name" className={labelClass}>
                         Nombre completo
                     </Label>
@@ -103,7 +103,7 @@ export function AuthRegisterForm() {
                 </div>
 
                 {/* Email */}
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                     <Label htmlFor="reg-email" className={labelClass}>
                         Email
                     </Label>
@@ -122,7 +122,7 @@ export function AuthRegisterForm() {
                 </div>
 
                 {/* Contraseña */}
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                     <Label htmlFor="reg-password" className={labelClass}>
                         Contraseña
                     </Label>
@@ -158,7 +158,7 @@ export function AuthRegisterForm() {
                 </div>
 
                 {/* Confirmar contraseña */}
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                     <Label
                         htmlFor="reg-confirmPassword"
                         className={labelClass}
@@ -203,7 +203,7 @@ export function AuthRegisterForm() {
                 {/* Submit */}
                 <Button
                     type="submit"
-                    className="group relative mt-2 h-[52px] w-full rounded-xl bg-white text-sm font-bold uppercase tracking-[0.15em] text-black transition-all duration-300 hover:bg-neutral-200 shadow-xl hover:shadow-2xl active:scale-[0.98] cursor-pointer disabled:opacity-60"
+                    className="group relative mt-1 h-[48px] w-full rounded-xl bg-white text-xs font-bold uppercase tracking-[0.15em] text-black transition-all duration-300 hover:bg-neutral-200 shadow-xl hover:shadow-2xl active:scale-[0.98] cursor-pointer disabled:opacity-60"
                     disabled={loading}
                 >
                     <span className="relative z-10 flex items-center justify-center gap-2.5">

@@ -98,13 +98,13 @@ export function AuthLoginForm() {
     const isDisabled = loading || googleLoading;
 
     return (
-        <div className="w-full space-y-6">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        <div className="w-full space-y-5">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 {/* Email */}
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                     <Label
                         htmlFor="login-email"
-                        className="ml-1 text-xs font-bold uppercase tracking-[0.2em] text-neutral-400"
+                        className="ml-1 text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400"
                     >
                         Email
                     </Label>
@@ -115,20 +115,20 @@ export function AuthLoginForm() {
                         placeholder="tu@email.com"
                         autoComplete="email"
                         {...register("email")}
-                        className="h-[52px] rounded-xl border border-white/6 bg-black/40 px-4 text-[15px] font-medium text-white shadow-inner transition-all placeholder:text-neutral-600 focus-visible:ring-1 focus-visible:ring-red-500/50 focus-visible:border-red-500/30"
+                        className="h-[48px] rounded-xl border border-white/6 bg-black/40 px-4 text-[14px] font-medium text-white shadow-inner transition-all placeholder:text-neutral-600 focus-visible:ring-1 focus-visible:ring-red-500/50 focus-visible:border-red-500/30"
                     />
                     {errors.email && (
-                        <p className="ml-1 text-xs font-semibold text-red-500">
+                        <p className="ml-1 text-[10px] font-semibold text-red-500">
                             {errors.email.message}
                         </p>
                     )}
                 </div>
 
                 {/* Password */}
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                     <Label
                         htmlFor="login-password"
-                        className="ml-1 text-xs font-bold uppercase tracking-[0.2em] text-neutral-400"
+                        className="ml-1 text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400"
                     >
                         Contraseña
                     </Label>
@@ -139,7 +139,7 @@ export function AuthLoginForm() {
                             placeholder="••••••••"
                             autoComplete="current-password"
                             {...register("password")}
-                            className="h-[52px] rounded-xl border border-white/6 bg-black/40 pl-4 pr-12 text-[15px] font-medium text-white shadow-inner transition-all placeholder:text-neutral-600 focus-visible:ring-1 focus-visible:ring-red-500/50 focus-visible:border-red-500/30"
+                            className="h-[48px] rounded-xl border border-white/6 bg-black/40 pl-4 pr-12 text-[14px] font-medium text-white shadow-inner transition-all placeholder:text-neutral-600 focus-visible:ring-1 focus-visible:ring-red-500/50 focus-visible:border-red-500/30"
                         />
                         <button
                             type="button"
@@ -159,7 +159,7 @@ export function AuthLoginForm() {
                         </button>
                     </div>
                     {errors.password && (
-                        <p className="ml-1 text-xs font-semibold text-red-500">
+                        <p className="ml-1 text-[10px] font-semibold text-red-500">
                             {errors.password.message}
                         </p>
                     )}
@@ -168,7 +168,7 @@ export function AuthLoginForm() {
                 {/* Submit */}
                 <Button
                     type="submit"
-                    className="group relative mt-2 h-[52px] w-full rounded-xl bg-red-600 text-sm font-bold uppercase tracking-[0.15em] text-white transition-all duration-300 hover:bg-red-700 shadow-[0_0_25px_-5px_rgba(220,38,38,0.5)] hover:shadow-[0_0_40px_-5px_rgba(239,68,68,0.6)] active:scale-[0.98] cursor-pointer disabled:opacity-60"
+                    className="group relative mt-1 h-[48px] w-full rounded-xl bg-red-600 text-xs font-bold uppercase tracking-[0.15em] text-white transition-all duration-300 hover:bg-red-700 shadow-[0_0_25px_-5px_rgba(220,38,38,0.5)] hover:shadow-[0_0_40px_-5px_rgba(239,68,68,0.6)] active:scale-[0.98] cursor-pointer disabled:opacity-60"
                     disabled={isDisabled}
                 >
                     <span className="relative z-10 flex items-center justify-center gap-2.5">
@@ -194,7 +194,7 @@ export function AuthLoginForm() {
                     <span className="w-full border-t border-white/6" />
                 </div>
                 <div className="relative flex justify-center">
-                    <span className="bg-neutral-900/80 px-4 text-[11px] font-bold uppercase tracking-[0.2em] text-neutral-600">
+                    <span className="bg-neutral-950 px-4 text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-600">
                         o continúa con
                     </span>
                 </div>
@@ -204,7 +204,7 @@ export function AuthLoginForm() {
             <Button
                 variant="outline"
                 type="button"
-                className="group h-[52px] w-full rounded-xl border border-white/6 bg-white/4 text-sm font-bold uppercase tracking-widest text-white transition-all duration-200 hover:bg-white/8 hover:border-white/10 active:scale-[0.98] cursor-pointer disabled:opacity-60"
+                className="group h-[48px] w-full rounded-xl border border-white/6 bg-white/4 text-xs font-bold uppercase tracking-widest text-white transition-all duration-200 hover:bg-white/8 hover:border-white/10 active:scale-[0.98] cursor-pointer disabled:opacity-60"
                 disabled={isDisabled}
                 onClick={handleGoogleLogin}
             >
