@@ -17,12 +17,18 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Isotipo } from "@/components/ui/isotipo";
+import { UserNav } from "@/components/layout/user-nav";
 
 interface SidebarProps {
     role?: string;
+    user?: {
+        name?: string | null;
+        email?: string | null;
+        image?: string | null;
+    };
 }
 
-export function Sidebar({ role }: SidebarProps) {
+export function Sidebar({ role, user }: SidebarProps) {
     const pathname = usePathname();
 
     const commonItems = [
@@ -63,13 +69,13 @@ export function Sidebar({ role }: SidebarProps) {
     ];
 
     return (
-        <aside className="hidden md:flex h-screen w-55 flex-col bg-black relative overflow-hidden">
+        <aside className="hidden md:block md:fixed md:top-0 md:left-0 md:h-screen md:w-55 flex flex-col bg-black relative overflow-hidden z-50">
             {/* Geometric Accents */}
             <div className="absolute top-0 left-0 w-full h-[500px] bg-linear-to-b from-red-600/5 to-transparent pointer-events-none" />
             <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-red-600/5 rounded-full blur-[100px] pointer-events-none" />
 
             {/* Logo Section */}
-            <div className="p-8 relative z-10">
+            <div className="p-8 relative z-10 shrink-0">
                 <Link href="/dashboard" className="flex items-center gap-4 group transition-all">
 <div className="relative">
     <div className="h-12 w-12 bg-white rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.1)] group-hover:scale-110 transition-transform duration-500">
@@ -114,7 +120,7 @@ export function Sidebar({ role }: SidebarProps) {
                                             className="absolute left-0 top-1/4 bottom-1/4 w-1 bg-red-600 rounded-r-full shadow-[4px_0_12px_rgba(220,38,38,0.5)]"
                                         />
                                     )}
-                                    <Icon className={cn("h-5 w-5 transition-transform duration-300", isActive ? "text-red-500 scale-110" : "text-neutral-600 group-hover:text-white group-hover:scale-110")} />
+                                    <Icon className={cn("h-5 w-5 transition-transform duration-300 shrink-0", isActive ? "text-red-500 scale-125" : "text-neutral-600 group-hover:text-white group-hover:scale-110")} />
                                     <span className={cn("text-xs font-black uppercase italic tracking-widest", isActive ? "text-white" : "group-hover:translate-x-1 transition-transform")}>
                                         {item.label}
                                     </span>
@@ -160,30 +166,30 @@ export function Sidebar({ role }: SidebarProps) {
                                             className="absolute left-0 top-1/4 bottom-1/4 w-1 bg-red-600 rounded-r-full shadow-[4px_0_12px_rgba(220,38,38,0.5)]"
                                         />
                                     )}
-                                    <Icon className={cn("h-5 w-5", isActive ? "text-red-500 scale-110" : "text-neutral-600 group-hover:text-white group-hover:scale-110")} />
+                                    <Icon className={cn("h-5 w-5 shrink-0", isActive ? "text-red-500 scale-125" : "text-neutral-600 group-hover:text-white group-hover:scale-110")} />
                                     <span className={cn("text-xs font-black uppercase italic tracking-widest", isActive ? "text-white" : "group-hover:translate-x-1 transition-transform")}>
                                         {item.label}
                                     </span>
                                 </Link>
                             );
                         })}
-                        <button
-                            onClick={() => signOut({ callbackUrl: "/" })}
-                            className="w-full flex items-center gap-4 px-5 py-4 rounded-3xl text-neutral-600 hover:bg-red-600/10 hover:text-red-500 transition-all duration-300 group mt-4 relative overflow-hidden"
-                        >
-                            <LogOut className="h-5 w-5 text-neutral-600 group-hover:text-red-500 transition-transform group-hover:-translate-x-1" />
-                            <span className="text-xs font-black uppercase italic tracking-widest">
-                                DESCONEXIÓN
-                            </span>
-                            <div className="absolute inset-0 bg-linear-to-r from-red-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </button>
                     </nav>
                 </div>
             </div>
 
-            {/* Designed by */}
-            <div className="p-6 relative z-10 border-t border-white/5">
-                <p className="text-[10px] text-neutral-600 text-center uppercase tracking-widest">
+            {/* User Profile Section - Fixed at bottom */}
+            <div className="mt-auto p-4 relative z-10 border-t border-white/5 space-y-4">
+                <UserNav user={user} />
+                <button
+                    onClick={() => signOut({ redirectTo: "/" })}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-neutral-500 hover:text-red-500 hover:bg-red-500/10 transition-all duration-300 group"
+                >
+                    <LogOut className="h-5 w-5" />
+                    <span className="text-xs font-black uppercase italic tracking-widest">
+                        Cerrar Sesión
+                    </span>
+                </button>
+                <p className="text-[10px] text-neutral-600 text-center uppercase tracking-widest pt-2">
                     Designed by <span className="text-white font-black italic">Juan17md</span>
                 </p>
             </div>

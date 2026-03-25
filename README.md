@@ -142,22 +142,6 @@ GymIA/
    npm run dev
    ```
 
-## 📈 Roadmap de Desarrollo
-
-- [ ] Integración con dispositivos wearables (Apple Watch, Garmin)
-- [ ] Sistema de notificaciones push para recordatorios de entrenamiento
-- [ ] Marketplace de rutinas compartidas por la comunidad
-- [ ] Análisis predictivo de rendimiento con machine learning
-- [ ] Gamificación y sistema de recompensas
-
-## 🤝 Contribución
-
-Este proyecto es privado y de uso personal. No se aceptan contribuciones externas en este momento.
-
-## 📄 Licencia
-
-Este proyecto es privado y de uso personal.
-
 ## 👤 Autor
 
 **Juan17MD**
