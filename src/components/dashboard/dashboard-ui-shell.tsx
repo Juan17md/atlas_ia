@@ -32,7 +32,7 @@ interface AthleteDashboardUIProps {
 
 export function AthleteDashboardUI({ user, activityData, weeklyCompleted, weeklyTarget, routine }: AthleteDashboardUIProps) {
     return (
-        <div className="space-y-12 pb-24 md:pb-10 relative">
+        <div className="space-y-8 md:space-y-12 pb-24 md:pb-10 relative">
             {/* Background Decorative Blobs */}
             <div className="absolute top-0 left-1/4 w-96 h-96 bg-red-600/5 rounded-full blur-[120px] pointer-events-none -z-10" />
             <div className="absolute bottom-1/4 right-0 w-64 h-64 bg-blue-600/5 rounded-full blur-[100px] pointer-events-none -z-10" />
@@ -43,7 +43,7 @@ export function AthleteDashboardUI({ user, activityData, weeklyCompleted, weekly
                 className="flex flex-col gap-6 md:flex-row md:justify-between md:items-end mb-2"
             >
                 <div className="space-y-1">
-                    <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase italic">Dashboard</h2>
+                    <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tighter uppercase italic leading-tight">Dashboard</h2>
                     <p className="text-neutral-500 font-bold uppercase tracking-[0.3em] text-[10px] ml-1 flex items-center gap-2">
                         Bienvenido de nuevo, <span className="text-red-500">{user?.name?.split(' ')[0]}</span>
                         {user?.role === 'advanced_athlete' && (
@@ -53,12 +53,12 @@ export function AthleteDashboardUI({ user, activityData, weeklyCompleted, weekly
                 </div>
                 <div className="grid grid-cols-2 gap-4 w-full md:w-auto md:flex md:gap-4">
                     <Link href="/history" className="w-full md:w-auto">
-                        <Button variant="ghost" className="w-full rounded-2xl border border-white/5 bg-neutral-900/40 backdrop-blur-md hover:bg-neutral-800 text-white h-14 px-8 font-black uppercase tracking-widest text-[10px] transition-all active:scale-95">
+                        <Button variant="ghost" className="w-full rounded-2xl border border-white/5 bg-neutral-900/40 backdrop-blur-md hover:bg-neutral-800 text-white h-11 md:h-14 px-8 font-black uppercase tracking-widest text-[10px] transition-all active:scale-95">
                             Historial
                         </Button>
                     </Link>
                     <Link href="/train" className="w-full md:w-auto">
-                        <Button className="w-full rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black h-14 px-10 shadow-2xl shadow-red-900/40 uppercase tracking-widest text-[10px] transition-all active:scale-95 group">
+                        <Button className="w-full rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black h-11 md:h-14 px-10 shadow-2xl shadow-red-900/40 uppercase tracking-widest text-[10px] transition-all active:scale-95 group">
                             <PlayCircle className="w-5 h-5 mr-3 group-hover:scale-110 transition-transform" />
                             Entrenar
                         </Button>
@@ -113,7 +113,7 @@ export function AthleteDashboardUI({ user, activityData, weeklyCompleted, weekly
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    className="lg:col-span-2 bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-4xl p-10 flex flex-col shadow-2xl"
+                    className="lg:col-span-2 bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-3xl md:rounded-4xl p-6 md:p-10 flex flex-col shadow-2xl"
                 >
                     <div className="flex justify-between items-start mb-10">
                         <div className="space-y-1">
@@ -135,7 +135,7 @@ export function AthleteDashboardUI({ user, activityData, weeklyCompleted, weekly
                         initial={{ opacity: 0, x: 20 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
-                        className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-4xl p-8 shadow-2xl"
+                        className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-3xl md:rounded-4xl p-6 md:p-8 shadow-2xl"
                     >
                         <div className="mb-px">
                             <h3 className="text-xl font-black text-white uppercase tracking-tight">Objetivo</h3>
@@ -148,11 +148,11 @@ export function AthleteDashboardUI({ user, activityData, weeklyCompleted, weekly
                         initial={{ opacity: 0, scale: 0.95 }}
                         whileInView={{ opacity: 1, scale: 1 }}
                         viewport={{ once: true }}
-                        className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-4xl overflow-hidden group hover:border-red-500/30 transition-all duration-500 shadow-2xl relative"
+                        className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-3xl md:rounded-4xl overflow-hidden group hover:border-red-500/30 transition-all duration-500 shadow-2xl relative"
                     >
                         <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:bg-red-600/20 transition-all duration-700" />
 
-                        <div className="relative z-10 p-8">
+                        <div className="relative z-10 p-6 md:p-8">
                             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 mb-2">
                                 {new Date().getDay() === 0 || new Date().getDay() === 6 ? "Rest Day" : "Next Session"}
                             </p>
@@ -171,7 +171,7 @@ export function AthleteDashboardUI({ user, activityData, weeklyCompleted, weekly
                                     <h3 className="text-3xl font-black mb-1 text-white uppercase tracking-tighter italic">{(routine as unknown as SerializedRoutine).name}</h3>
                                     <p className="text-xs text-neutral-500 font-medium mb-8 uppercase tracking-widest">{((routine as unknown as SerializedRoutine).schedule?.length) || 0} bloqueos en calendario</p>
                                     <Link href="/train">
-                                        <Button className="w-full rounded-2xl bg-white text-black hover:bg-neutral-200 font-black uppercase tracking-[0.2em] text-[10px] py-6 shadow-xl shadow-white/5 h-14 active:scale-95 transition-all">
+                                        <Button className="w-full rounded-2xl bg-white text-black hover:bg-neutral-200 font-black uppercase tracking-[0.2em] text-[10px] py-6 shadow-xl shadow-white/5 h-12 md:h-14 active:scale-95 transition-all">
                                             Iniciar Sesión
                                         </Button>
                                     </Link>
@@ -195,7 +195,7 @@ export function AthleteDashboardUI({ user, activityData, weeklyCompleted, weekly
                 initial={{ opacity: 0, scale: 0.98 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
-                className="bg-linear-to-br from-neutral-900 via-neutral-900 to-red-900/20 border border-white/5 rounded-4xl p-10 relative overflow-hidden group shadow-3xl"
+                className="bg-linear-to-br from-neutral-900 via-neutral-900 to-red-900/20 border border-white/5 rounded-3xl md:rounded-4xl p-6 md:p-10 relative overflow-hidden group shadow-3xl"
             >
                 <div className="absolute top-0 right-0 p-12 opacity-5 group-hover:opacity-10 transition-opacity duration-1000">
                     <Activity className="w-64 h-64 text-red-500 rotate-12" />
@@ -207,7 +207,7 @@ export function AthleteDashboardUI({ user, activityData, weeklyCompleted, weekly
                             <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                             AI Coach Insight
                         </div>
-                        <h3 className="text-4xl font-black text-white tracking-tighter uppercase italic leading-none">
+                        <h3 className="text-2xl md:text-4xl font-black text-white tracking-tighter uppercase italic leading-none">
                             Tu potencial no <br />tiene límites
                         </h3>
                         <p className="text-neutral-400 font-medium leading-relaxed max-w-xl text-lg opacity-80">
@@ -238,7 +238,7 @@ interface CoachDashboardUIProps {
 
 export function CoachDashboardUI({ user, stats, activities }: CoachDashboardUIProps) {
     return (
-        <div className="space-y-12 pb-24 md:pb-10 relative">
+        <div className="space-y-8 md:space-y-12 pb-24 md:pb-10 relative">
             {/* Background Decorative Blobs */}
             <div className="absolute top-0 right-1/4 w-96 h-96 bg-red-600/5 rounded-full blur-[120px] pointer-events-none -z-10" />
 
@@ -248,14 +248,14 @@ export function CoachDashboardUI({ user, stats, activities }: CoachDashboardUIPr
                 className="flex flex-col gap-6 md:flex-row md:justify-between md:items-end mb-4 md:mb-6"
             >
                 <div className="space-y-1">
-                    <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase italic leading-none">Command Center</h2>
+                    <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tighter uppercase italic leading-none">Command Center</h2>
                     <p className="text-neutral-500 font-bold uppercase tracking-[0.3em] text-[10px] ml-1">
                         Panel de Control: <span className="text-red-500">Coach Mode</span>
                     </p>
                 </div>
                 <div className="flex gap-4 items-center w-full md:w-auto">
                     <Link href="/athletes" className="w-full md:w-auto">
-                        <Button className="group relative w-full md:w-auto overflow-hidden rounded-2xl bg-red-600 px-8 h-14 text-xs font-black text-white shadow-2xl shadow-red-900/40 transition-all duration-300 active:scale-95 group hover:bg-red-700">
+                        <Button className="group relative w-full md:w-auto overflow-hidden rounded-2xl bg-red-600 px-8 h-12 md:h-14 text-xs font-black text-white shadow-2xl shadow-red-900/40 transition-all duration-300 active:scale-95 group hover:bg-red-700">
                             <span className="relative z-10 flex items-center gap-3 uppercase tracking-[0.2em]">
                                 <Users className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
                                 Gestionar Atletas
@@ -301,7 +301,7 @@ export function CoachDashboardUI({ user, stats, activities }: CoachDashboardUIPr
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-4xl p-10 shadow-2xl"
+                        className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-3xl md:rounded-4xl p-6 md:p-10 shadow-2xl"
                     >
                         <div className="flex justify-between items-start mb-10">
                             <div className="space-y-1">
@@ -320,7 +320,7 @@ export function CoachDashboardUI({ user, stats, activities }: CoachDashboardUIPr
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-4xl p-10 shadow-2xl"
+                        className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-3xl md:rounded-4xl p-6 md:p-10 shadow-2xl"
                     >
                         <div className="flex justify-between items-center mb-8">
                             <div className="space-y-1">
@@ -372,7 +372,7 @@ export function CoachDashboardUI({ user, stats, activities }: CoachDashboardUIPr
                                     </motion.div>
                                 ))
                             ) : (
-                                <div className="text-center py-12 bg-black/20 rounded-4xl border border-dashed border-white/5">
+                                <div className="text-center py-6 md:py-12 bg-black/20 rounded-3xl md:rounded-4xl border border-dashed border-white/5">
                                     <Activity className="w-12 h-12 mx-auto mb-4 text-neutral-700 opacity-50" />
                                     <p className="text-xs font-black text-neutral-600 uppercase tracking-widest">Sin actividad registrada hoy</p>
                                 </div>
@@ -388,7 +388,7 @@ export function CoachDashboardUI({ user, stats, activities }: CoachDashboardUIPr
                         initial={{ opacity: 0, x: 20 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
-                        className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-4xl p-8 shadow-2xl relative overflow-hidden group"
+                        className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-3xl md:rounded-4xl p-6 md:p-8 shadow-2xl relative overflow-hidden group"
                     >
                         <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:bg-red-600/20 transition-all duration-700" />
 
@@ -397,17 +397,17 @@ export function CoachDashboardUI({ user, stats, activities }: CoachDashboardUIPr
 
                         <div className="space-y-3 relative z-10">
                             <Link href="/routines" className="block">
-                                <Button className="w-full justify-start h-14 rounded-2xl border border-white/5 bg-neutral-900/50 hover:bg-neutral-800 text-white font-black uppercase tracking-[0.2em] text-[10px] transition-all hover:translate-x-1">
+                                <Button className="w-full justify-start h-12 md:h-14 rounded-2xl border border-white/5 bg-neutral-900/50 hover:bg-neutral-800 text-white font-black uppercase tracking-[0.2em] text-[10px] transition-all hover:translate-x-1">
                                     <FileText className="w-4 h-4 mr-3 text-red-500" /> Nueva Rutina
                                 </Button>
                             </Link>
                             <Link href="/exercises" className="block">
-                                <Button className="w-full justify-start h-14 rounded-2xl border border-white/5 bg-neutral-900/50 hover:bg-neutral-800 text-white font-black uppercase tracking-[0.2em] text-[10px] transition-all hover:translate-x-1">
+                                <Button className="w-full justify-start h-12 md:h-14 rounded-2xl border border-white/5 bg-neutral-900/50 hover:bg-neutral-800 text-white font-black uppercase tracking-[0.2em] text-[10px] transition-all hover:translate-x-1">
                                     <Plus className="w-4 h-4 mr-3 text-red-500" /> Cargar Ejercicio
                                 </Button>
                             </Link>
                             <Link href="/athletes" className="block">
-                                <Button className="w-full justify-start h-14 rounded-2xl border border-white/5 bg-neutral-900/50 hover:bg-neutral-800 text-white font-black uppercase tracking-[0.2em] text-[10px] transition-all hover:translate-x-1">
+                                <Button className="w-full justify-start h-12 md:h-14 rounded-2xl border border-white/5 bg-neutral-900/50 hover:bg-neutral-800 text-white font-black uppercase tracking-[0.2em] text-[10px] transition-all hover:translate-x-1">
                                     <UserPlus className="w-4 h-4 mr-3 text-red-500" /> Alta Atleta
                                 </Button>
                             </Link>
@@ -419,7 +419,7 @@ export function CoachDashboardUI({ user, stats, activities }: CoachDashboardUIPr
                         initial={{ opacity: 0, scale: 0.95 }}
                         whileInView={{ opacity: 1, scale: 1 }}
                         viewport={{ once: true }}
-                        className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-4xl p-8 shadow-2xl"
+                        className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-3xl md:rounded-4xl p-6 md:p-8 shadow-2xl"
                     >
                         <h3 className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.3em] mb-6">Status del Hub</h3>
                         <div className="flex items-center gap-4 bg-black/40 p-4 rounded-2xl border border-white/5">

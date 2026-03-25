@@ -44,7 +44,7 @@ export function StatCard({
             whileHover={{ y: -4 }}
             transition={{ duration: 0.3 }}
             className={cn(
-                "p-6 rounded-4xl bg-neutral-900/40 backdrop-blur-xl border border-white/5 flex flex-col justify-between h-44 group transition-all relative overflow-hidden shadow-2xl",
+                "p-4 md:p-6 rounded-4xl bg-neutral-900/40 backdrop-blur-xl border border-white/5 flex flex-col justify-between h-32 md:h-44 group transition-all relative overflow-hidden shadow-2xl",
                 "hover:border-white/20 hover:bg-neutral-900/60",
                 className
             )}
@@ -55,10 +55,10 @@ export function StatCard({
             <div className="flex justify-between items-start relative z-10">
                 <div className="space-y-1">
                     <p className="text-neutral-500 font-bold text-[10px] uppercase tracking-[0.2em]">{title}</p>
-                    <h3 className="text-3xl font-black text-white tracking-tighter leading-none">{value}</h3>
+                    <h3 className="text-2xl md:text-3xl font-black text-white tracking-tighter leading-none">{value}</h3>
                 </div>
                 <div className={cn(
-                    "w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 group-hover:rotate-12 group-hover:scale-110 shadow-lg",
+                    "w-10 h-10 md:w-12 md:h-12 rounded-2xl flex items-center justify-center transition-all duration-500 group-hover:rotate-12 group-hover:scale-110 shadow-lg",
                     colorStyles[color],
                     "border border-white/5"
                 )}>
