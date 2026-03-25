@@ -24,7 +24,6 @@ interface MobileNavProps {
 export function MobileNav({ role, user }: MobileNavProps) {
     const [isOpen, setIsOpen] = React.useState(false);
     const pathname = usePathname();
-    if (pathname === "/train") return null;
 
     const commonItems = [
         { label: "Inicio", href: "/dashboard", icon: LayoutDashboard },
