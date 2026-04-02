@@ -46,3 +46,12 @@ next-env.d.ts
 .firebase/
 firebase-debug.log
 firebase-service-account.json
+
+# agents & skills
+.agents/
+.agent/
+_agents/
+_agent/
+.gemini/
+AGENTS.md
+SKILL.md

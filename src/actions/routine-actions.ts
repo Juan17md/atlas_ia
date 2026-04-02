@@ -233,6 +233,45 @@ export async function assignRoutineToAthlete(athleteId: string, routineId: strin
     }
 }
 
+// Unassign/Deactivate Routine from Athlete
+export async function unassignRoutineFromAthlete(athleteId: string) {
+    const session = await auth();
+    if (!session?.user?.id || session.user.role !== "coach") {
+        return { success: false, error: "No autorizado" };
+    }
+
+    try {
+        const snapshot = await adminDb.collection("routines")
+            .where("athleteId", "==", athleteId)
+            .where("active", "==", true)
+            .get();
+
+        if (snapshot.empty) {
+            return { success: true };
+        }
+
+        const batch = adminDb.batch();
+        snapshot.docs.forEach(doc => {
+            batch.update(doc.ref, {
+                active: false,
+                deletedAt: new Date(),
+                updatedAt: new Date()
+            });
+        });
+
+        await batch.commit();
+
+        revalidatePath(`/athletes/${athleteId}`);
+        revalidatePath("/athletes");
+        revalidatePath("/dashboard");
+
+        return { success: true };
+    } catch (error) {
+        console.error("Error unassigning routine:", error);
+        return { success: false, error: "Error al desasignar rutina" };
+    }
+}
+
 // Get athletes assigned to a routine template
 export async function getAssignedAthletes(routineId: string) {
     const session = await auth();

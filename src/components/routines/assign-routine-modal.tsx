@@ -33,9 +33,10 @@ interface AssignRoutineModalProps {
     athleteName: string;
     routines: Routine[];
     className?: string;
+    trigger?: React.ReactNode;
 }
 
-export function AssignRoutineModal({ athleteId, athleteName, routines = [], className }: AssignRoutineModalProps) {
+export function AssignRoutineModal({ athleteId, athleteName, routines = [], className, trigger }: AssignRoutineModalProps) {
     const [open, setOpen] = useState(false);
     const [step, setStep] = useState<1 | 2>(1);
     const [selectedRoutine, setSelectedRoutine] = useState<Routine | null>(null);
@@ -120,10 +121,12 @@ export function AssignRoutineModal({ athleteId, athleteName, routines = [], clas
     return (
         <Dialog open={open} onOpenChange={reset}>
             <DialogTrigger asChild>
-                <Button className={cn("bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl h-10 px-6 shadow-lg shadow-red-900/20 transition-all hover:scale-105", className)}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Asignar Rutina
-                </Button>
+                {trigger || (
+                    <Button className={cn("bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl h-10 px-6 shadow-lg shadow-red-900/20 transition-all hover:scale-105", className)}>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Asignar Rutina
+                    </Button>
+                )}
             </DialogTrigger>
             <DialogContent className="bg-neutral-900 border-neutral-800 text-white sm:max-w-[550px] p-0 overflow-hidden gap-0">
                 {/* Header */}

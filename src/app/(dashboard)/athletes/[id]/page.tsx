@@ -12,7 +12,7 @@ import { ProgressChart } from "@/components/dashboard/progress-chart";
 import { TrainingHistoryList } from "@/components/training/training-history-list";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { AssignRoutineModal } from "@/components/routines/assign-routine-modal";
+import { AthleteRoutineSettings } from "@/components/athletes/athlete-routine-settings";
 import { ArrowLeft, Dumbbell, Trophy, Target, Calendar, Activity, ShieldAlert, Heart } from "lucide-react";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -145,35 +145,12 @@ export default async function AthleteDetailsPage({ params }: PageProps) {
                 </div>
 
                 <div className="flex flex-col w-full md:w-auto md:items-end gap-4">
-                    {routine ? (
-                        <Link href={`/athletes/${athlete.id}/routine`} className="group block">
-                            <div className="bg-neutral-900/40 backdrop-blur-3xl border border-white/5 hover:border-red-600/30 rounded-3xl flex items-center pr-8 pl-4 py-3 gap-5 transition-all duration-500 cursor-pointer shadow-2xl h-20">
-                                <div className="h-12 w-12 bg-linear-to-br from-red-500 to-red-700 rounded-2xl flex items-center justify-center shrink-0 shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-                                    <Dumbbell className="text-white w-6 h-6" />
-                                </div>
-                                <div className="text-left flex flex-col justify-center">
-                                    <p className="text-[9px] font-black text-neutral-600 uppercase tracking-[0.3em] mb-1.5">Rutina Activa</p>
-                                    <p className="text-white font-black text-base uppercase tracking-tight italic group-hover:text-red-500 transition-colors duration-500 truncate max-w-[180px] md:max-w-[250px]">
-                                        {routine.name || "Sin Nombre"}
-                                    </p>
-                                </div>
-                                {routine.schedule && (
-                                    <div className="hidden lg:flex flex-col items-center border-l border-white/5 pl-6 h-10 justify-center min-w-[60px]">
-                                        <span className="text-[9px] text-neutral-600 font-black uppercase tracking-widest leading-none mb-1">Días</span>
-                                        <span className="text-lg font-black text-white italic leading-none">{routine.schedule.length}</span>
-                                    </div>
-                                )}
-                            </div>
-                        </Link>
-                    ) : (
-                        <div className="h-20 flex items-center justify-center">
-                            <AssignRoutineModal
-                                athleteId={athlete.id}
-                                athleteName={athlete.name || "Atleta"}
-                                routines={coachRoutines || []}
-                            />
-                        </div>
-                    )}
+                    <AthleteRoutineSettings
+                        athleteId={athlete.id}
+                        athleteName={athlete.name || "Atleta"}
+                        hasActiveRoutine={!!routine}
+                        libraryRoutines={coachRoutines}
+                    />
 
                     <div className="flex flex-wrap gap-3 w-full md:w-auto">
                         {athlete.goal && (

@@ -2,7 +2,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, Target, Calendar, TrendingUp } from "lucide-react";
+import { ChevronRight, Target, Calendar, Dumbbell } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -14,6 +14,7 @@ interface Athlete {
     image?: string | null;
     goal?: string;
     createdAt?: string;
+    hasActiveRoutine?: boolean;
 }
 
 interface AthleteCardProps {
@@ -87,9 +88,11 @@ export function AthleteCard({ athlete }: AthleteCardProps) {
                             <p className="text-[10px] text-white font-black uppercase italic">{memberSince}</p>
                         </div>
                         <div className="bg-black/40 backdrop-blur-md p-3 rounded-2xl border border-white/5 group-hover:border-red-600/10 transition-colors text-center">
-                            <TrendingUp className="w-4 h-4 text-emerald-500 mx-auto mb-1.5 opacity-50 group-hover:opacity-100 transition-opacity" />
-                            <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest mb-1">Estado</p>
-                            <p className="text-[10px] text-emerald-500 font-black uppercase italic">Activo</p>
+                            <Dumbbell className={cn("w-4 h-4 mx-auto mb-1.5 opacity-50 group-hover:opacity-100 transition-opacity", athlete.hasActiveRoutine ? "text-emerald-500" : "text-amber-500")} />
+                            <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest mb-1">Rutina</p>
+                            <p className={cn("text-[10px] font-black uppercase italic", athlete.hasActiveRoutine ? "text-emerald-500" : "text-amber-500")}>
+                                {athlete.hasActiveRoutine ? "Activa" : "Pendiente"}
+                            </p>
                         </div>
                     </div>
 
