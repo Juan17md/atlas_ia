@@ -64,12 +64,9 @@ export function Sidebar({ role, user }: SidebarProps) {
             ? advancedAthleteItems
             : athleteItems;
 
-    const generalItems = [
-        { label: "PERFIL", href: "/profile", icon: UserCircle, prefetch: false },
-    ];
 
     return (
-        <aside className="hidden md:block md:fixed md:top-0 md:left-0 md:h-screen md:w-55 flex flex-col bg-black relative overflow-hidden z-50">
+        <aside className="hidden md:flex md:fixed md:top-0 md:left-0 md:h-screen md:w-55 flex-col bg-black relative overflow-hidden z-50">
             {/* Geometric Accents */}
             <div className="absolute top-0 left-0 w-full h-[500px] bg-linear-to-b from-red-600/5 to-transparent pointer-events-none" />
             <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-red-600/5 rounded-full blur-[100px] pointer-events-none" />
@@ -136,49 +133,10 @@ export function Sidebar({ role, user }: SidebarProps) {
                     </nav>
                 </div>
 
-                {/* Opciones */}
-                <div className="space-y-6">
-                    <div className="flex items-center gap-3 px-4">
-                        <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-neutral-600 italic">
-                            Operador
-                        </h3>
-                        <div className="h-px flex-1 bg-white/5" />
-                    </div>
-                    <nav className="space-y-2">
-                        {generalItems.map((item) => {
-                            const isActive = pathname === item.href;
-                            const Icon = item.icon;
-                            return (
-                                <Link
-                                    key={item.href}
-                                    href={item.href}
-                                    prefetch={item.prefetch}
-                                    className={cn(
-                                        "flex items-center gap-4 px-5 py-4 rounded-3xl transition-all duration-300 group relative overflow-hidden",
-                                        isActive
-                                            ? "bg-white/5 text-white"
-                                            : "text-neutral-500 hover:text-white"
-                                    )}
-                                >
-                                    {isActive && (
-                                        <motion.div
-                                            layoutId="active-pill-gen"
-                                            className="absolute left-0 top-1/4 bottom-1/4 w-1 bg-red-600 rounded-r-full shadow-[4px_0_12px_rgba(220,38,38,0.5)]"
-                                        />
-                                    )}
-                                    <Icon className={cn("h-5 w-5 shrink-0", isActive ? "text-red-500 scale-125" : "text-neutral-600 group-hover:text-white group-hover:scale-110")} />
-                                    <span className={cn("text-xs font-black uppercase italic tracking-widest", isActive ? "text-white" : "group-hover:translate-x-1 transition-transform")}>
-                                        {item.label}
-                                    </span>
-                                </Link>
-                            );
-                        })}
-                    </nav>
-                </div>
             </div>
 
             {/* User Profile Section - Fixed at bottom */}
-            <div className="mt-auto p-4 relative z-10 border-t border-white/5 space-y-4">
+            <div className="mt-auto px-6 py-8 relative z-10 border-t border-white/5 space-y-4">
                 <UserNav user={user} />
                 <button
                     onClick={() => signOut({ redirectTo: "/" })}
