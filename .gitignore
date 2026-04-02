@@ -50,8 +50,14 @@ firebase-service-account.json
 # agents & skills
 .agents/
 .agent/
+.agent/skills
 _agents/
 _agent/
 .gemini/
 AGENTS.md
 SKILL.md
+.cursorrules
+.claude/
+.cursor/
+design-system/
+skills-lock.json
