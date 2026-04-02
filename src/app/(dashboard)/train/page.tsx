@@ -4,12 +4,15 @@ import { getRoutine } from "@/actions/routine-actions";
 import { WorkoutSession } from "@/components/training/workout-session";
 import { RestDayView } from "@/components/training/rest-day-view";
 import { WorkoutCompletedView } from "@/components/training/workout-completed-view";
-import { checkCompletedWorkoutToday } from "@/actions/training-actions";
+import { MarkRestButton } from "@/components/training/mark-rest-button";
+import { checkCompletedWorkoutToday } from "@/actions/training-logs";
+
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { AlertCircle, Dumbbell, Calendar } from "lucide-react";
+import { AlertCircle, Dumbbell, Calendar, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+
 import { obtenerAhoraLocal, obtenerFechaISOLocal } from "@/lib/fecha-utils";
 
 // Tipo inline para compatibilidad con WorkoutSession
@@ -92,7 +95,8 @@ export default async function TrainPage(props: {
                     <div className="grid grid-cols-1 gap-4 md:gap-6">
                         <Link href="/train?assigned=true" className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 rounded-3xl">
                             <Button className="w-full h-24 bg-neutral-900 border border-white/5 text-white hover:bg-white/5 font-black uppercase italic tracking-widest text-lg rounded-3xl transition-all shadow-2xl active:scale-95 flex flex-col items-center justify-center group relative overflow-hidden">
-                                <div className="absolute inset-0 bg-linear-to-r from-red-600/0 via-red-600/10 to-red-600/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                                <div className="absolute inset-0 bg-linear-to-r from-red-600/0 via-red-600/10 to-red-600/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+
                                 <div className="flex items-center gap-3 relative z-10">
                                     <Calendar className="w-5 h-5 text-red-500 group-hover:scale-110 transition-transform" />
                                     <span>Asignada</span>
@@ -105,7 +109,7 @@ export default async function TrainPage(props: {
 
                         <Link href="/train?mode=free" className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/20 rounded-3xl">
                             <Button className="w-full h-24 bg-amber-500/10 border border-amber-500/20 text-amber-500 hover:bg-amber-500/15 font-black uppercase italic tracking-widest text-lg rounded-3xl transition-all shadow-2xl shadow-amber-900/10 active:scale-95 flex flex-col items-center justify-center group relative overflow-hidden">
-                                <div className="absolute inset-0 bg-linear-to-r from-amber-600/0 via-amber-600/10 to-amber-600/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                                <div className="absolute inset-0 bg-linear-to-r from-amber-600/0 via-amber-600/10 to-amber-600/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                                 <div className="flex items-center gap-3 relative z-10">
                                     <Dumbbell className="w-5 h-5 group-hover:-rotate-12 transition-transform" />
                                     <span>Rutina Libre</span>
@@ -115,7 +119,23 @@ export default async function TrainPage(props: {
                                 </span>
                             </Button>
                         </Link>
+
+
+                        <MarkRestButton 
+                            className="w-full h-24 bg-blue-500/10 border border-blue-500/20 text-blue-500 hover:bg-blue-500/15 font-black uppercase italic tracking-widest text-lg rounded-3xl transition-all shadow-2xl shadow-blue-900/10 active:scale-95 flex flex-col items-center justify-center group relative overflow-hidden cursor-pointer"
+                        >
+                            <div className="absolute inset-0 bg-linear-to-r from-blue-600/0 via-blue-600/10 to-blue-600/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                            <div className="flex items-center gap-3 relative z-10">
+                                <Moon className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+                                <span>Descanso</span>
+                            </div>
+                            <span className="text-[10px] font-bold text-blue-500/70 mt-1.5 relative z-10">
+                                Registra tu recuperación hoy
+                            </span>
+                        </MarkRestButton>
                     </div>
+
+
                 </div>
             </div>
         );
@@ -166,12 +186,16 @@ export default async function TrainPage(props: {
                     </div>
 
                     <div className="grid grid-cols-1 gap-4">
+                        <MarkRestButton 
+                            className="w-full h-14 bg-blue-600 hover:bg-blue-700 text-white font-black uppercase italic tracking-widest rounded-2xl shadow-xl shadow-blue-500/10 active:scale-95"
+                        />
                         <Link href="/dashboard" className="block">
-                            <Button className="w-full h-14 bg-white text-black font-black uppercase italic tracking-widest rounded-2xl hover:bg-neutral-200 transition-all shadow-xl shadow-white/5 active:scale-95">
+                            <Button variant="outline" className="w-full h-14 border-white/10 bg-transparent text-white/50 font-black uppercase italic tracking-widest rounded-2xl hover:bg-white/5 hover:text-white transition-all active:scale-95">
                                 Retorno Seguro
                             </Button>
                         </Link>
                     </div>
+
                 </div>
             </div>
         );

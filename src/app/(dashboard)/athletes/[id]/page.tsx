@@ -5,7 +5,7 @@ import { adminDb } from "@/lib/firebase-admin";
 export const dynamic = "force-dynamic";
 
 import { getPersonalRecords, getWeeklyActivity, getWeeklyProgress } from "@/actions/analytics-actions";
-import { getTrainingLogs } from "@/actions/training-actions";
+import { getTrainingLogs } from "@/actions/training-logs";
 import { getAthleteRoutine, getCoachRoutines } from "@/actions/routine-actions";
 import { ActivityChart } from "@/components/dashboard/activity-chart";
 import { ProgressChart } from "@/components/dashboard/progress-chart";

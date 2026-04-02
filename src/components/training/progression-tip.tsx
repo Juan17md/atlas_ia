@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getProgressionSuggestion, type ProgressionSuggestion } from "@/actions/training-actions";
+import { getProgressionSuggestion, type ProgressionSuggestion } from "@/actions/progression-ai";
 import { TrendingUp, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Check, Clock, Trophy, Info, Loader2, Play, Dumbbell, ChevronLeft, ChevronRight, Save, Activity, Sparkles, Plus, Trash2, RefreshCw } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger, SheetClose } from "@/components/ui/sheet";
-import { logWorkoutSession, getLastSessionExerciseData, WorkoutSessionData } from "@/actions/training-actions";
+import { logWorkoutSession, getLastSessionExerciseData, type WorkoutSessionData } from "@/actions/training-logs";
 import { cn, calculateRealTimeAdjustment } from "@/lib/utils";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";

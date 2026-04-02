@@ -7,6 +7,10 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { ClientMotionDiv } from "@/components/ui/client-motion";
 import { toast } from "sonner";
+import { markAsRestDay } from "@/actions/training-logs";
+import { useState } from "react";
+import { Loader2 } from "lucide-react";
+
 
 interface RestDayViewProps {
     dayName: string;
@@ -14,6 +18,8 @@ interface RestDayViewProps {
 
 export function RestDayView({ dayName }: RestDayViewProps) {
     const router = useRouter();
+    const [isPending, setIsPending] = useState(false);
+
 
     return (
         <div className="flex flex-col items-center justify-center min-h-[50vh] py-4 md:py-10 px-6 text-center relative overflow-hidden">
@@ -61,14 +67,33 @@ export function RestDayView({ dayName }: RestDayViewProps) {
                 </div>
 
                 <Button
-                    onClick={() => {
-                        toast.success("Día de descanso marcado como completado");
-                        router.push("/dashboard");
+                    disabled={isPending}
+                    onClick={async () => {
+                        setIsPending(true);
+                        try {
+                            const res = await markAsRestDay();
+                            if (res.success) {
+                                toast.success("Día de descanso registrado formalmente");
+                                router.push("/dashboard");
+                            } else {
+                                toast.error(res.error || "Error al registrar descanso");
+                            }
+                        } catch (error) {
+                            toast.error("Error de conexión");
+                        } finally {
+                            setIsPending(false);
+                        }
                     }}
                     className="w-full h-14 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs md:text-sm uppercase tracking-[0.2em] shadow-lg shadow-blue-900/20 transition-all active:scale-95 flex items-center justify-center gap-2 mb-6"
                 >
-                    <Moon className="w-4 h-4" /> Completar Descanso
+                    {isPending ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                        <Moon className="w-4 h-4" />
+                    )}
+                    Completar Descanso
                 </Button>
+
 
                 {/* Technical Info Matrix */}
                 <div className="grid grid-cols-2 md:grid-cols-2 gap-3 md:gap-6 max-w-md mx-auto">

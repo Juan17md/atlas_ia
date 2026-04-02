@@ -6,7 +6,9 @@ import { getAthleteAssignments, getRecordedWorkoutDays, getLogsPorFecha } from "
 import { startOfMonth, endOfMonth, format, parseISO, isSameDay } from "date-fns";
 import { es } from "date-fns/locale";
 import { Loader2, Dumbbell, CheckCircle2, Moon, Calendar as CalendarIcon, ChevronRight, Clock, Flame } from "lucide-react";
+import { MarkRestButton } from "@/components/training/mark-rest-button";
 import { Badge } from "@/components/ui/badge";
+
 import { cn } from "@/lib/utils";
 import { fechaLocalAString } from "@/lib/fecha-utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -228,6 +230,12 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
                                     <h4 className="font-black text-white uppercase tracking-tight">Recuperación</h4>
                                     <p className="text-xs text-neutral-500 font-medium">Escucha a tu cuerpo hoy.</p>
                                 </div>
+                                <MarkRestButton 
+                                    dateStr={date ? fechaLocalAString(date) : undefined}
+                                    variant="outline"
+                                    className="w-full border-white/10 text-white/70 hover:text-white"
+                                />
+
                             </motion.div>
                         ) : isRecordedDay ? (
                             <div className="space-y-3">
@@ -376,12 +384,24 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
                                         </div>
                                     )}
                                 </motion.div>
+                                <MarkRestButton 
+                                    dateStr={date ? fechaLocalAString(date) : undefined}
+                                    variant="ghost"
+                                    className="w-full text-neutral-500 hover:text-white hover:bg-white/5"
+                                />
+
                             </div>
                         ) : (
-                            <div className="h-full flex flex-col items-center justify-center py-20 opacity-30 grayscale">
+                            <div className="h-full flex flex-col items-center justify-center py-20 opacity-30 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500">
                                 <Dumbbell className="h-12 w-12 mb-4" />
-                                <p className="text-xs font-black uppercase tracking-widest">Sin Actividad</p>
+                                <p className="text-xs font-black uppercase tracking-widest mb-6">Sin Actividad</p>
+                                <MarkRestButton 
+                                    dateStr={date ? fechaLocalAString(date) : undefined}
+                                    variant="outline"
+                                    className="border-white/20 text-white/50 hover:text-white hover:border-white/40"
+                                />
                             </div>
+
                         )}
                     </AnimatePresence>
                 </div>

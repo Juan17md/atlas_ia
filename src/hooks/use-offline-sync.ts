@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { logWorkoutSession, WorkoutSessionData } from "@/actions/training-actions";
+import { logWorkoutSession, type WorkoutSessionData } from "@/actions/training-logs";
 
 export function useOfflineSync() {
     const [isOnline, setIsOnline] = useState(true);

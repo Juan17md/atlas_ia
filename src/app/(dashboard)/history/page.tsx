@@ -1,4 +1,4 @@
-import { getTrainingLogs } from "@/actions/training-actions";
+import { getTrainingLogs } from "@/actions/training-logs";
 import { TrainingHistoryList } from "@/components/training/training-history-list";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
