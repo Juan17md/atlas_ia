@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Check, Loader2, Play, Dumbbell, Sparkles, Plus, Trash2, RefreshCw } from "lucide-react";
+import { Check, Loader2, Play, Dumbbell, Sparkles, Plus, Trash2, RefreshCw, ChevronDown } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { logWorkoutSession, getLastSessionExerciseData, type WorkoutSessionData } from "@/actions/training-logs";
@@ -721,11 +721,12 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                                                                         >
                                                                             <SelectTrigger
                                                                                 className={cn(
-                                                                                    "h-14 md:h-14 w-full px-0 justify-center text-center text-lg md:text-2xl font-black border-0 bg-neutral-950 rounded-xl focus:ring-2 focus:ring-white/10 transition-all text-white [&>svg]:hidden italic shadow-inner",
+                                                                                    "h-14 w-full px-4 justify-center text-center text-lg md:text-2xl font-black border-0 bg-neutral-950 rounded-xl focus:ring-2 focus:ring-white/10 transition-all text-white italic shadow-inner relative group",
                                                                                     isCompleted && "text-emerald-400 bg-emerald-950/20 ring-1 ring-emerald-500/30"
                                                                                 )}
                                                                             >
                                                                                 <SelectValue placeholder={historySet ? `${historySet.rpe}` : "-"} />
+                                                                                <ChevronDown className="w-4 h-4 ml-2 opacity-20 group-hover:opacity-100 transition-opacity absolute right-4" />
                                                                             </SelectTrigger>
                                                                             <SelectContent className="bg-neutral-900 border border-white/10 text-white min-w-[60px] rounded-2xl backdrop-blur-3xl shadow-2xl">
                                                                                 {[10, 9, 8, 7, 6, 5].map((val) => (
