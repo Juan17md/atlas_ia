@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Check, Clock, Trophy, Info, Loader2, Play, Dumbbell, ChevronLeft, ChevronRight, Save, Activity, Sparkles, Plus, Trash2, RefreshCw } from "lucide-react";
+import { Check, Loader2, Play, Dumbbell, Sparkles, Plus, Trash2, RefreshCw } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { logWorkoutSession, getLastSessionExerciseData, type WorkoutSessionData } from "@/actions/training-logs";
@@ -20,52 +20,11 @@ import { ClientMotionDiv } from "@/components/ui/client-motion";
 import { motion, AnimatePresence } from "framer-motion";
 import { ExerciseSelector } from "@/components/routines/exercise-selector";
 
-// --- INTERFACES ---
-
-interface RoutineSet {
-    reps?: number;
-    weight?: number;
-    rpe?: number;
-    rpeTarget?: number;
-    type?: "warmup" | "working" | "failure";
-    rest?: number;
-}
-
-interface RoutineExercise {
-    exerciseId?: string;
-    exerciseName: string;
-    notes?: string;
-    sets: RoutineSet[];
-    variantIds?: string[];
-}
-
-interface RoutineDay {
-    id?: string;
-    name: string;
-    exercises: RoutineExercise[];
-}
-
-interface Routine {
-    id: string;
-    name: string;
-    schedule: RoutineDay[];
-}
-
-interface SessionSet {
-    reps: string;
-    weight: string;
-    rpe: string;
-    completed: boolean;
-    targetReps?: number;
-}
-
-interface SessionExercise {
-    exerciseId: string;
-    exerciseName: string;
-    sets: SessionSet[];
-    feedback: string;
-    exerciseIdUsed: string; // ID del ejercicio realmente realizado (principal o variante)
-}
+import type { Routine, RoutineExercise, RoutineSet, SessionExercise, SessionSet } from "./workout-session-types";
+import { WorkoutHeader } from "./workout-header";
+import { WorkoutNavigation } from "./workout-navigation";
+import { SessionStartView } from "./session-start-view";
+import { FreeWorkoutView } from "./free-workout-view";
 
 interface WorkoutSessionProps {
     routine: Routine;
@@ -81,36 +40,29 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
 
     const isAdvanced = userRole === "advanced_athlete";
 
-    // Form state structure matching schema
-    // We map the active day exercises to a local state for logging
     const [sessionLog, setSessionLog] = useState<SessionExercise[]>([]);
     const [showFeedback, setShowFeedback] = useState(false);
     const [showCancelDialog, setShowCancelDialog] = useState(false);
     const { saveLogLocally } = useOfflineSync();
 
-    // Estado mutable de ejercicios del día (permite al atleta avanzado modificar la rutina)
     const [mutableExercises, setMutableExercises] = useState<RoutineExercise[]>([]);
 
-    // Estado para el selector de ejercicios (cambiar/agregar)
     const [showExerciseSelector, setShowExerciseSelector] = useState(false);
     const [exerciseSelectorMode, setExerciseSelectorMode] = useState<"swap" | "add">("add");
     const [swapTargetIndex, setSwapTargetIndex] = useState<number>(-1);
     const [availableExercises, setAvailableExercises] = useState<{ id: string; name: string }[]>([]);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
 
-    const activeDay = routine.schedule[0]; // El componente padre (TrainPage) filtra la rutina para enviar solo el día activo
-    // Estado para guardar el historial de la última sesión
-    const [historySets, setHistorySets] = useState<any[]>([]);
+    const activeDay = routine.schedule[0];
+    const [historySets, setHistorySets] = useState<{ weight: number; reps: number; rpe?: number }[]>([]);
 
-    // Translate/Clean names for UI
-
-    // Translate/Clean names for UI
     const cleanRoutineName = routine.name.replace(/\(assigned\)/i, '').trim();
     const cleanDayName = activeDay
         ? new Date().toLocaleDateString('es-ES', { weekday: 'long' })
         : "";
 
-    // 1. Initialize State (Load from Storage or Create New)
+    const isFreeWorkout = routine.id.startsWith('free_workout');
+
     useEffect(() => {
         if (!activeDay) return;
 
@@ -120,13 +72,11 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
         if (stored) {
             try {
                 const data = JSON.parse(stored);
-                // Restaurar ejercicios mutables si existen
                 if (data.mutableExercises && data.mutableExercises.length > 0) {
                     setMutableExercises(data.mutableExercises);
                 } else {
                     setMutableExercises([...activeDay.exercises]);
                 }
-                // Validate if stored data has sessionLog
                 if (data.sessionLog && data.sessionLog.length > 0) {
                     setSessionLog(data.sessionLog);
                     setElapsedTime(data.elapsedTime || 0);
@@ -140,7 +90,6 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
             }
         }
 
-        // Default Initialization
         setMutableExercises([...activeDay.exercises]);
         setSessionLog(activeDay.exercises.map((ex: RoutineExercise) => ({
             exerciseId: ex.exerciseId || "temp-id",
@@ -150,14 +99,13 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                 weight: "",
                 rpe: "",
                 completed: false,
-                targetReps: set.reps, // Keep reference to target
+                targetReps: set.reps,
             })),
             feedback: "",
             exerciseIdUsed: ex.exerciseId || "temp-id"
         })));
     }, [activeDay, routine.id]);
 
-    // 2. Persistence Effect (Save on Change)
     useEffect(() => {
         if (!activeDay || sessionLog.length === 0) return;
 
@@ -205,7 +153,6 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
         }
     }, [activeDay, mutableExercises]);
 
-    // Cargar ejercicios disponibles para el selector (solo atletas avanzados)
     useEffect(() => {
         if (!isAdvanced) return;
         getExercises().then(res => {
@@ -214,8 +161,6 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
             }
         });
     }, [isAdvanced]);
-
-    // --- Handlers de edición de rutina (solo advanced_athlete) ---
 
     const openSwapSelector = useCallback((exerciseIndex: number) => {
         setExerciseSelectorMode("swap");
@@ -231,7 +176,6 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
 
     const handleExerciseSelected = useCallback((exercise: { id?: string; name: string }) => {
         if (exerciseSelectorMode === "swap" && swapTargetIndex >= 0) {
-            // Cambiar ejercicio
             setMutableExercises(prev => {
                 const updated = [...prev];
                 updated[swapTargetIndex] = {
@@ -249,7 +193,6 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                     exerciseId: exercise.id || "custom",
                     exerciseName: exercise.name,
                     sets: updated[swapTargetIndex].sets.map(s => ({
-                        ...s,
                         weight: "",
                         reps: "",
                         rpe: "",
@@ -262,7 +205,6 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
             });
             toast.success(`Ejercicio cambiado a: ${exercise.name}`);
         } else {
-            // Agregar ejercicio
             const defaultSets: RoutineSet[] = [
                 { reps: 12, type: "working" },
                 { reps: 10, type: "working" },
@@ -346,7 +288,6 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
 
         updateSet(exerciseIndex, setIndex, "completed", isTurningComplete);
 
-        // IA Proactiva: Feedback en tiempo real
         if (isTurningComplete && currentSet.weight && currentSet.rpe) {
             const weightNum = Number(currentSet.weight);
             const rpeNum = Number(currentSet.rpe);
@@ -362,7 +303,6 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                         action: suggestion.adjustment > 0 ? {
                             label: `Subir +${suggestion.adjustment}kg`,
                             onClick: () => {
-                                // Aplicar sugerencia al siguiente set si existe
                                 if (setIndex < currentLogEx.sets.length - 1) {
                                     updateSet(exerciseIndex, setIndex + 1, "weight", (weightNum + suggestion.adjustment).toString());
                                 }
@@ -387,10 +327,9 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
     const handleCompleteSession = async (sessionRpe: number, sessionNotes: string) => {
         setIsSubmitting(true);
 
-        // Transform data to fit Schema
         const logData = {
             routineId: routine.id,
-            dayId: activeDay.id || activeDay.name, // Fallback if no specific ID
+            dayId: activeDay.id || activeDay.name,
             durationMinutes: Math.round(elapsedTime / 60),
             sessionRpe,
             sessionNotes,
@@ -414,7 +353,6 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                 toast.success("¡Entrenamiento guardado!", {
                     description: "Gran trabajo. Sigue así."
                 });
-                // Clear storage on success
                 localStorage.removeItem(`gymia_session_${routine.id}_${activeDay.name}`);
                 router.push("/dashboard");
             } else {
@@ -427,7 +365,6 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                 toast.warning("Guardado localmente (Offline)", {
                     description: "Se sincronizará automáticamente cuando recuperes la conexión."
                 });
-                // Clear storage as it is now in offline queue
                 localStorage.removeItem(`gymia_session_${routine.id}_${activeDay.name}`);
                 router.push("/dashboard");
             } else {
@@ -457,251 +394,72 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
 
     if (!activeDay) return <div className="p-10 text-center">No hay día activo seleccionado.</div>;
     
-    // Si la rutina NO es libre y no hay ejercicios, mostramos cargando. (Si es libre, length es 0)
-    const isFreeWorkout = routine.id.startsWith('free_workout');
     if (mutableExercises.length === 0 && sessionLog.length === 0 && !isFreeWorkout) {
         return <div className="p-10 text-center">Cargando...</div>;
     }
 
     if (!isStarted) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[85vh] px-4 space-y-8 pb-32 animate-in fade-in duration-500">
-                <ClientMotionDiv
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-center space-y-3"
-                >
-                    <h1 className="text-4xl md:text-6xl font-black text-white tracking-tighter uppercase italic leading-none">
-                        {cleanRoutineName}
-                    </h1>
-                    <div className="flex items-center justify-center gap-3">
-                        <div className="h-px w-8 bg-red-600/30" />
-                        <p className="text-sm md:text-base font-black text-red-500 uppercase tracking-[0.4em] italic">
-                            {cleanDayName}
-                        </p>
-                        <div className="h-px w-8 bg-red-600/30" />
-                    </div>
-                </ClientMotionDiv>
-
-                <ClientMotionDiv
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.2 }}
-                    className="w-full max-w-md bg-neutral-900/20 backdrop-blur-3xl border border-white/5 rounded-4xl p-8 space-y-8 relative overflow-hidden group shadow-2xl"
-                >
-                    <div className="absolute inset-0 bg-linear-to-br from-red-600/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-
-                    <div className="flex items-center justify-between relative z-10">
-                        <div className="flex items-center gap-3 text-neutral-400">
-                            <Activity className="w-5 h-5 text-red-500" />
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Sesión de Entrenamiento</span>
-                        </div>
-                        <span className="text-[10px] font-black text-neutral-600 uppercase tracking-widest">{mutableExercises.length} Ejercicios</span>
-                    </div>
-
-                    <div className="space-y-4 relative z-10">
-                        {mutableExercises.length === 0 ? (
-                            <div className="py-8 flex flex-col items-center justify-center text-center space-y-3">
-                                <Dumbbell className="w-10 h-10 text-neutral-800" />
-                                <p className="text-neutral-500 font-bold text-sm tracking-tight">Sesión en blanco lista.</p>
-                                <p className="text-neutral-600 text-[10px] uppercase font-black tracking-widest px-4">
-                                    Podrás agregar ejercicios libremente al iniciar.
-                                </p>
-                            </div>
-                        ) : (
-                            mutableExercises.map((ex, i) => (
-                                <div key={i} className="flex items-center gap-4 group/item">
-                                    <div className="h-8 w-8 rounded-xl bg-neutral-950 border border-white/5 flex items-center justify-center text-[10px] font-black text-neutral-600 group-hover/item:text-red-500 group-hover/item:border-red-600/30 transition-all duration-300">
-                                        {String(i + 1).padStart(2, '0')}
-                                    </div>
-                                    <span className="text-neutral-400 font-bold text-sm tracking-tight group-hover/item:text-white transition-colors">
-                                        {ex.exerciseName}
-                                    </span>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                </ClientMotionDiv>
-
-                <div className="w-full max-w-md pt-4">
-                    <Button
-                        onClick={() => setIsStarted(true)}
-                        className="w-full h-16 text-xl font-black italic bg-white text-black hover:bg-neutral-200 rounded-2xl shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
-                    >
-                        <Play className="w-6 h-6 mr-2 fill-black" />
-                        INICIAR
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        onClick={() => router.push('/dashboard')}
-                        className="w-full mt-4 text-neutral-500 hover:text-white cursor-pointer"
-                    >
-                        Volver
-                    </Button>
-                </div>
-            </div>
+            <SessionStartView
+                routineName={cleanRoutineName}
+                dayName={cleanDayName}
+                exercises={mutableExercises}
+                onStart={() => setIsStarted(true)}
+                onBack={() => router.push('/dashboard')}
+                isFreeWorkout={isFreeWorkout}
+            />
         );
     }
 
-    // Get current exercise data
     const currentExercise = mutableExercises[currentExerciseIndex];
     const currentLogExercise = sessionLog[currentExerciseIndex];
 
-    // Check if it's an empty started session
     if (isStarted && mutableExercises.length === 0 && isAdvanced) {
         return (
-            <div className="max-w-3xl mx-auto pb-24 space-y-6 pt-4">
-                <div className={cn(
-                    "sticky top-0 z-30 bg-black/40 backdrop-blur-3xl border-b border-white/5 py-4 px-4 -mx-4 md:rounded-b-4xl md:mx-0 shadow-2xl transition-all duration-300",
-                    showExerciseSelector && "opacity-0 pointer-events-none"
-                )}>
-                    <div className="flex justify-between items-center max-w-3xl mx-auto gap-4">
-                        <div className="flex-1 min-w-0">
-                            <h2 className="text-base font-bold text-white tracking-tight truncate uppercase italic">
-                                Rutina Libre
-                            </h2>
-                        </div>
-                        <div className="flex gap-2 items-center shrink-0">
-                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-900/50 rounded-xl border border-white/5">
-                                <Clock className="w-3.5 h-3.5 text-red-500 animate-pulse" />
-                                <span className="text-xs font-black text-white italic tracking-widest">{formatTime(elapsedTime)}</span>
-                            </div>
-                            <Button
-                                onClick={() => setShowCancelDialog(true)}
-                                variant="ghost"
-                                className="text-neutral-500 hover:text-red-500 hover:bg-red-500/10 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all h-9 px-3"
-                            >
-                                Abortar
-                            </Button>
-                            <Button
-                                onClick={handleFinishClick}
-                                disabled={isSubmitting}
-                                className="hidden lg:flex rounded-xl bg-white text-black font-black text-[10px] uppercase tracking-widest hover:bg-neutral-200 transition-all h-9 px-4 shadow-lg shadow-white/5"
-                            >
-                                Finalizar
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-
-                <div className={cn(
-                    "py-20 flex flex-col items-center justify-center text-center space-y-6 border border-dashed border-white/10 rounded-3xl bg-neutral-900/20 transition-opacity duration-300",
-                    showExerciseSelector && "opacity-0 pointer-events-none"
-                )}>
-                    <Dumbbell className="w-16 h-16 text-neutral-800" />
-                    <div className="space-y-2 max-w-xs">
-                        <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter">Sesión Vacía</h3>
-                        <p className="text-xs text-neutral-500 font-bold">Inicia tu entrenamiento añadiendo el primer ejercicio de tu rutina libre.</p>
-                    </div>
-                    <Button
-                        onClick={openAddSelector}
-                        className="h-14 px-8 bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 border border-amber-500/20 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] transition-all shadow-xl group"
-                    >
-                        <Plus className="w-4 h-4 mr-3 group-hover:scale-110 transition-transform" />
-                        Agregar Ejercicio
-                    </Button>
-                </div>
-
-                {isAdvanced && (
-                    <ExerciseSelector
-                        open={showExerciseSelector}
-                        onOpenChange={setShowExerciseSelector}
-                        onSelect={handleExerciseSelected}
-                        availableExercises={availableExercises}
-                        title={exerciseSelectorMode === "swap" ? "Cambiar Ejercicio" : "Agregar Ejercicio"}
-                    />
-                )}
-                
-                <SessionFeedbackDialog
-                    open={showFeedback}
-                    onOpenChange={setShowFeedback}
-                    onConfirm={handleCompleteSession}
-                    isSubmitting={isSubmitting}
-                />
-
-                <CancelWorkoutDialog
-                    open={showCancelDialog}
-                    onOpenChange={setShowCancelDialog}
-                    onConfirm={handleCancelConfirm}
-                />
-            </div>
+            <FreeWorkoutView
+                elapsedTime={elapsedTime}
+                formatTime={formatTime}
+                isStarted={isStarted}
+                onCancel={() => setShowCancelDialog(true)}
+                onFinish={handleFinishClick}
+                onAddExercise={openAddSelector}
+                showExerciseSelector={showExerciseSelector}
+                onOpenExerciseSelector={() => setShowExerciseSelector(true)}
+            />
         );
     }
     
     if (!currentExercise || !currentLogExercise) return <div className="p-10 text-center">Cargando...</div>;
 
+    const handleNumberInput = (value: string) => {
+        const val = value.replace(",", ".");
+        if (val === "" || /^\d*\.?\d*$/.test(val)) {
+            return val;
+        }
+        return null;
+    };
+
+    const updateFeedback = (value: string) => {
+        const newLog = [...sessionLog];
+        newLog[currentExerciseIndex].feedback = value;
+        setSessionLog(newLog);
+    };
+
     return (
         <div className={cn("max-w-3xl mx-auto pb-32 space-y-6 transition-all duration-300", showExerciseSelector && "opacity-20 saturate-0 scale-[0.98] pointer-events-none")}>
-            {/* Header Sticky */}
-            <div className="sticky top-0 z-30 bg-black/40 backdrop-blur-3xl border-b border-white/5 py-4 px-4 -mx-4 md:rounded-b-4xl md:mx-0 shadow-2xl transition-all duration-300">
-                <div className="flex justify-between items-center max-w-3xl mx-auto gap-2 md:gap-4">
-                    <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 md:gap-3">
-                            <div className="hidden sm:block px-2 py-1 bg-red-600/10 border border-red-600/20 rounded-lg shrink-0">
-                                <span className="text-[10px] font-black text-red-500 uppercase tracking-widest italic">
-                                    {currentExerciseIndex + 1}/{mutableExercises.length}
-                                </span>
-                            </div>
-                            <h2 className="text-sm md:text-base font-bold text-white tracking-tight truncate uppercase italic">
-                                {currentLogExercise?.exerciseName}
-                            </h2>
-                            {isAdvanced && (
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => openSwapSelector(currentExerciseIndex)}
-                                    className="h-7 w-7 rounded-lg text-neutral-500 hover:text-amber-400 hover:bg-amber-400/10 transition-all shrink-0"
-                                    title="Cambiar ejercicio"
-                                >
-                                    <RefreshCw className="w-3.5 h-3.5" />
-                                </Button>
-                            )}
-                        </div>
-                    </div>
+            <WorkoutHeader
+                currentExerciseIndex={currentExerciseIndex}
+                totalExercises={mutableExercises.length}
+                exerciseName={currentLogExercise?.exerciseName || ""}
+                elapsedTime={elapsedTime}
+                isStarted={isStarted}
+                isAdvanced={isAdvanced}
+                onSwapExercise={() => openSwapSelector(currentExerciseIndex)}
+                onCancel={() => setShowCancelDialog(true)}
+                onFinish={handleFinishClick}
+                showExerciseSelector={showExerciseSelector}
+            />
 
-                    <div className="flex gap-1 md:gap-2 items-center shrink-0">
-                        <div className="flex items-center gap-1 px-2 py-1 bg-neutral-900/50 rounded-lg border border-white/5">
-                            <Clock className="w-3 h-3 md:w-3.5 md:h-3.5 text-red-500 animate-pulse" />
-                            <span className="text-[10px] md:text-xs font-black text-white italic tracking-widest">{formatTime(elapsedTime)}</span>
-                        </div>
-
-                        <AIAssistantDialog
-                            muscleGroups={[currentExercise?.exerciseName || "General"]}
-                            availableExercises={[currentExercise?.exerciseName]}
-                        />
-
-                        <div className="h-6 w-px bg-white/5 mx-1 md:mx-2" />
-
-                        <Button
-                            onClick={() => setShowCancelDialog(true)}
-                            variant="ghost"
-                            className="text-neutral-500 hover:text-red-500 hover:bg-red-500/10 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all h-9 px-3"
-                        >
-                            Abortar
-                        </Button>
-
-                        <Button
-                            onClick={handleFinishClick}
-                            disabled={isSubmitting}
-                            className="hidden lg:flex rounded-xl bg-white text-black font-black text-[10px] uppercase tracking-widest hover:bg-neutral-200 transition-all h-9 px-4 shadow-lg shadow-white/5"
-                        >
-                            Finalizar
-                        </Button>
-                    </div>
-                </div>
-
-                {/* Progress Bar Area */}
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-neutral-900 overflow-hidden">
-                    <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${((currentExerciseIndex + 1) / mutableExercises.length) * 100}%` }}
-                        transition={{ duration: 0.5, ease: "circOut" }}
-                        className="h-full bg-linear-to-r from-red-600 to-red-400 shadow-[0_0_15px_rgba(220,38,38,0.5)]"
-                    />
-                </div>
-            </div>
-
-            {/* Current Exercise Card */}
             <div className="space-y-6 min-h-[50vh] relative">
                 <AnimatePresence mode="wait">
                     <motion.div
@@ -712,7 +470,6 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                         transition={{ duration: 0.4, ease: "circOut" }}
                         className="bg-neutral-900/40 backdrop-blur-3xl rounded-4xl border border-white/5 overflow-hidden shadow-2xl relative"
                     >
-                        {/* Static Glow decoration */}
                         <div className="absolute top-0 right-0 w-64 h-64 bg-red-600/5 rounded-full blur-[100px] pointer-events-none -z-10" />
 
                         <div className="bg-white/2 border-b border-white/5 p-6 md:p-8 space-y-4">
@@ -829,7 +586,7 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
 
                                 {currentExercise.notes && (
                                     <div className="bg-white/5 p-3 rounded-2xl border border-white/5 hover:bg-white/10 transition-colors cursor-help group" title={currentExercise.notes}>
-                                        <Info className="w-5 h-5 text-neutral-500 group-hover:text-white transition-colors" />
+                                        <span className="text-neutral-500 group-hover:text-white transition-colors text-xs">INFO</span>
                                     </div>
                                 )}
                             </div>
@@ -857,7 +614,7 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                             </div>
 
                             <div className="space-y-3">
-                                {currentExercise.sets.map((set: RoutineSet, setIndex: number) => {
+                                {currentExercise.sets.map((set, setIndex) => {
                                     const logSet = currentLogExercise.sets[setIndex];
                                     const isCompleted = logSet?.completed;
                                     const historySet = historySets[setIndex];
@@ -872,10 +629,8 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                                                     : "bg-neutral-900 border-white/5 hover:border-white/10"
                                             )}
                                         >
-                                            {/* Header de la tarjeta en móvil / Columnas iniciales en desktop */}
                                             <div className="flex justify-between items-center md:contents">
                                                 <div className="flex items-center gap-3 md:col-span-4 z-10 md:justify-start">
-                                                    {/* SQ / Indicador de Set */}
                                                     <span className={cn(
                                                         "text-[9px] md:text-[10px] font-black w-7 h-7 md:w-8 md:h-8 rounded-xl flex items-center justify-center border transition-all duration-300 md:ml-auto md:mr-4 shrink-0",
                                                         isCompleted ? "bg-emerald-500 text-black border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.4)]" :
@@ -886,7 +641,6 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                                                         {setIndex + 1}
                                                     </span>
                                                     
-                                                    {/* Objetivo */}
                                                     <div className="text-left md:text-center min-w-0">
                                                         <div className="text-white font-black text-xs md:text-base italic leading-tight uppercase tracking-wider truncate">
                                                             OBJ: {set.reps} {set.rpeTarget && <span className="text-neutral-500 text-[9px] md:text-[10px] ml-1">@RPE {set.rpeTarget}</span>}
@@ -894,7 +648,6 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                                                     </div>
                                                 </div>
 
-                                                {/* Check in mobile (hidden in md) */}
                                                 <div className="md:hidden flex justify-center z-10 shrink-0">
                                                     <Button
                                                         variant="ghost"
@@ -912,9 +665,7 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                                                 </div>
                                             </div>
 
-                                            {/* Inputs row */}
                                             <div className="grid grid-cols-3 gap-2 md:contents z-10 w-full">
-                                                {/* Carga */}
                                                 <div className="md:col-span-2 relative">
                                                     <div className="text-[9px] text-neutral-500 uppercase font-black tracking-widest mb-1.5 px-1 truncate md:hidden">Carga (kg)</div>
                                                     <Input
@@ -923,10 +674,8 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                                                         placeholder={historySet ? `${historySet.weight}` : "-"}
                                                         value={logSet?.weight}
                                                         onChange={(e) => {
-                                                            const val = e.target.value.replace(",", ".");
-                                                            if (val === "" || /^\d*\.?\d*$/.test(val)) {
-                                                                updateSet(currentExerciseIndex, setIndex, "weight", val);
-                                                            }
+                                                            const val = handleNumberInput(e.target.value);
+                                                            if (val !== null) updateSet(currentExerciseIndex, setIndex, "weight", val);
                                                         }}
                                                         className={cn(
                                                             "h-11 md:h-14 px-0 text-center text-base md:text-2xl font-black border-0 bg-neutral-950 rounded-xl focus:ring-2 focus:ring-white/10 transition-all placeholder:text-neutral-800 text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none italic shadow-inner w-full",
@@ -935,7 +684,6 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                                                     />
                                                 </div>
 
-                                                {/* Reps */}
                                                 <div className="md:col-span-2 relative">
                                                     <div className="text-[9px] text-neutral-500 uppercase font-black tracking-widest mb-1.5 px-1 truncate md:hidden">Reps</div>
                                                     <Input
@@ -944,10 +692,8 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                                                         placeholder={historySet ? `${historySet.reps}` : "-"}
                                                         value={logSet?.reps}
                                                         onChange={(e) => {
-                                                            const val = e.target.value.replace(",", ".");
-                                                            if (val === "" || /^\d*\.?\d*$/.test(val)) {
-                                                                updateSet(currentExerciseIndex, setIndex, "reps", val);
-                                                            }
+                                                            const val = handleNumberInput(e.target.value);
+                                                            if (val !== null) updateSet(currentExerciseIndex, setIndex, "reps", val);
                                                         }}
                                                         className={cn(
                                                             "h-14 md:h-14 px-0 text-center text-lg md:text-2xl font-black border-0 bg-neutral-950 rounded-xl focus:ring-2 focus:ring-white/10 transition-all placeholder:text-neutral-800 text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none italic shadow-inner w-full",
@@ -956,7 +702,6 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                                                     />
                                                 </div>
 
-                                                {/* RPE */}
                                                 <div className="md:col-span-2 relative">
                                                     <div className="text-[9px] text-neutral-500 uppercase font-black tracking-widest mb-1.5 px-1 truncate md:hidden">RPE</div>
                                                     <Select
@@ -986,7 +731,6 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                                                 </div>
                                             </div>
 
-                                            {/* Status Button in Desktop (hidden in Mobile) */}
                                             <div className="hidden md:col-span-2 md:flex justify-center z-10 md:ml-auto">
                                                 <Button
                                                     variant="ghost"
@@ -1015,11 +759,7 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                                 <Input
                                     placeholder="Añadir observaciones técnicas..."
                                     value={currentLogExercise.feedback}
-                                    onChange={(e) => {
-                                        const newLog = [...sessionLog];
-                                        newLog[currentExerciseIndex].feedback = e.target.value;
-                                        setSessionLog(newLog);
-                                    }}
+                                    onChange={(e) => updateFeedback(e.target.value)}
                                     className="bg-neutral-950/50 border border-white/5 rounded-2xl px-6 py-8 text-sm text-neutral-300 focus-visible:ring-1 focus-visible:ring-red-600/50 placeholder:text-neutral-700 transition-all"
                                 />
                             </div>
@@ -1028,7 +768,6 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                 </AnimatePresence>
             </div>
 
-            {/* Botón agregar ejercicio (solo advanced_athlete) */}
             {isAdvanced && (
                 <div className="px-2">
                     <Button
@@ -1042,46 +781,15 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                 </div>
             )}
 
-            {/* Navigation Footer */}
-            <div className="fixed bottom-0 left-0 right-0 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] md:pb-6 md:p-6 bg-black/80 backdrop-blur-3xl border-t border-white/10 flex justify-between items-center gap-6 z-40 animate-in slide-in-from-bottom-full duration-700 shadow-[0_-20px_40px_rgba(0,0,0,0.5)]">
-                <div className="max-w-3xl mx-auto w-full flex justify-between items-center gap-4 md:gap-6">
-                    <Button
-                        onClick={handlePrevExercise}
-                        disabled={currentExerciseIndex === 0}
-                        className="h-12 w-12 md:h-16 md:w-16 rounded-2xl bg-neutral-900/50 border border-white/5 text-white hover:bg-white/10 disabled:opacity-20 transition-all shadow-xl group shrink-0"
-                    >
-                        <ChevronLeft className="w-5 h-5 md:w-8 md:h-8 group-hover:-translate-x-1 transition-transform" />
-                    </Button>
-
-                    <div className="flex-1 flex flex-col items-center justify-center gap-0">
-                        <span className="text-[8px] md:text-[9px] uppercase font-black text-neutral-500 tracking-[0.2em] md:tracking-[0.3em] italic">Ejercicio</span>
-                        <div className="flex items-center gap-3">
-                            <span className="text-base md:text-2xl font-black text-white italic tracking-tighter">
-                                <span className="text-red-600">{currentExerciseIndex + 1}</span>
-                                <span className="text-neutral-700 mx-1">/</span>
-                                {mutableExercises.length}
-                            </span>
-                        </div>
-                    </div>
-
-                    <Button
-                        onClick={handleNextExercise}
-                        className={cn(
-                            "h-12 md:h-16 px-4 md:px-8 rounded-2xl font-black text-[10px] md:text-sm uppercase tracking-[0.15em] md:tracking-[0.2em] transition-all shadow-2xl active:scale-95 flex items-center gap-2 md:gap-3 shrink-0",
-                            currentExerciseIndex === mutableExercises.length - 1
-                                ? "bg-red-600 text-white hover:bg-red-500 shadow-red-900/40"
-                                : "bg-white text-black hover:bg-neutral-200 shadow-white/20"
-                        )}
-                    >
-                        <span>{currentExerciseIndex === mutableExercises.length - 1 ? "Finalizar" : "Siguiente"}</span>
-                        {currentExerciseIndex === mutableExercises.length - 1 ? (
-                            <Trophy className="w-3.5 h-3.5 md:w-5 md:h-5" />
-                        ) : (
-                            <ChevronRight className="w-3.5 h-3.5 md:w-5 md:h-5" />
-                        )}
-                    </Button>
-                </div>
-            </div>
+            <WorkoutNavigation
+                currentIndex={currentExerciseIndex}
+                totalExercises={mutableExercises.length}
+                onPrev={handlePrevExercise}
+                onNext={handleNextExercise}
+                isLastExercise={currentExerciseIndex === mutableExercises.length - 1}
+                isFirstExercise={currentExerciseIndex === 0}
+                onFinish={handleFinishClick}
+            />
 
             <SessionFeedbackDialog
                 open={showFeedback}
@@ -1096,7 +804,6 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                 onConfirm={handleCancelConfirm}
             />
 
-            {/* Selector de ejercicios (solo advanced_athlete) */}
             {isAdvanced && (
                 <ExerciseSelector
                     open={showExerciseSelector}

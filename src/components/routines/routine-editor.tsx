@@ -2,12 +2,12 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
-import { createRoutine, updateRoutine, generateRoutineWithAI } from "@/actions/routine-actions";
+import { createRoutine, updateRoutine } from "@/actions/routine-actions";
 import { generateRoutineDescription } from "@/actions/ai-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Plus, Trash2, Wand2, Sparkles, Save, ArrowLeft, Check, ChevronsUpDown, Dumbbell, CalendarDays, Clock, Copy, Activity, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Loader2, Plus, Trash2, Save, ArrowLeft, Check, ChevronsUpDown, Dumbbell, CalendarDays, Clock, Copy, Activity, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, X, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -21,274 +21,17 @@ import { ExerciseSelector } from "@/components/routines/exercise-selector";
 import { ClientMotionDiv } from "@/components/ui/client-motion";
 import { motion, AnimatePresence } from "framer-motion";
 
-// --- INTERFACES ---
+import type { RoutineFormData, ScheduleDay, ScheduleExercise, AIRoutine } from "./routine-editor-types";
+import { WEEKDAYS } from "./routine-editor-types";
+import { AIGenerator } from "./ai-generator";
+import { RoutineImporter } from "./routine-importer";
 
-interface ExerciseSet {
-    type?: string;
-    reps?: string | number;
-    rpeTarget?: number;
-    restSeconds?: number;
-}
-
-interface ScheduleExercise {
-    exerciseId?: string;
-    exerciseName: string;
-    notes?: string;
-    sets: ExerciseSet[];
-    order?: number;
-    variantIds?: string[];
-}
-
-interface ScheduleDay {
-    name: string;
-    exercises: ScheduleExercise[];
-}
-
-interface AIRoutine {
-    name: string;
-    description?: string;
-    type?: string;
-    schedule: ScheduleDay[];
-}
-
-interface RoutineFormData {
-    id?: string;
-    name: string;
-    description?: string;
-    type: string;
-    schedule: ScheduleDay[];
-}
-
-interface AvailableExercise {
-    id: string;
-    name: string;
-}
-
-// --- Constantes ---
-const WEEKDAYS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
-
-// --- AI Generator Component ---
-function AIGenerator({ onGenerate, currentType }: { onGenerate: (routine: AIRoutine) => void, currentType: "weekly" | "daily" }) {
-    const [loading, setLoading] = useState(false);
-    const [open, setOpen] = useState(false);
-    const [criteria, setCriteria] = useState({
-        goal: "hypertrophy",
-        daysPerWeek: 3,
-        experienceLevel: "intermediate",
-        injuries: "",
-        focus: "",
-        userPrompt: ""
-    });
-
-    const handleGenerate = async () => {
-        setLoading(true);
-        try {
-            const injuriesArray = criteria.injuries.split(",").map(s => s.trim()).filter(Boolean);
-            const res = await generateRoutineWithAI({
-                athleteId: "generic",
-                goal: criteria.goal,
-                daysPerWeek: Number(criteria.daysPerWeek),
-                experienceLevel: criteria.experienceLevel,
-                injuries: injuriesArray,
-                focus: criteria.focus,
-                routineType: currentType,
-                userPrompt: criteria.userPrompt
-            });
-
-            if (res.success && res.routine) {
-                onGenerate(res.routine);
-                setOpen(false);
-                toast.success("¡Protocolo generado por IA!");
-            } else {
-                toast.error(res.error || "Error al generar");
-            }
-        } catch (error) {
-            toast.error("Error de conexión");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <Button variant="outline" className="relative h-12 px-8 rounded-full border border-red-500/30 bg-red-500/5 text-red-500 hover:bg-red-500/10 hover:border-red-500 hover:text-white font-black uppercase italic tracking-widest text-[10px] transition-all overflow-hidden group">
-                    <div className="absolute inset-0 bg-linear-to-r from-red-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <Sparkles className="w-4 h-4 mr-2 relative z-10" />
-                    <span className="relative z-10 hidden sm:inline">Activar Generador IA</span>
-                    <span className="relative z-10 sm:hidden">IA</span>
-                </Button>
-            </DialogTrigger>
-            <DialogContent className="bg-black/95 backdrop-blur-3xl border border-white/10 text-white sm:max-w-[550px] p-0 rounded-4xl overflow-hidden shadow-[0_0_100px_-20px_rgba(239,68,68,0.2)]">
-                <div className="absolute inset-0 bg-linear-to-b from-red-600/3 to-transparent pointer-events-none" />
-                <div className="p-8 md:p-10 relative z-10">
-                    <DialogHeader className="mb-10 text-center md:text-left">
-                        <DialogTitle className="flex items-center justify-center md:justify-start gap-4 text-3xl font-black uppercase italic tracking-tighter leading-none">
-                            <div className="w-12 h-12 bg-red-600/10 rounded-2xl flex items-center justify-center border border-red-600/20 shadow-xl">
-                                <Wand2 className="w-6 h-6 text-red-500" />
-                            </div>
-                            <span>Inteligencia <span className="text-neutral-500">Generativa</span></span>
-                        </DialogTitle>
-                        <DialogDescription className="text-[10px] font-black uppercase tracking-widest text-neutral-500 mt-4 italic">
-                            Configuración Técnica de Parámetros de Entrenamiento
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <div className="space-y-8">
-                        <div className="grid grid-cols-2 gap-6 text-[10px] font-black uppercase tracking-widest text-neutral-500 italic">
-                            <div className="space-y-3">
-                                <Label className="ml-1 opacity-70">Objetivo Estratégico</Label>
-                                <Select value={criteria.goal} onValueChange={(v) => setCriteria({ ...criteria, goal: v })}>
-                                    <SelectTrigger className="bg-neutral-900/50 border border-white/5 rounded-2xl h-12 text-xs font-bold text-white transition-all focus:ring-1 focus:ring-red-500/50 hover:bg-neutral-900 uppercase">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent className="bg-neutral-900 border-white/5 text-white rounded-2xl shadow-2xl">
-                                        <SelectItem value="hypertrophy" className="font-bold uppercase tracking-widest text-[10px] py-3 rounded-xl focus:bg-white focus:text-black italic">Hipertrofia</SelectItem>
-                                        <SelectItem value="strength" className="font-bold uppercase tracking-widest text-[10px] py-3 rounded-xl focus:bg-white focus:text-black italic">Fuerza</SelectItem>
-                                        <SelectItem value="weight_loss" className="font-bold uppercase tracking-widest text-[10px] py-3 rounded-xl focus:bg-white focus:text-black italic">Pérdida Peso</SelectItem>
-                                        <SelectItem value="endurance" className="font-bold uppercase tracking-widest text-[10px] py-3 rounded-xl focus:bg-white focus:text-black italic">Resistencia</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="space-y-3">
-                                <Label className="ml-1 opacity-70">Frecuencia (D/S)</Label>
-                                <Input
-                                    type="number"
-                                    min={1} max={7}
-                                    value={criteria.daysPerWeek}
-                                    onChange={(e) => setCriteria({ ...criteria, daysPerWeek: Number(e.target.value) })}
-                                    className="bg-neutral-900/50 border border-white/5 rounded-2xl h-12 text-xs font-bold text-white transition-all focus:ring-1 focus:ring-red-500/50 text-center"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="space-y-3">
-                            <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-500 ml-1 italic opacity-70">Nivel de Competencia</Label>
-                            <Select value={criteria.experienceLevel} onValueChange={(v) => setCriteria({ ...criteria, experienceLevel: v })}>
-                                <SelectTrigger className="bg-neutral-900/50 border border-white/5 rounded-2xl h-12 text-xs font-bold text-white transition-all focus:ring-1 focus:ring-red-500/50 hover:bg-neutral-900 uppercase">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent className="bg-neutral-900 border-white/5 text-white rounded-2xl shadow-2xl">
-                                    <SelectItem value="beginner" className="font-bold uppercase tracking-widest text-[10px] py-3 rounded-xl focus:bg-white focus:text-black italic">Principiante</SelectItem>
-                                    <SelectItem value="intermediate" className="font-bold uppercase tracking-widest text-[10px] py-3 rounded-xl focus:bg-white focus:text-black italic">Intermedio</SelectItem>
-                                    <SelectItem value="advanced" className="font-bold uppercase tracking-widest text-[10px] py-3 rounded-xl focus:bg-white focus:text-black italic">Avanzado</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        <div className="space-y-3">
-                            <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-500 ml-1 italic opacity-70">Restricciones Físicas</Label>
-                            <div className="relative">
-                                <Activity className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-600" />
-                                <Input
-                                    placeholder="LESIONES O LIMITACIONES..."
-                                    value={criteria.injuries}
-                                    onChange={(e) => setCriteria({ ...criteria, injuries: e.target.value })}
-                                    className="bg-neutral-900/50 border border-white/5 rounded-2xl h-12 pl-12 pr-4 text-[10px] font-black text-white transition-all focus:ring-1 focus:ring-red-500/50 uppercase placeholder:text-neutral-700 italic tracking-widest"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="space-y-3">
-                            <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-500 ml-1 italic opacity-70">Prompt de Misión (Opcional)</Label>
-                            <Textarea
-                                placeholder="DESCRIBE TU ENFOQUE PERSONALIZADO..."
-                                value={criteria.userPrompt}
-                                onChange={(e) => setCriteria({ ...criteria, userPrompt: e.target.value })}
-                                className="bg-neutral-900/50 border border-white/5 rounded-4xl min-h-[120px] p-6 text-[10px] font-black text-white focus:ring-1 focus:ring-red-500/50 transition-all resize-none uppercase placeholder:text-neutral-700 italic tracking-widest leading-relaxed"
-                            />
-                        </div>
-
-                        <Button
-                            onClick={handleGenerate}
-                            disabled={loading}
-                            className="w-full h-16 bg-white text-black hover:bg-neutral-200 font-black uppercase italic tracking-widest text-[10px] rounded-2xl shadow-2xl transition-all shadow-white/5 hover:-translate-y-1"
-                        >
-                            {loading ? <Loader2 className="w-5 h-5 animate-spin mr-3" /> : <Sparkles className="w-5 h-5 mr-3" />}
-                            Iniciar Generación de Datos
-                        </Button>
-                    </div>
-                </div>
-            </DialogContent>
-        </Dialog>
-    );
-}
-
-// --- Routine Importer Component ---
-function RoutineImporter({ routines = [], onImport }: { routines: any[], onImport: (routine: any) => void }) {
-    const [open, setOpen] = useState(false);
-
-    // Deduplicar rutinas por ID para evitar el error "Children with the same key"
-    const uniqueRoutines = Array.from(new Map(routines.map(r => [r.id, r])).values());
-
-    return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <Button variant="outline" className="border-white/10 bg-white/5 text-white hover:bg-white/10 gap-2 transition-all rounded-full px-4 sm:px-6 h-12 text-xs font-bold tracking-wide">
-                    <Copy className="w-4 h-4" />
-                    <span className="hidden sm:inline">IMPORTAR</span>
-                    <span className="sm:hidden">IMPORTAR</span>
-                </Button>
-            </DialogTrigger>
-            <DialogContent className="bg-neutral-900 border-neutral-800 text-white sm:max-w-[450px] p-0 overflow-hidden rounded-2xl">
-                <DialogHeader className="p-6 pb-0">
-                    <DialogTitle className="text-xl font-black uppercase tracking-tighter">Copiar de Existente</DialogTitle>
-                    <DialogDescription className="text-neutral-400">
-                        Selecciona una rutina para copiar su estructura y ejercicios.
-                    </DialogDescription>
-                </DialogHeader>
-                <div className="p-4">
-                    <Command className="bg-transparent text-white">
-                        <CommandInput placeholder="Buscar rutina..." className="border-none focus:ring-0 text-white" />
-                        <CommandList className="max-h-[300px] mt-2">
-                            <CommandEmpty className="py-4 text-center text-neutral-500">No se encontraron rutinas.</CommandEmpty>
-                            <CommandGroup>
-                                {uniqueRoutines.map((r) => (
-                                    <CommandItem
-                                        key={r.id}
-                                        onSelect={() => {
-                                            onImport(r);
-                                            setOpen(false);
-                                            toast.success(`Datos importados de: ${r.name}`);
-                                        }}
-                                        className="hover:bg-white/5 cursor-pointer rounded-lg p-3 aria-selected:bg-white/10"
-                                    >
-                                        <div className="flex flex-col">
-                                            <span className="font-bold text-red-500 text-sm uppercase">{r.name}</span>
-                                            <span className="text-xs text-neutral-400 line-clamp-1">{r.description || "Sin descripción"}</span>
-                                            <div className="flex gap-2 mt-1">
-                                                <span className="text-[10px] text-neutral-600 uppercase tracking-widest font-bold">
-                                                    {r.type === 'daily' ? '1 Día' : `${r.schedule?.length || 0} Días`}
-                                                </span>
-                                                <span className="text-[10px] text-neutral-600 uppercase tracking-widest font-bold">
-                                                    {r.schedule?.reduce((acc: number, d: any) => acc + (d.exercises?.length || 0), 0)} Ejercicios
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </CommandItem>
-                                ))}
-                            </CommandGroup>
-                        </CommandList>
-                    </Command>
-                </div>
-            </DialogContent>
-        </Dialog>
-    );
-}
-
-// --- Main Editor Component ---
-
-// Tipos para props - Usamos tipos amplios debido a la naturaleza dinámica del editor
-// TODO: Tipar estrictamente cuando se refactorice el manejo de formularios
 interface RoutineEditorProps {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    initialData?: any;
+    initialData?: RoutineFormData;
     isEditing?: boolean;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    availableExercises?: any[];
+    availableExercises?: { id: string; name: string }[];
     athleteId?: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    availableRoutines?: any[];
+    availableRoutines?: RoutineFormData[];
     initialDayIndex?: number;
 }
 
@@ -311,7 +54,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
             description: "",
             type: "weekly",
             schedule: [
-                { name: "Día 1", exercises: [] }
+                { id: "day-1", name: "Día 1", exercises: [] }
             ]
         }
     });
@@ -326,16 +69,12 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
     const schedule = watch("schedule");
     const routineType = watch("type");
 
-    // --- LOGICA DE PERSISTENCIA (LocalStorage) ---
-
-    // Cargar borrador al montar (solo si no estamos editando una existente)
     useEffect(() => {
         if (!isEditing) {
             const savedDraft = localStorage.getItem(DRAFT_KEY);
             if (savedDraft) {
                 try {
                     const parsedDraft = JSON.parse(savedDraft);
-                    // Solo restaurar si tiene contenido (nombre o al menos un ejercicio)
                     const hasContent = parsedDraft.name || (parsedDraft.schedule[0]?.exercises?.length > 0);
 
                     if (hasContent) {
@@ -350,7 +89,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                         name: "",
                                         description: "",
                                         type: "weekly",
-                                        schedule: [{ name: "Día 1", exercises: [] }]
+                                        schedule: [{ id: "day-1", name: "Día 1", exercises: [] }]
                                     });
                                 }
                             }
@@ -363,10 +102,8 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
         }
     }, [isEditing, reset]);
 
-    // Guardar automáticamente al cambiar
     useEffect(() => {
         if (!isEditing) {
-            // Guardamos con un pequeño retraso para no saturar el localStorage
             const timer = setTimeout(() => {
                 localStorage.setItem(DRAFT_KEY, JSON.stringify(formData));
             }, 1000);
@@ -375,7 +112,6 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
     }, [formData, isEditing]);
 
     const addExerciseToDay = (dayIndex: number, insertAt?: number) => {
-        const currentExercises = Array.isArray(schedule[dayIndex]?.exercises) ? schedule[dayIndex].exercises : [];
         const newExercise = {
             exerciseId: "",
             exerciseName: "Nuevo Ejercicio",
@@ -402,19 +138,11 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
         setValue("schedule", updatedSchedule);
     };
 
-    const updateDayExercises = (dayIndex: number, exercises: any[]) => {
-        const updatedSchedule = [...schedule];
-        if (updatedSchedule[dayIndex]) {
-            updatedSchedule[dayIndex].exercises = exercises;
-            setValue("schedule", updatedSchedule);
-        }
-    };
-
     const updateExerciseField = (dayIndex: number, exIndex: number, field: string, value: string | any[]) => {
         const updatedSchedule = [...schedule];
         if (updatedSchedule[dayIndex] && updatedSchedule[dayIndex].exercises[exIndex]) {
             if (field === 'exerciseName') {
-                const found = (availableExercises as any[]).find(ex => ex.name === value);
+                const found = sortedExercises.find(ex => ex.name === value);
                 if (found) {
                     updatedSchedule[dayIndex].exercises[exIndex].exerciseId = found.id;
                 }
@@ -435,7 +163,24 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
     const handleGenerateDescription = async () => {
         setIsGeneratingDescription(true);
         try {
-            const res = await generateRoutineDescription(schedule);
+            const scheduleWithIds = schedule.map((day, idx) => ({
+                id: day.id || `day-${idx}`,
+                name: day.name,
+                exercises: day.exercises.map((ex, exIdx) => ({
+                    exerciseId: ex.exerciseId || `ex-${exIdx}`,
+                    exerciseName: ex.exerciseName,
+                    sets: ex.sets.map(s => ({
+                        type: s.type || "working",
+                        reps: String(s.reps || ""),
+                        rpeTarget: s.rpeTarget,
+                        restSeconds: s.restSeconds,
+                    })),
+                    order: ex.order || exIdx,
+                    notes: ex.notes || "",
+                    variantIds: ex.variantIds || [],
+                })),
+            }));
+            const res = await generateRoutineDescription(scheduleWithIds as any);
             if (res.success && res.description) {
                 setValue("description", res.description);
                 toast.success("Descripción generada");
@@ -463,13 +208,12 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
         setIsSaving(true);
         try {
             const res = isEditing && initialData?.id
-                ? await updateRoutine(initialData.id, data as unknown as Parameters<typeof updateRoutine>[1])
-                : await createRoutine(data as unknown as Parameters<typeof createRoutine>[0]);
+                ? await updateRoutine(initialData.id, data as any)
+                : await createRoutine(data as any);
 
             if (res.success) {
                 toast.success(isEditing ? "Rutina actualizada" : "Rutina creada");
 
-                // Limpiar borrador al guardar con éxito
                 if (!isEditing) {
                     localStorage.removeItem(DRAFT_KEY);
                 }
@@ -490,7 +234,6 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
         }
     };
 
-    // Helper for Exercise Selector Modal (Mobile Optimized)
     const [selectorOpen, setSelectorOpen] = useState(false);
     const [selectorContext, setSelectorContext] = useState<{ dayIndex: number; exIndex: number } | null>(null);
 
@@ -503,7 +246,6 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
         if (selectorContext) {
             const { dayIndex, exIndex } = selectorContext;
             if (isVariantMode) {
-                // Agregar variante
                 if (exercise.id) {
                     const updatedSchedule = [...schedule];
                     const currentVariants = updatedSchedule[dayIndex].exercises[exIndex].variantIds || [];
@@ -514,7 +256,6 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                     }
                 }
             } else {
-                // Seleccionar ejercicio principal
                 updateExerciseField(dayIndex, exIndex, "exerciseName", exercise.name);
                 if (exercise.id) {
                     const updatedSchedule = [...schedule];
@@ -528,7 +269,6 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
         setIsVariantMode(false);
     };
 
-    // Corregir error de tipo en handleVariantSelect
     const removeVariant = (dayIndex: number, exIndex: number, variantId: string) => {
         const updatedSchedule = [...schedule];
         const currentVariants = updatedSchedule[dayIndex].exercises[exIndex].variantIds || [];
@@ -538,7 +278,6 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
 
     const [isVariantMode, setIsVariantMode] = useState(false);
 
-    // Wizard Logic
     const totalSteps = routineType === "daily" ? 3 : 4;
     
     const nextStep = () => {
@@ -547,7 +286,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
             return;
         }
         let next = step + 1;
-        if (routineType === "daily" && next === 2) next = 3; // Saltamos el calendario si es diaria
+        if (routineType === "daily" && next === 2) next = 3;
         if (next <= 4) setStep(next);
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
@@ -561,10 +300,8 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
 
     return (
         <div className="container mx-auto max-w-7xl px-0 md:px-6 relative flex flex-col h-dvh md:h-auto md:min-h-screen bg-black overflow-hidden">
-            {/* Ambient Lighting */}
             <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-red-600/5 rounded-full blur-[100px] -z-10 animate-pulse pointer-events-none" />
 
-            {/* Header / Editor Toolbar */}
             <div className="px-4 md:px-0 pt-6 md:pt-10 pb-4 md:pb-8 flex flex-col gap-4 bg-black/80 backdrop-blur-xl z-20 shrink-0 border-b border-white/5">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
@@ -580,7 +317,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                 {isEditing ? "Editar" : "Crear"} <span className="text-neutral-500">Rutina</span>
                             </h1>
                             <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest mt-1">
-                                Paso {step} de {totalSteps}
+                                Paso {routineType === "daily" ? (step === 1 ? 1 : step === 3 ? 2 : 3) : step} de {totalSteps}
                             </p>
                         </div>
                     </div>
@@ -592,7 +329,6 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                     </div>
                 </div>
 
-                {/* Progress Bar */}
                 <div className="h-1.5 w-full bg-neutral-900 rounded-full overflow-hidden mt-2">
                     <motion.div 
                         className="h-full bg-red-600 rounded-full"
@@ -602,7 +338,6 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                     />
                 </div>
             </div>
-
 
             <main className="flex-1 overflow-y-auto px-4 md:px-0 py-8 scrollbar-hide">
                 <AnimatePresence mode="wait">
@@ -614,7 +349,6 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                             exit={{ opacity: 0, x: -20 }}
                             className="space-y-12 pb-24"
                         >
-                            {/* Step 1: Metadata (Extracting from existing column) */}
                             <div className="bg-neutral-900/30 backdrop-blur-3xl border border-white/5 rounded-4xl p-8 md:p-10 shadow-2xl relative overflow-hidden group">
                                 <div className="absolute inset-0 bg-linear-to-b from-white/2 to-transparent pointer-events-none" />
                                 
@@ -629,60 +363,91 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                     </div>
 
                                     <div className="space-y-4">
-                                        <Label className="ml-1 text-[10px] font-black uppercase tracking-widest text-neutral-500 italic">Tipo de Rutina</Label>
-                                        <div className="grid grid-cols-2 gap-3 p-1.5 bg-neutral-950/80 rounded-2xl border border-white/5">
-                                            <button
-                                                type="button"
-                                                onClick={() => setValue("type", "weekly")}
-                                                className={cn(
-                                                    "flex items-center justify-center gap-3 py-4 rounded-xl text-[10px] font-black uppercase italic tracking-widest transition-all",
-                                                    routineType === "weekly" ? "bg-white text-black shadow-xl" : "text-neutral-600 hover:text-neutral-400"
-                                                )}
-                                            >
-                                                <CalendarDays className="w-4 h-4" /> Semanal
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    setValue("type", "daily");
-                                                    if (schedule.length > 1) setValue("schedule", [schedule[0]]);
-                                                    setActiveDayIndex(0);
-                                                }}
-                                                className={cn(
-                                                    "flex items-center justify-center gap-3 py-4 rounded-xl text-[10px] font-black uppercase italic tracking-widest transition-all",
-                                                    routineType === "daily" ? "bg-white text-black shadow-xl" : "text-neutral-600 hover:text-neutral-400"
-                                                )}
-                                            >
-                                                <Clock className="w-4 h-4" /> Diario
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-4">
-                                        <div className="flex justify-between items-center mb-1">
-                                            <Label className="ml-1 text-[10px] font-black uppercase tracking-widest text-neutral-500 italic">Resumen Estratégico</Label>
+                                        <div className="flex items-center justify-between">
+                                            <Label className="ml-1 text-[10px] font-black uppercase tracking-widest text-neutral-500 italic">Descripción</Label>
                                             <Button
-                                                type="button"
                                                 variant="ghost"
+                                                size="sm"
                                                 onClick={handleGenerateDescription}
                                                 disabled={isGeneratingDescription}
-                                                className="h-8 px-4 bg-red-500/10 text-red-500 hover:bg-white hover:text-black rounded-full text-[9px] font-black uppercase italic tracking-widest transition-all border border-red-500/20"
+                                                className="text-[10px] font-black uppercase tracking-widest text-amber-500 hover:text-amber-400"
                                             >
-                                                <Sparkles className="w-3 h-3 mr-2" /> Generar con IA
+                                                {isGeneratingDescription ? (
+                                                    <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                                                ) : (
+                                                    <Sparkles className="w-3 h-3 mr-1" />
+                                                )}
+                                                Generar con IA
                                             </Button>
                                         </div>
                                         <Textarea
                                             {...register("description")}
-                                            placeholder="DESCRIBE TU ENFOQUE PERSONALIZADO..."
-                                            className="bg-neutral-950/50 border border-white/5 rounded-3xl min-h-[160px] p-6 text-[10px] font-black text-white placeholder:text-neutral-800 transition-all focus-visible:ring-1 focus-visible:ring-red-500/40 resize-none uppercase italic leading-relaxed tracking-widest shadow-inner overflow-y-auto"
+                                            placeholder="Describe el objetivo y características de la rutina..."
+                                            className="h-32 bg-neutral-950/50 border border-white/5 rounded-2xl px-6 py-4 text-sm text-white placeholder:text-neutral-800 transition-all focus-visible:ring-1 focus-visible:ring-red-500/50 resize-none"
                                         />
                                     </div>
+
+                                    <div className="space-y-4">
+                                        <Label className="ml-1 text-[10px] font-black uppercase tracking-widest text-neutral-500 italic">Tipo de Rutina</Label>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <label className={cn(
+                                                "relative cursor-pointer group",
+                                                routineType === "weekly" ? "col-span-1" : "col-span-1 opacity-50"
+                                            )}>
+                                                <input
+                                                    type="radio"
+                                                    value="weekly"
+                                                    {...register("type")}
+                                                    className="sr-only"
+                                                />
+                                                <div className={cn(
+                                                    "p-6 rounded-2xl border-2 transition-all text-center",
+                                                    routineType === "weekly"
+                                                        ? "border-red-500 bg-red-500/10"
+                                                        : "border-white/10 bg-neutral-950/50 hover:border-white/20"
+                                                )}>
+                                                    <CalendarDays className={cn("w-8 h-8 mx-auto mb-2", routineType === "weekly" ? "text-red-500" : "text-neutral-500")} />
+                                                    <span className={cn("text-sm font-black uppercase tracking-widest", routineType === "weekly" ? "text-white" : "text-neutral-500")}>Semanal</span>
+                                                </div>
+                                            </label>
+                                            <label className={cn(
+                                                "relative cursor-pointer group",
+                                                routineType === "daily" ? "col-span-1" : "col-span-1 opacity-50"
+                                            )}>
+                                                <input
+                                                    type="radio"
+                                                    value="daily"
+                                                    {...register("type")}
+                                                    className="sr-only"
+                                                />
+                                                <div className={cn(
+                                                    "p-6 rounded-2xl border-2 transition-all text-center",
+                                                    routineType === "daily"
+                                                        ? "border-red-500 bg-red-500/10"
+                                                        : "border-white/10 bg-neutral-950/50 hover:border-white/20"
+                                                )}>
+                                                    <Dumbbell className={cn("w-8 h-8 mx-auto mb-2", routineType === "daily" ? "text-red-500" : "text-neutral-500")} />
+                                                    <span className={cn("text-sm font-black uppercase tracking-widest", routineType === "daily" ? "text-white" : "text-neutral-500")}>Diaria</span>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
                                 </div>
+                            </div>
+
+                            <div className="flex justify-end">
+                                <Button
+                                    onClick={nextStep}
+                                    className="h-14 px-8 bg-white text-black font-black uppercase tracking-widest rounded-2xl hover:bg-neutral-200 transition-all"
+                                >
+                                    Siguiente
+                                    <ChevronRight className="w-5 h-5 ml-2" />
+                                </Button>
                             </div>
                         </motion.div>
                     )}
 
-                    {step === 2 && routineType === "weekly" && (
+                    {step === 2 && (
                         <motion.div
                             key="step2"
                             initial={{ opacity: 0, x: 20 }}
@@ -690,58 +455,87 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                             exit={{ opacity: 0, x: -20 }}
                             className="space-y-8 pb-24"
                         >
-                            <div className="flex flex-col gap-6">
-                                <div className="space-y-2">
-                                    <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">Estructura Semanal</h2>
-                                    <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest">Selecciona los días de entrenamiento</p>
-                                </div>
-                                
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    {dayFields.map((field, index) => (
-                                        <div
-                                            key={field.id}
-                                            className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 p-6 rounded-3xl flex justify-between items-center group hover:bg-neutral-900/60 transition-all"
-                                        >
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 rounded-2xl bg-neutral-950 border border-white/10 flex items-center justify-center text-xs font-black text-neutral-500 group-hover:text-red-500 transition-colors">
-                                                    {String(index + 1).padStart(2, '0')}
-                                                </div>
-                                                <div>
-                                                    <p className="text-[8px] font-black uppercase tracking-widest text-neutral-700 italic">{WEEKDAYS[index] || "DÍA"}</p>
-                                                    <input 
-                                                        value={schedule[index]?.name || ""}
-                                                        onChange={(e) => {
-                                                            const newSched = [...schedule];
-                                                            newSched[index].name = e.target.value;
-                                                            setValue("schedule", newSched);
-                                                        }}
-                                                        className="bg-transparent border-none p-0 text-sm font-black text-white focus:ring-0 uppercase italic tracking-widest w-full"
-                                                        placeholder="Nombre del día..."
-                                                    />
-                                                </div>
-                                            </div>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8 text-neutral-700 hover:text-red-500 hover:bg-red-500/10 rounded-xl"
-                                                onClick={() => removeDay(index)}
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </Button>
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">Días de Entrenamiento</h2>
+                                <Button
+                                    onClick={() => {
+                                        const newDayName = routineType === "weekly" 
+                                            ? WEEKDAYS[dayFields.length] || `Día ${dayFields.length + 1}`
+                                            : `Día ${dayFields.length + 1}`;
+                                        appendDay({ id: `day-${Date.now()}`, name: newDayName, exercises: [] });
+                                    }}
+                                    className="h-10 px-4 bg-white/10 text-white font-black text-[10px] uppercase tracking-widest rounded-xl hover:bg-white/20 transition-all"
+                                >
+                                    <Plus className="w-4 h-4 mr-2" />
+                                    Añadir Día
+                                </Button>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                {dayFields.map((day, dayIndex) => (
+                                    <ClientMotionDiv
+                                        key={day.id}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: dayIndex * 0.05 }}
+                                        className={cn(
+                                            "relative p-6 rounded-3xl border-2 transition-all cursor-pointer",
+                                            activeDayIndex === dayIndex
+                                                ? "border-red-500 bg-red-500/10"
+                                                : "border-white/10 bg-neutral-900/30 hover:border-white/20"
+                                        )}
+                                        onClick={() => setActiveDayIndex(dayIndex)}
+                                    >
+                                        <div className="flex items-center justify-between mb-4">
+                                            <input
+                                                {...register(`schedule.${dayIndex}.name`)}
+                                                className="bg-transparent border-none text-lg font-black text-white uppercase italic tracking-tight focus:outline-none focus:ring-0 w-full"
+                                                placeholder="Nombre del día"
+                                            />
+                                            {dayFields.length > 1 && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        removeDay(dayIndex);
+                                                        if (activeDayIndex >= dayIndex && activeDayIndex > 0) {
+                                                            setActiveDayIndex(prev => prev - 1);
+                                                        }
+                                                    }}
+                                                    className="h-8 w-8 rounded-lg text-neutral-600 hover:text-red-500 hover:bg-red-500/10"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                            )}
                                         </div>
-                                    ))}
-                                    
-                                    {dayFields.length < 7 && (
-                                        <Button
-                                            variant="outline"
-                                            className="h-full min-h-[80px] border-dashed border-white/5 bg-transparent rounded-3xl flex flex-col items-center justify-center gap-2 hover:bg-white/5 transition-all text-neutral-600 hover:text-white"
-                                            onClick={() => appendDay({ name: WEEKDAYS[dayFields.length] || `Día ${dayFields.length + 1}`, exercises: [] })}
-                                        >
-                                            <Plus className="w-5 h-5" />
-                                            <span className="text-[9px] font-black uppercase tracking-widest">Añadir Día</span>
-                                        </Button>
-                                    )}
-                                </div>
+                                        <div className="flex items-center gap-2 text-[10px] font-black text-neutral-500 uppercase tracking-widest">
+                                            <Dumbbell className="w-3 h-3" />
+                                            {schedule[dayIndex]?.exercises?.length || 0} Ejercicios
+                                        </div>
+                                        {activeDayIndex === dayIndex && (
+                                            <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-1 h-8 bg-red-500 rounded-full" />
+                                        )}
+                                    </ClientMotionDiv>
+                                ))}
+                            </div>
+
+                            <div className="flex justify-between">
+                                <Button
+                                    onClick={prevStep}
+                                    variant="ghost"
+                                    className="h-14 px-8 text-neutral-500 font-black uppercase tracking-widest rounded-2xl hover:text-white transition-all"
+                                >
+                                    <ChevronLeft className="w-5 h-5 mr-2" />
+                                    Atrás
+                                </Button>
+                                <Button
+                                    onClick={nextStep}
+                                    className="h-14 px-8 bg-white text-black font-black uppercase tracking-widest rounded-2xl hover:bg-neutral-200 transition-all"
+                                >
+                                    Siguiente
+                                    <ChevronRight className="w-5 h-5 ml-2" />
+                                </Button>
                             </div>
                         </motion.div>
                     )}
@@ -752,191 +546,225 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -20 }}
-                            className="space-y-8 pb-32"
+                            className="space-y-8 pb-24"
                         >
-                            {/* Day Navigation Tabs for Weekly */}
-                            {routineType === "weekly" && (
-                                <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4 sticky top-0 bg-black/50 backdrop-blur-md z-10 py-4">
-                                    {schedule.map((day: ScheduleDay, idx: number) => (
-                                        <button
-                                            key={idx}
-                                            onClick={() => setActiveDayIndex(idx)}
-                                            className={cn(
-                                                "px-6 py-3 rounded-full text-[10px] font-black uppercase italic tracking-widest transition-all whitespace-nowrap border shrink-0",
-                                                activeDayIndex === idx 
-                                                    ? "bg-white text-black border-white shadow-xl shadow-white/5" 
-                                                    : "bg-neutral-900/50 text-neutral-500 border-white/5 hover:bg-neutral-800"
-                                            )}
-                                        >
-                                            {day.name || `Día ${idx + 1}`}
-                                        </button>
-                                    ))}
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">Ejercicios</h2>
+                                    <p className="text-sm text-neutral-500 font-bold mt-1">
+                                        {schedule[activeDayIndex]?.name || `Día ${activeDayIndex + 1}`}
+                                    </p>
                                 </div>
-                            )}
+                                <Button
+                                    onClick={() => addExerciseToDay(activeDayIndex)}
+                                    className="h-10 px-4 bg-white text-black font-black text-[10px] uppercase tracking-widest rounded-xl hover:bg-neutral-200 transition-all"
+                                >
+                                    <Plus className="w-4 h-4 mr-2" />
+                                    Añadir Ejercicio
+                                </Button>
+                            </div>
 
-                            {/* Exercises for Active Day */}
-                            <div className="space-y-6">
-                                <div className="flex items-center justify-between">
-                                    <div className="space-y-1">
-                                        <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">Ejercicios</h2>
-                                        <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest">Día: {schedule[activeDayIndex]?.name}</p>
-                                    </div>
-                                    <Button
-                                        onClick={() => addExerciseToDay(activeDayIndex)}
-                                        className="h-10 bg-white text-black hover:bg-neutral-200 font-black uppercase italic tracking-widest text-[9px] rounded-xl px-6"
+                            <div className="space-y-4">
+                                {(schedule[activeDayIndex]?.exercises || []).map((exercise: any, exIndex: number) => (
+                                    <ClientMotionDiv
+                                        key={exIndex}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: exIndex * 0.03 }}
+                                        className="bg-neutral-900/30 border border-white/5 rounded-3xl p-6 space-y-4"
                                     >
-                                        <Plus className="w-4 h-4 mr-2" /> Añadir
-                                    </Button>
-                                </div>
-
-                                {schedule[activeDayIndex]?.exercises?.length === 0 ? (
-                                    <div className="py-20 border border-dashed border-white/5 rounded-3xl flex flex-col items-center justify-center opacity-40 gap-4">
-                                        <Dumbbell className="w-12 h-12 text-neutral-600" />
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-white italic">No hay ejercicios aún</p>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-4">
-                                        {schedule[activeDayIndex]?.exercises?.map((exercise: ScheduleExercise, exIdx: number) => (
-                                            <div 
-                                                key={exIdx} 
-                                                className="bg-neutral-950 border border-white/5 rounded-3xl overflow-hidden shadow-2xl relative"
-                                            >
-                                                {/* Card Header Compact */}
-                                                <div className="p-4 bg-white/2 border-b border-white/5 flex items-center justify-between gap-4">
-                                                    <div className="flex items-center gap-3 min-w-0">
-                                                        <div className="w-8 h-8 rounded-xl bg-black border border-white/5 flex items-center justify-center text-[10px] font-black text-red-500 shadow-inner">
-                                                            {String(exIdx + 1).padStart(2, '0')}
-                                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex-1">
+                                                <Popover>
+                                                    <PopoverTrigger asChild>
                                                         <Button
                                                             variant="ghost"
-                                                            className="text-xs font-black text-white hover:bg-white/5 p-0 h-auto justify-start uppercase italic tracking-widest truncate max-w-[180px]"
-                                                            onClick={() => openExerciseSelector(activeDayIndex, exIdx)}
+                                                            className="h-auto p-0 text-left hover:bg-transparent font-black text-lg text-white uppercase italic tracking-tighter hover:text-red-400 transition-colors flex items-center gap-2"
                                                         >
-                                                            {exercise.exerciseName || "SELECCIONAR..."}
+                                                            {exercise.exerciseName || "Seleccionar ejercicio"}
+                                                            <ChevronsUpDown className="w-4 h-4 text-neutral-500" />
                                                         </Button>
-                                                    </div>
-                                                    <div className="flex items-center gap-1">
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="h-8 w-8 text-neutral-700 hover:text-white"
-                                                            onClick={() => {
-                                                                if (exIdx > 0) {
-                                                                    const newExs = [...schedule[activeDayIndex].exercises];
-                                                                    [newExs[exIdx - 1], newExs[exIdx]] = [newExs[exIdx], newExs[exIdx - 1]];
-                                                                    updateDayExercises(activeDayIndex, newExs);
-                                                                }
-                                                            }}
-                                                            disabled={exIdx === 0}
-                                                        >
-                                                            <ChevronUp className="w-4 h-4" />
-                                                        </Button>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="h-8 w-8 text-neutral-700 hover:text-white"
-                                                            onClick={() => {
-                                                                if (exIdx < schedule[activeDayIndex].exercises.length - 1) {
-                                                                    const newExs = [...schedule[activeDayIndex].exercises];
-                                                                    [newExs[exIdx], newExs[exIdx + 1]] = [newExs[exIdx + 1], newExs[exIdx]];
-                                                                    updateDayExercises(activeDayIndex, newExs);
-                                                                }
-                                                            }}
-                                                            disabled={exIdx === schedule[activeDayIndex].exercises.length - 1}
-                                                        >
-                                                            <ChevronDown className="w-4 h-4" />
-                                                        </Button>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="h-8 w-8 text-neutral-700 hover:text-red-500"
-                                                            onClick={() => removeExercise(activeDayIndex, exIdx)}
-                                                        >
-                                                            <Trash2 className="w-4 h-4" />
-                                                        </Button>
-                                                    </div>
-                                                </div>
-
-                                                {/* Compact Sets List */}
-                                                <div className="p-4 space-y-3">
-                                                    {exercise.sets?.map((set, sIdx) => (
-                                                        <div key={sIdx} className="grid grid-cols-12 gap-2 items-center">
-                                                            <div className="col-span-1 text-[8px] font-black text-neutral-700 text-center">{sIdx + 1}</div>
-                                                            <div className="col-span-4">
-                                                                <Select
-                                                                    value={set.type}
-                                                                    onValueChange={(v) => {
-                                                                        const newSets = [...exercise.sets];
-                                                                        newSets[sIdx].type = v;
-                                                                        updateExerciseField(activeDayIndex, exIdx, "sets", newSets);
-                                                                    }}
-                                                                >
-                                                                    <SelectTrigger className="h-9 text-[9px] font-black uppercase italic bg-black border-white/5 text-white rounded-lg px-2">
-                                                                        <SelectValue />
-                                                                    </SelectTrigger>
-                                                                    <SelectContent className="bg-neutral-900 border-white/10 text-white">
-                                                                        <SelectItem value="warmup" className="text-[9px] font-black uppercase italic">Calent.</SelectItem>
-                                                                        <SelectItem value="working" className="text-[9px] font-black uppercase italic">Efect.</SelectItem>
-                                                                        <SelectItem value="failure" className="text-[9px] font-black uppercase italic">Fallo</SelectItem>
-                                                                        <SelectItem value="drop" className="text-[9px] font-black uppercase italic">Drop</SelectItem>
-                                                                    </SelectContent>
-                                                                </Select>
-                                                            </div>
-                                                            <div className="col-span-3">
-                                                                <Input
-                                                                    value={set.reps}
-                                                                    onChange={(e) => {
-                                                                        const newSets = [...exercise.sets];
-                                                                        newSets[sIdx].reps = e.target.value;
-                                                                        updateExerciseField(activeDayIndex, exIdx, "sets", newSets);
-                                                                    }}
-                                                                    placeholder="Reps"
-                                                                    className="h-9 text-[10px] font-black italic bg-black border-white/5 text-center text-white rounded-lg px-0"
-                                                                />
-                                                            </div>
-                                                            <div className="col-span-2">
-                                                                <Input
-                                                                    type="number"
-                                                                    value={set.rpeTarget}
-                                                                    onChange={(e) => {
-                                                                        const newSets = [...exercise.sets];
-                                                                        newSets[sIdx].rpeTarget = Number(e.target.value);
-                                                                        updateExerciseField(activeDayIndex, exIdx, "sets", newSets);
-                                                                    }}
-                                                                    placeholder="RPE"
-                                                                    className="h-9 text-[10px] font-black italic bg-black border-white/5 text-center text-white rounded-lg px-0"
-                                                                />
-                                                            </div>
-                                                            <div className="col-span-2 flex justify-end">
-                                                                <button 
-                                                                    onClick={() => {
-                                                                        const newSets = [...exercise.sets];
-                                                                        newSets.splice(sIdx, 1);
-                                                                        updateExerciseField(activeDayIndex, exIdx, "sets", newSets);
-                                                                    }}
-                                                                    className="text-neutral-700 hover:text-red-500 transition-colors"
-                                                                >
-                                                                    <X className="w-3.5 h-3.5" />
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        onClick={() => {
-                                                            const newSets = [...exercise.sets, { type: "working", reps: "8-12", rpeTarget: 8, restSeconds: 90 }];
-                                                            updateExerciseField(activeDayIndex, exIdx, "sets", newSets);
-                                                        }}
-                                                        className="w-full h-8 text-[8px] font-black uppercase italic text-neutral-600 hover:text-white hover:bg-white/5 border border-dashed border-white/5 rounded-xl mt-2"
-                                                    >
-                                                        <Plus className="w-3 h-3 mr-1" /> Añadir Serie
-                                                    </Button>
-                                                </div>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent className="p-0 bg-neutral-900 border-white/10 rounded-2xl max-h-[300px] overflow-y-auto" side="bottom" align="start">
+                                                        <Command className="bg-transparent">
+                                                            <CommandInput placeholder="Buscar ejercicio..." className="border-none focus:ring-0" />
+                                                            <CommandList>
+                                                                <CommandEmpty>No encontrado</CommandEmpty>
+                                                                <CommandGroup>
+                                                                    {sortedExercises.map((ex) => (
+                                                                        <CommandItem
+                                                                            key={ex.id}
+                                                                            value={ex.name}
+                                                                            onSelect={() => {
+                                                                                updateExerciseField(activeDayIndex, exIndex, "exerciseName", ex.name);
+                                                                                if (ex.id) {
+                                                                                    const updated = [...schedule];
+                                                                                    updated[activeDayIndex].exercises[exIndex].exerciseId = ex.id;
+                                                                                    setValue("schedule", updated);
+                                                                                }
+                                                                            }}
+                                                                            className="cursor-pointer"
+                                                                        >
+                                                                            {ex.name}
+                                                                        </CommandItem>
+                                                                    ))}
+                                                                </CommandGroup>
+                                                            </CommandList>
+                                                        </Command>
+                                                    </PopoverContent>
+                                                </Popover>
                                             </div>
-                                        ))}
-                                    </div>
-                                )}
+                                            <div className="flex items-center gap-2">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => {
+                                                        const current = schedule[activeDayIndex].exercises;
+                                                        if (exIndex > 0) {
+                                                            const updated = [...schedule];
+                                                            [updated[activeDayIndex].exercises[exIndex - 1], updated[activeDayIndex].exercises[exIndex]] = 
+                                                            [updated[activeDayIndex].exercises[exIndex], updated[activeDayIndex].exercises[exIndex - 1]];
+                                                            setValue("schedule", updated);
+                                                        }
+                                                    }}
+                                                    disabled={exIndex === 0}
+                                                    className="h-8 w-8 rounded-lg text-neutral-600 hover:text-white hover:bg-white/10 disabled:opacity-30"
+                                                >
+                                                    <ChevronUp className="w-4 h-4" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => {
+                                                        const updated = [...schedule];
+                                                        const exs = updated[activeDayIndex].exercises;
+                                                        if (exIndex < exs.length - 1) {
+                                                            [updated[activeDayIndex].exercises[exIndex], updated[activeDayIndex].exercises[exIndex + 1]] = 
+                                                            [updated[activeDayIndex].exercises[exIndex + 1], updated[activeDayIndex].exercises[exIndex]];
+                                                            setValue("schedule", updated);
+                                                        }
+                                                    }}
+                                                    disabled={exIndex === (schedule[activeDayIndex]?.exercises?.length || 0) - 1}
+                                                    className="h-8 w-8 rounded-lg text-neutral-600 hover:text-white hover:bg-white/10 disabled:opacity-30"
+                                                >
+                                                    <ChevronDown className="w-4 h-4" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => removeExercise(activeDayIndex, exIndex)}
+                                                    className="h-8 w-8 rounded-lg text-neutral-600 hover:text-red-500 hover:bg-red-500/10"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                                            {exercise.sets?.map((set: any, setIndex: number) => (
+                                                <div key={setIndex} className="space-y-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <select
+                                                            {...register(`schedule.${activeDayIndex}.exercises.${exIndex}.sets.${setIndex}.type`)}
+                                                            className="bg-neutral-950 border border-white/10 rounded-xl px-3 py-2 text-xs font-black text-white uppercase"
+                                                        >
+                                                            <option value="working">Working</option>
+                                                            <option value="warmup">Warmup</option>
+                                                            <option value="failure">Failure</option>
+                                                        </select>
+                                                    </div>
+                                                    <Input
+                                                        {...register(`schedule.${activeDayIndex}.exercises.${exIndex}.sets.${setIndex}.reps`)}
+                                                        placeholder="Reps"
+                                                        className="h-10 bg-neutral-950 border border-white/10 rounded-xl px-3 text-sm font-black text-white placeholder:text-neutral-700"
+                                                    />
+                                                    <div className="flex items-center gap-2">
+                                                        <Input
+                                                            {...register(`schedule.${activeDayIndex}.exercises.${exIndex}.sets.${setIndex}.rpeTarget`)}
+                                                            type="number"
+                                                            placeholder="RPE"
+                                                            className="h-10 w-16 bg-neutral-950 border border-white/10 rounded-xl px-3 text-sm font-black text-white placeholder:text-neutral-700"
+                                                        />
+                                                        <Input
+                                                            {...register(`schedule.${activeDayIndex}.exercises.${exIndex}.sets.${setIndex}.restSeconds`)}
+                                                            type="number"
+                                                            placeholder="Seg"
+                                                            className="h-10 flex-1 bg-neutral-950 border border-white/10 rounded-xl px-3 text-sm font-black text-white placeholder:text-neutral-700"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => {
+                                                    const updated = [...schedule];
+                                                    updated[activeDayIndex].exercises[exIndex].sets.push({ type: "working", reps: "10", rpeTarget: 8, restSeconds: 60 });
+                                                    setValue("schedule", updated);
+                                                }}
+                                                className="h-10 text-neutral-500 hover:text-white text-xs font-black uppercase"
+                                            >
+                                                <Plus className="w-3 h-3 mr-1" />
+                                                Set
+                                            </Button>
+                                        </div>
+
+                                        <div className="flex flex-wrap items-center gap-2 pt-2">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => {
+                                                    setIsVariantMode(true);
+                                                    openExerciseSelector(activeDayIndex, exIndex);
+                                                }}
+                                                className="text-[10px] font-black uppercase tracking-widest border-white/20 text-neutral-400 hover:text-white hover:border-white/40 rounded-xl"
+                                            >
+                                                <Plus className="w-3 h-3 mr-1" />
+                                                Variante
+                                            </Button>
+                                            {(exercise.variantIds || []).map((variantId: string) => {
+                                                const variantEx = availableExercises.find(ex => ex.id === variantId);
+                                                return (
+                                                    <div key={variantId} className="flex items-center gap-1 px-2 py-1 bg-neutral-950 rounded-lg border border-white/10">
+                                                        <span className="text-[10px] font-black text-neutral-400 uppercase">
+                                                            {variantEx?.name || "Variante"}
+                                                        </span>
+                                                        <button
+                                                            onClick={() => removeVariant(activeDayIndex, exIndex, variantId)}
+                                                            className="text-neutral-600 hover:text-red-500"
+                                                        >
+                                                            <X className="w-3 h-3" />
+                                                        </button>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+
+                                        <Input
+                                            {...register(`schedule.${activeDayIndex}.exercises.${exIndex}.notes`)}
+                                            placeholder="Notas adicionales..."
+                                            className="h-10 bg-neutral-950/50 border border-white/5 rounded-xl px-4 text-xs text-neutral-400 placeholder:text-neutral-700"
+                                        />
+                                    </ClientMotionDiv>
+                                ))}
+                            </div>
+
+                            <div className="flex justify-between">
+                                <Button
+                                    onClick={prevStep}
+                                    variant="ghost"
+                                    className="h-14 px-8 text-neutral-500 font-black uppercase tracking-widest rounded-2xl hover:text-white transition-all"
+                                >
+                                    <ChevronLeft className="w-5 h-5 mr-2" />
+                                    Atrás
+                                </Button>
+                                <Button
+                                    onClick={nextStep}
+                                    className="h-14 px-8 bg-white text-black font-black uppercase tracking-widest rounded-2xl hover:bg-neutral-200 transition-all"
+                                >
+                                    Siguiente
+                                    <ChevronRight className="w-5 h-5 ml-2" />
+                                </Button>
                             </div>
                         </motion.div>
                     )}
@@ -947,87 +775,79 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -20 }}
-                            className="space-y-8 pb-32"
+                            className="space-y-8 pb-24"
                         >
-                            <div className="space-y-6">
-                                <div className="space-y-1">
-                                    <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">Auditoría Final</h2>
-                                    <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest">Revisión de seguridad y balance</p>
-                                </div>
+                            <div>
+                                <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-4">Resumen de la Rutina</h2>
+                                <div className="bg-neutral-900/30 border border-white/5 rounded-3xl p-6 space-y-6">
+                                    <div className="flex items-center justify-between pb-4 border-b border-white/5">
+                                        <div>
+                                            <h3 className="text-xl font-black text-white uppercase italic">{formData.name}</h3>
+                                            <p className="text-sm text-neutral-500 mt-1">{formData.description || "Sin descripción"}</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">{formData.type === "weekly" ? "Semanal" : "Diaria"}</span>
+                                        </div>
+                                    </div>
 
-                                <RoutineSafetyCheck routine={watch()} athleteId={athleteId} />
-
-                                <div className="bg-neutral-900/30 backdrop-blur-3xl border border-white/5 rounded-4xl p-8 space-y-6">
-                                    <div className="flex justify-between items-center border-b border-white/5 pb-4">
-                                        <span className="text-[10px] font-black text-neutral-500 uppercase tracking-widest italic">Rutina</span>
-                                        <span className="text-sm font-black text-white uppercase italic">{watch("name")}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center border-b border-white/5 pb-4">
-                                        <span className="text-[10px] font-black text-neutral-500 uppercase tracking-widest italic">Días Activos</span>
-                                        <span className="text-sm font-black text-neutral-500 uppercase italic">{schedule.length} Días</span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-[10px] font-black text-neutral-500 uppercase tracking-widest italic">Total Ejercicios</span>
-                                        <span className="text-sm font-black text-red-500 uppercase italic">
-                                            {schedule.reduce((acc: number, curr: ScheduleDay) => acc + (curr.exercises?.length || 0), 0)}
-                                        </span>
-                                    </div>
+                                    {schedule.map((day: any, dayIndex: number) => (
+                                        <div key={dayIndex} className="space-y-3">
+                                            <h4 className="text-sm font-black text-red-500 uppercase tracking-widest">{day.name}</h4>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                                {day.exercises?.map((ex: any, exIndex: number) => (
+                                                    <div key={exIndex} className="flex items-center gap-2 text-sm">
+                                                        <div className="h-6 w-6 rounded-lg bg-neutral-950 border border-white/5 flex items-center justify-center text-[10px] font-black text-neutral-500">
+                                                            {exIndex + 1}
+                                                        </div>
+                                                        <span className="text-neutral-300 font-bold">{ex.exerciseName}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
+                            </div>
+
+                            <RoutineSafetyCheck routine={formData as any} athleteId={athleteId} />
+
+                            <div className="flex justify-between">
+                                <Button
+                                    onClick={prevStep}
+                                    variant="ghost"
+                                    className="h-14 px-8 text-neutral-500 font-black uppercase tracking-widest rounded-2xl hover:text-white transition-all"
+                                >
+                                    <ChevronLeft className="w-5 h-5 mr-2" />
+                                    Atrás
+                                </Button>
+                                <Button
+                                    onClick={handleSubmit(onSubmit)}
+                                    disabled={isSaving}
+                                    className="h-14 px-8 bg-white text-black font-black uppercase tracking-widest rounded-2xl hover:bg-neutral-200 transition-all"
+                                >
+                                    {isSaving ? (
+                                        <>
+                                            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                                            Guardando...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Save className="w-5 h-5 mr-2" />
+                                            {isEditing ? "Actualizar" : "Crear"} Rutina
+                                        </>
+                                    )}
+                                </Button>
                             </div>
                         </motion.div>
                     )}
                 </AnimatePresence>
             </main>
 
-            {/* Sticky Navigation Footer */}
-            <div className="fixed bottom-0 inset-x-0 bg-black/80 backdrop-blur-3xl border-t border-white/5 p-4 z-40 md:relative md:bg-transparent md:border-none md:p-10">
-                <div className="flex items-center justify-between gap-4 max-w-7xl mx-auto">
-                    <Button
-                        variant="ghost"
-                        onClick={prevStep}
-                        disabled={step === 1}
-                        className={cn(
-                            "h-14 px-8 rounded-2xl font-black uppercase italic tracking-widest text-[10px] border border-white/5 text-neutral-500 hover:text-white transition-all",
-                            step === 1 && "opacity-0 pointer-events-none"
-                        )}
-                    >
-                        <ChevronLeft className="w-5 h-5 mr-3" /> Atrás
-                    </Button>
-                    
-                    {step < totalSteps ? (
-                        <Button
-                            onClick={nextStep}
-                            className="h-14 px-10 bg-white text-black hover:bg-neutral-200 font-black uppercase italic tracking-widest text-[10px] rounded-2xl shadow-xl shadow-white/5 transition-all hover:-translate-y-1"
-                        >
-                            Siguiente <ChevronRight className="w-5 h-5 ml-3" />
-                        </Button>
-                    ) : (
-                        <Button
-                            onClick={handleSubmit(onSubmit)}
-                            disabled={isSaving}
-                            className="h-14 px-12 bg-red-600 text-white hover:bg-red-700 font-black uppercase italic tracking-widest text-[10px] rounded-2xl shadow-xl shadow-red-600/20 transition-all hover:-translate-y-1 active:scale-95"
-                        >
-                            {isSaving ? (
-                                <Loader2 className="w-4 h-4 animate-spin mr-3" />
-                            ) : (
-                                <Save className="w-4 h-4 mr-3" />
-                            )}
-                            Finalizar Rutina
-                        </Button>
-                    )}
-                </div>
-            </div>
-
             <ExerciseSelector
                 open={selectorOpen}
-                onOpenChange={(op) => {
-                    setSelectorOpen(op);
-                    if (!op) setIsVariantMode(false);
-                }}
+                onOpenChange={setSelectorOpen}
                 onSelect={handleExerciseSelect}
-                availableExercises={sortedExercises}
-                isVariantSelector={isVariantMode}
-                title={isVariantMode ? "VARIANTE" : "EJERCICIO"}
+                availableExercises={availableExercises}
+                title={isVariantMode ? "Añadir Variante" : "Seleccionar Ejercicio"}
             />
         </div>
     );

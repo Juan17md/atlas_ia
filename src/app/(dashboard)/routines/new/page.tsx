@@ -1,4 +1,5 @@
 import { RoutineEditor } from "@/components/routines/routine-editor";
+import type { RoutineFormData } from "@/components/routines/routine-editor-types";
 import { auth } from "@/lib/auth";
 import { getExercises } from "@/actions/exercise-actions";
 import { getRoutines } from "@/actions/routine-actions";
@@ -15,5 +16,13 @@ export default async function NewRoutinePage() {
     const { exercises } = await getExercises();
     const { routines: availableRoutines } = await getRoutines();
 
-    return <RoutineEditor availableExercises={exercises || []} availableRoutines={availableRoutines || []} />;
+    const transformedRoutines: RoutineFormData[] = (availableRoutines || []).map((r: any) => ({
+        id: r.id,
+        name: r.name,
+        description: r.description,
+        type: r.type || "weekly",
+        schedule: r.schedule || [],
+    }));
+
+    return <RoutineEditor availableExercises={exercises || []} availableRoutines={transformedRoutines} />;
 }

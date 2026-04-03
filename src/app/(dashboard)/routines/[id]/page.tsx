@@ -1,4 +1,5 @@
 import { RoutineEditor } from "@/components/routines/routine-editor";
+import type { RoutineFormData } from "@/components/routines/routine-editor-types";
 import { auth } from "@/lib/auth";
 import { getRoutine, getRoutines } from "@/actions/routine-actions";
 import { getExercises } from "@/actions/exercise-actions";
@@ -21,7 +22,7 @@ export default async function EditRoutinePage({ params, searchParams }: PageProp
     const role = session.user.role as string;
     if (role !== "coach" && role !== "advanced_athlete") redirect("/dashboard");
 
-    const { routine, error } = await getRoutine(id);
+    const { routine, error } = await getRoutine(id) as { routine?: { name: string; description?: string; type?: string; schedule: any[] }; error?: string };
     const { exercises } = await getExercises();
     const { routines: availableRoutines } = await getRoutines();
 
@@ -29,5 +30,20 @@ export default async function EditRoutinePage({ params, searchParams }: PageProp
         return <div>Error: {error || "Rutina no encontrada"}</div>;
     }
 
-    return <RoutineEditor initialData={routine} isEditing availableExercises={exercises || []} availableRoutines={availableRoutines || []} initialDayIndex={initialDayIndex} />;
+    const initialData: RoutineFormData = {
+        name: routine.name,
+        description: routine.description,
+        type: routine.type || "weekly",
+        schedule: routine.schedule || [],
+    };
+
+    const transformedRoutines: RoutineFormData[] = (availableRoutines || []).map((r: any) => ({
+        id: r.id,
+        name: r.name,
+        description: r.description,
+        type: r.type || "weekly",
+        schedule: r.schedule || [],
+    }));
+
+    return <RoutineEditor initialData={initialData} isEditing availableExercises={exercises || []} availableRoutines={transformedRoutines} initialDayIndex={initialDayIndex} />;
 }
