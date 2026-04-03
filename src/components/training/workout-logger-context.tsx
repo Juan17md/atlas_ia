@@ -55,7 +55,7 @@ interface WorkoutLoggerContextType {
     setExerciseSelectorMode: (v: "swap" | "add" | "insert") => void;
     targetIndex: number;
     setTargetIndex: (v: number) => void;
-    availableExercises: { id: string; name: string }[];
+    availableExercises: { id: string; name: string; muscleGroups?: string[] }[];
     
     // Diálogos
     showConfirmDialog: boolean;
@@ -113,7 +113,7 @@ export function WorkoutLoggerProvider({ children, initialRoutineName, routineDay
     const [showExerciseSelector, setShowExerciseSelector] = useState(false);
     const [exerciseSelectorMode, setExerciseSelectorMode] = useState<"swap" | "add" | "insert">("add");
     const [targetIndex, setTargetIndex] = useState<number>(-1);
-    const [availableExercises, setAvailableExercises] = useState<{ id: string; name: string }[]>([]);
+    const [availableExercises, setAvailableExercises] = useState<{ id: string; name: string; muscleGroups?: string[] }[]>([]);
     
     const [aiFeedback, setAiFeedback] = useState<string | null>(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -262,7 +262,11 @@ export function WorkoutLoggerProvider({ children, initialRoutineName, routineDay
     useEffect(() => {
         getExercises().then(res => {
             if (res.success && res.exercises) {
-                setAvailableExercises(res.exercises.map((ex: any) => ({ id: ex.id, name: ex.name })));
+                setAvailableExercises(res.exercises.map((ex: any) => ({ 
+                    id: ex.id, 
+                    name: ex.name,
+                    muscleGroups: ex.muscleGroups || []
+                })));
             }
         });
     }, []);

@@ -7,8 +7,8 @@ import { Plus, Search, Dumbbell } from "lucide-react";
 interface ExerciseSelectorProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    onSelect: (exercise: { id?: string; name: string }) => void;
-    availableExercises: { id: string; name: string }[];
+    onSelect: (exercise: { id?: string; name: string; muscleGroups?: string[] }) => void;
+    availableExercises: { id: string; name: string; muscleGroups?: string[] }[];
     title?: string;
     isVariantSelector?: boolean;
 }

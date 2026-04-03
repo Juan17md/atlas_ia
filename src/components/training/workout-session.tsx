@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Check, Loader2, Play, Dumbbell, Sparkles, Plus, Trash2, RefreshCw, ChevronDown } from "lucide-react";
+import { Check, Loader2, Play, Dumbbell, Sparkles, Plus, Trash2, RefreshCw, ChevronDown, ArrowUp, ArrowDown } from "lucide-react";
+import { RPESelector } from "@/components/training/rpe-selector";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger, SheetClose } from "@/components/ui/sheet";
@@ -50,8 +51,15 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
 
     const [showExerciseSelector, setShowExerciseSelector] = useState(false);
     const [exerciseSelectorMode, setExerciseSelectorMode] = useState<"swap" | "add">("add");
+    const [rpeSelectorState, setRpeSelectorState] = useState<{
+        open: boolean;
+        exerciseIndex: number;
+        setIndex: number;
+        value: string;
+        targetRpe?: number;
+    } | null>(null);
     const [swapTargetIndex, setSwapTargetIndex] = useState<number>(-1);
-    const [availableExercises, setAvailableExercises] = useState<{ id: string; name: string }[]>([]);
+    const [availableExercises, setAvailableExercises] = useState<{ id: string; name: string; muscleGroups?: string[] }[]>([]);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
 
     const activeDay = routine.schedule[0];
@@ -239,6 +247,30 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
         }
         setShowExerciseSelector(false);
     }, [exerciseSelectorMode, swapTargetIndex]);
+
+    const handleMoveExercise = useCallback((index: number, direction: 'up' | 'down') => {
+        const newIndex = direction === 'up' ? index - 1 : index + 1;
+        if (newIndex < 0 || newIndex >= mutableExercises.length) return;
+
+        setMutableExercises(prev => {
+            const updated = [...prev];
+            const temp = updated[index];
+            updated[index] = updated[newIndex];
+            updated[newIndex] = temp;
+            return updated;
+        });
+
+        setSessionLog(prev => {
+            const updated = [...prev];
+            const temp = updated[index];
+            updated[index] = updated[newIndex];
+            updated[newIndex] = temp;
+            return updated;
+        });
+
+        setCurrentExerciseIndex(newIndex);
+        toast.success(`Ejercicio movido ${direction === 'up' ? 'arriba' : 'abajo'}`);
+    }, [mutableExercises.length]);
 
     const handleRemoveExercise = useCallback((index: number) => {
         if (mutableExercises.length <= 1) {
@@ -496,6 +528,26 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                                                                     <Button
                                                                         variant="ghost"
                                                                         size="icon"
+                                                                        onClick={() => handleMoveExercise(currentExerciseIndex, 'up')}
+                                                                        disabled={currentExerciseIndex === 0}
+                                                                        className="h-8 w-8 rounded-lg text-neutral-600 hover:text-white disabled:opacity-20 transition-all"
+                                                                        title="Mover arriba"
+                                                                    >
+                                                                        <ArrowUp className="w-4 h-4" />
+                                                                    </Button>
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="icon"
+                                                                        onClick={() => handleMoveExercise(currentExerciseIndex, 'down')}
+                                                                        disabled={currentExerciseIndex === mutableExercises.length - 1}
+                                                                        className="h-8 w-8 rounded-lg text-neutral-600 hover:text-white disabled:opacity-20 transition-all"
+                                                                        title="Mover abajo"
+                                                                    >
+                                                                        <ArrowDown className="w-4 h-4" />
+                                                                    </Button>
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="icon"
                                                                         onClick={() => openSwapSelector(currentExerciseIndex)}
                                                                         className="h-8 w-8 rounded-lg text-neutral-600 hover:text-amber-400 hover:bg-amber-400/10 transition-all"
                                                                         title="Cambiar ejercicio"
@@ -716,46 +768,25 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
 
                                                                     <div className="md:col-span-2 relative">
                                                                         <div className="text-[9px] text-neutral-500 uppercase font-black tracking-widest mb-1.5 px-1 truncate md:hidden">RPE</div>
-                                                                        <Popover>
-                                                                            <PopoverTrigger asChild>
-                                                                                <Button
-                                                                                    variant="ghost"
-                                                                                    className={cn(
-                                                                                        "h-14 w-full px-4 justify-center text-center text-lg md:text-2xl font-black border-0 bg-neutral-950 rounded-xl focus:ring-2 focus:ring-white/10 transition-all text-white italic shadow-inner relative group",
-                                                                                        isCompleted && "text-emerald-400 bg-emerald-950/20 ring-1 ring-emerald-500/30"
-                                                                                    )}
-                                                                                >
-                                                                                    <span className="flex items-center justify-center gap-2">
-                                                                                        {logSet?.rpe || historySet?.rpe || "-"}
-                                                                                        <ChevronDown className="w-4 h-4 opacity-20 group-hover:opacity-100 transition-opacity" />
-                                                                                    </span>
-                                                                                </Button>
-                                                                            </PopoverTrigger>
-                                                                            <PopoverContent 
-                                                                                className="w-48 bg-neutral-900/90 border-white/10 backdrop-blur-2xl rounded-2xl p-2 shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-50"
-                                                                                side="bottom"
-                                                                                align="center"
-                                                                            >
-                                                                                <div className="grid grid-cols-3 gap-1">
-                                                                                    {[10, 9, 8, 7, 6, 5].map((val) => (
-                                                                                        <Button
-                                                                                            key={val}
-                                                                                            variant="ghost"
-                                                                                            size="sm"
-                                                                                            onClick={() => updateSet(currentExerciseIndex, setIndex, "rpe", val.toString())}
-                                                                                            className={cn(
-                                                                                                "h-12 w-full text-lg font-black italic rounded-xl border border-transparent transition-all",
-                                                                                                logSet?.rpe === val.toString() 
-                                                                                                    ? "bg-red-600 text-white border-red-500 shadow-[0_0_15px_rgba(220,38,38,0.4)]" 
-                                                                                                    : "text-neutral-400 hover:text-white hover:bg-white/5 hover:border-white/10"
-                                                                                            )}
-                                                                                        >
-                                                                                            {val}
-                                                                                        </Button>
-                                                                                    ))}
-                                                                                </div>
-                                                                            </PopoverContent>
-                                                                        </Popover>
+                                                                        <Button
+                                                                            variant="ghost"
+                                                                            onClick={() => setRpeSelectorState({
+                                                                                open: true,
+                                                                                exerciseIndex: currentExerciseIndex,
+                                                                                setIndex: setIndex,
+                                                                                value: logSet?.rpe || historySet?.rpe?.toString() || "",
+                                                                                targetRpe: historySet?.rpe
+                                                                            })}
+                                                                            className={cn(
+                                                                                "h-14 w-full px-4 justify-center text-center text-lg md:text-2xl font-black border-0 bg-neutral-950 rounded-xl focus:ring-2 focus:ring-white/10 transition-all text-white italic shadow-inner relative group",
+                                                                                isCompleted && "text-emerald-400 bg-emerald-950/20 ring-1 ring-emerald-500/30"
+                                                                            )}
+                                                                        >
+                                                                            <span className="flex items-center justify-center gap-2">
+                                                                                {logSet?.rpe || historySet?.rpe || "-"}
+                                                                                <ChevronDown className="w-4 h-4 opacity-20 group-hover:opacity-100 transition-opacity" />
+                                                                            </span>
+                                                                        </Button>
                                                                     </div>
                                                                 </div>
 
@@ -829,6 +860,26 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                 onOpenChange={setShowFeedback}
                 onConfirm={handleCompleteSession}
                 isSubmitting={isSubmitting}
+                volumeData={(() => {
+                    const stats: Record<string, { sets: number; volume: number }> = {};
+                    sessionLog.forEach(ex => {
+                        const exerciseInfo = availableExercises.find(ae => ae.id === ex.exerciseId);
+                        const muscles = exerciseInfo?.muscleGroups || ["General"];
+                        
+                        const completedSets = ex.sets.filter(s => s.completed);
+                        if (completedSets.length === 0) return;
+
+                        muscles.forEach((m: string) => {
+                            if (!stats[m]) stats[m] = { sets: 0, volume: 0 };
+                            stats[m].sets += completedSets.length;
+                            stats[m].volume += completedSets.reduce((acc, s) => acc + (parseFloat(s.weight) || 0) * (parseFloat(s.reps) || 0), 0);
+                        });
+                    });
+                    return Object.entries(stats).map(([muscleGroup, data]) => ({
+                        muscleGroup,
+                        ...data
+                    })).sort((a, b) => b.sets - a.sets);
+                })()}
             />
 
             <CancelWorkoutDialog
@@ -844,6 +895,18 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                     onSelect={handleExerciseSelected}
                     availableExercises={availableExercises}
                     title={exerciseSelectorMode === "swap" ? "Cambiar Ejercicio" : "Agregar Ejercicio"}
+                />
+            )}
+
+            {rpeSelectorState && (
+                <RPESelector
+                    open={rpeSelectorState.open}
+                    onOpenChange={(open) => setRpeSelectorState(prev => prev ? { ...prev, open } : null)}
+                    value={rpeSelectorState.value}
+                    targetRpe={rpeSelectorState.targetRpe}
+                    onSelect={(val) => {
+                        updateSet(rpeSelectorState.exerciseIndex, rpeSelectorState.setIndex, "rpe", val);
+                    }}
                 />
             )}
         </>

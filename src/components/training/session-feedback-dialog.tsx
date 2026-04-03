@@ -14,9 +14,10 @@ interface SessionFeedbackDialogProps {
     onOpenChange: (open: boolean) => void;
     onConfirm: (rpe: number, notes: string) => void;
     isSubmitting: boolean;
+    volumeData?: { muscleGroup: string; sets: number; volume: number }[];
 }
 
-export function SessionFeedbackDialog({ open, onOpenChange, onConfirm, isSubmitting }: SessionFeedbackDialogProps) {
+export function SessionFeedbackDialog({ open, onOpenChange, onConfirm, isSubmitting, volumeData }: SessionFeedbackDialogProps) {
     const [rpe, setRpe] = useState(7); // Default to a good effort
     const [notes, setNotes] = useState("");
 
@@ -86,6 +87,30 @@ export function SessionFeedbackDialog({ open, onOpenChange, onConfirm, isSubmitt
                             onChange={(e) => setNotes(e.target.value)}
                         />
                     </div>
+
+                    {/* Volume Summary */}
+                    {volumeData && volumeData.length > 0 && (
+                        <div className="space-y-3 pt-2">
+                            <Label className="text-sm font-bold uppercase tracking-wider text-neutral-300">Resumen de Carga</Label>
+                            <div className="grid grid-cols-2 gap-3">
+                                {volumeData.map((data) => (
+                                    <div key={data.muscleGroup} className="bg-neutral-950 border border-white/5 rounded-xl p-3 flex flex-col gap-1 shadow-inner group hover:border-red-600/30 transition-all">
+                                        <span className="text-[10px] font-black uppercase text-neutral-500 tracking-tighter italic">{data.muscleGroup}</span>
+                                        <div className="flex items-baseline gap-2">
+                                            <span className="text-2xl font-black italic text-white leading-none">{data.sets}</span>
+                                            <span className="text-[9px] font-bold text-neutral-600 uppercase">Series</span>
+                                        </div>
+                                        <div className="w-full h-1 bg-neutral-900 rounded-full mt-1 overflow-hidden">
+                                            <div 
+                                                className="h-full bg-red-600 shadow-[0_0_10px_rgba(220,38,38,0.5)] transition-all duration-1000"
+                                                style={{ width: `${Math.min(100, (data.sets / 15) * 100)}%` }}
+                                            />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <DialogFooter className="flex-col sm:flex-row gap-3">
