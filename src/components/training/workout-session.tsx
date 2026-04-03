@@ -634,7 +634,7 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                                                             <div
                                                                 key={setIndex}
                                                                 className={cn(
-                                                                    "flex flex-col md:grid md:grid-cols-12 gap-2 md:gap-3 p-3 md:p-3 rounded-2xl md:items-center transition-all duration-500 relative overflow-hidden group/set border",
+                                                                    "flex flex-col md:grid md:grid-cols-12 gap-2 md:gap-3 p-3 md:p-3 rounded-2xl md:items-center transition-all duration-500 relative group/set border",
                                                                     isCompleted
                                                                         ? "bg-emerald-500/10 border-emerald-500/30 shadow-[0_0_30px_-10px_rgba(16,185,129,0.2)]"
                                                                         : "bg-neutral-900 border-white/5 hover:border-white/10"
@@ -676,7 +676,7 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                                                                     </div>
                                                                 </div>
 
-                                                                <div className="grid grid-cols-3 gap-2 md:contents z-10 w-full">
+                                                                <div className="grid grid-cols-3 gap-2 md:grid md:grid-cols-6 md:col-span-6 z-10 w-full">
                                                                     <div className="md:col-span-2 relative">
                                                                         <div className="text-[9px] text-neutral-500 uppercase font-black tracking-widest mb-1.5 px-1 truncate md:hidden">Carga (kg)</div>
                                                                         <Input
