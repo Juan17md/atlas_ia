@@ -20,7 +20,7 @@ export function ExerciseSelector({ open, onOpenChange, onSelect, availableExerci
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="p-0 gap-0 bg-neutral-950 border-neutral-800 text-white sm:max-w-[500px] w-full h-dvh sm:h-auto sm:max-h-[90vh] flex flex-col overflow-hidden rounded-none sm:rounded-2xl border-none sm:border">
+            <DialogContent className="p-0 gap-0 bg-neutral-950 border-neutral-800 text-white sm:max-w-[500px] w-full h-dvh sm:h-auto sm:max-h-[90vh] flex flex-col overflow-hidden rounded-none sm:rounded-2xl border-none sm:border shadow-2xl">
                 <DialogHeader className="px-4 py-4 border-b border-neutral-800 bg-neutral-900 shrink-0">
                     <DialogTitle className="text-sm font-bold uppercase tracking-widest flex items-center gap-2 text-neutral-400">
                         <Search className="w-4 h-4" />

@@ -46,6 +46,7 @@ export default async function TrainPage(props: {
 
     // Usar fecha local del usuario (no UTC del servidor de Vercel)
     const todayDate = obtenerAhoraLocal();
+    const todayISO = obtenerFechaISOLocal();
     const dayOfWeek = todayDate.getDay();
     const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
     const rawDayName = todayDate.toLocaleDateString('es-ES', { weekday: 'long' });
@@ -59,7 +60,7 @@ export default async function TrainPage(props: {
 
     if (isAdvanced && isFreeMode) {
         const dummyRoutine: WorkoutRoutine = {
-            id: `free_workout_${Date.now()}`,
+            id: `free_workout_${todayISO}`,
             name: 'Rutina Libre',
             schedule: [{
                 id: 'base_day',
@@ -72,7 +73,6 @@ export default async function TrainPage(props: {
     }
 
     // 1. Check for a specific assignment for TODAY
-    const todayISO = obtenerFechaISOLocal();
     const { assignment } = await getTodayAssignment(session.user.id, todayISO);
 
     // Si es atleta avanzado y no ha elegido todavía, le mostramos el Triage

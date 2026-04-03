@@ -28,6 +28,10 @@ export function MobileNav({ role, user }: MobileNavProps) {
     const userRoleKey = (user?.role || "athlete").toLowerCase();
     const roleInfo = ROLE_CONFIG[userRoleKey] || ROLE_CONFIG.athlete;
 
+    // Ocultar la barra de navegación durante el entrenamiento activo
+    // (WorkoutSession tiene su propio footer de navegación)
+    if (pathname.startsWith('/train')) return null;
+
     const commonItems = [
         { label: "Inicio", href: "/dashboard", icon: LayoutDashboard },
     ];

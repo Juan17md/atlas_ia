@@ -465,7 +465,7 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
 
     if (!isStarted) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[85vh] px-4 space-y-8 pb-24 animate-in fade-in duration-500">
+            <div className="flex flex-col items-center justify-center min-h-[85vh] px-4 space-y-8 pb-32 animate-in fade-in duration-500">
                 <ClientMotionDiv
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -551,7 +551,10 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
     if (isStarted && mutableExercises.length === 0 && isAdvanced) {
         return (
             <div className="max-w-3xl mx-auto pb-24 space-y-6 pt-4">
-                <div className="sticky top-0 z-50 bg-black/40 backdrop-blur-3xl border-b border-white/5 py-4 px-4 -mx-4 md:rounded-b-4xl md:mx-0 shadow-2xl transition-all duration-300">
+                <div className={cn(
+                    "sticky top-0 z-30 bg-black/40 backdrop-blur-3xl border-b border-white/5 py-4 px-4 -mx-4 md:rounded-b-4xl md:mx-0 shadow-2xl transition-all duration-300",
+                    showExerciseSelector && "opacity-0 pointer-events-none"
+                )}>
                     <div className="flex justify-between items-center max-w-3xl mx-auto gap-4">
                         <div className="flex-1 min-w-0">
                             <h2 className="text-base font-bold text-white tracking-tight truncate uppercase italic">
@@ -559,6 +562,10 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                             </h2>
                         </div>
                         <div className="flex gap-2 items-center shrink-0">
+                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-900/50 rounded-xl border border-white/5">
+                                <Clock className="w-3.5 h-3.5 text-red-500 animate-pulse" />
+                                <span className="text-xs font-black text-white italic tracking-widest">{formatTime(elapsedTime)}</span>
+                            </div>
                             <Button
                                 onClick={() => setShowCancelDialog(true)}
                                 variant="ghost"
@@ -577,7 +584,10 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                     </div>
                 </div>
 
-                <div className="py-20 flex flex-col items-center justify-center text-center space-y-6 border border-dashed border-white/10 rounded-3xl bg-neutral-900/20">
+                <div className={cn(
+                    "py-20 flex flex-col items-center justify-center text-center space-y-6 border border-dashed border-white/10 rounded-3xl bg-neutral-900/20 transition-opacity duration-300",
+                    showExerciseSelector && "opacity-0 pointer-events-none"
+                )}>
                     <Dumbbell className="w-16 h-16 text-neutral-800" />
                     <div className="space-y-2 max-w-xs">
                         <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter">Sesión Vacía</h3>
@@ -621,18 +631,18 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
     if (!currentExercise || !currentLogExercise) return <div className="p-10 text-center">Cargando...</div>;
 
     return (
-        <div className="max-w-3xl mx-auto pb-24 space-y-6">
+        <div className={cn("max-w-3xl mx-auto pb-32 space-y-6 transition-all duration-300", showExerciseSelector && "opacity-20 saturate-0 scale-[0.98] pointer-events-none")}>
             {/* Header Sticky */}
-            <div className="sticky top-0 z-50 bg-black/40 backdrop-blur-3xl border-b border-white/5 py-4 px-4 -mx-4 md:rounded-b-4xl md:mx-0 shadow-2xl transition-all duration-300">
-                <div className="flex justify-between items-center max-w-3xl mx-auto gap-4">
+            <div className="sticky top-0 z-30 bg-black/40 backdrop-blur-3xl border-b border-white/5 py-4 px-4 -mx-4 md:rounded-b-4xl md:mx-0 shadow-2xl transition-all duration-300">
+                <div className="flex justify-between items-center max-w-3xl mx-auto gap-2 md:gap-4">
                     <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-3">
-                            <div className="px-3 py-1 bg-red-600/10 border border-red-600/20 rounded-lg">
+                        <div className="flex items-center gap-2 md:gap-3">
+                            <div className="hidden sm:block px-2 py-1 bg-red-600/10 border border-red-600/20 rounded-lg shrink-0">
                                 <span className="text-[10px] font-black text-red-500 uppercase tracking-widest italic">
-                                    EJ {currentExerciseIndex + 1}/{mutableExercises.length}
+                                    {currentExerciseIndex + 1}/{mutableExercises.length}
                                 </span>
                             </div>
-                            <h2 className="text-base font-bold text-white tracking-tight truncate uppercase italic">
+                            <h2 className="text-sm md:text-base font-bold text-white tracking-tight truncate uppercase italic">
                                 {currentLogExercise?.exerciseName}
                             </h2>
                             {isAdvanced && (
@@ -649,13 +659,18 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                         </div>
                     </div>
 
-                    <div className="flex gap-2 items-center shrink-0">
+                    <div className="flex gap-1 md:gap-2 items-center shrink-0">
+                        <div className="flex items-center gap-1 px-2 py-1 bg-neutral-900/50 rounded-lg border border-white/5">
+                            <Clock className="w-3 h-3 md:w-3.5 md:h-3.5 text-red-500 animate-pulse" />
+                            <span className="text-[10px] md:text-xs font-black text-white italic tracking-widest">{formatTime(elapsedTime)}</span>
+                        </div>
+
                         <AIAssistantDialog
                             muscleGroups={[currentExercise?.exerciseName || "General"]}
                             availableExercises={[currentExercise?.exerciseName]}
                         />
 
-                        <div className="h-6 w-px bg-white/5 mx-1" />
+                        <div className="h-6 w-px bg-white/5 mx-1 md:mx-2" />
 
                         <Button
                             onClick={() => setShowCancelDialog(true)}
@@ -832,13 +847,13 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                         </div>
 
                         <div className="p-2 md:p-6 md:pt-0">
-                            <div className="grid grid-cols-12 gap-1 md:gap-3 mb-4 px-4 text-[10px] font-black text-neutral-500 text-center uppercase tracking-[0.2em] bg-white/2 py-3 rounded-2xl border border-white/5">
-                                <div className="hidden md:block md:col-span-1 italic">SQ</div>
-                                <div className="col-span-2 md:col-span-3 italic">Objetivo</div>
-                                <div className="col-span-3 md:col-span-2 italic">Carga (kg)</div>
-                                <div className="col-span-3 md:col-span-2 italic">Reps</div>
+                            <div className="hidden md:grid md:grid-cols-12 md:gap-3 mb-4 px-4 text-[10px] font-black text-neutral-500 text-center uppercase tracking-[0.2em] bg-white/2 py-3 rounded-2xl border border-white/5">
+                                <div className="col-span-1 italic">SQ</div>
+                                <div className="col-span-3 italic">Obj.</div>
+                                <div className="col-span-2 italic">Carga (kg)</div>
+                                <div className="col-span-2 italic">Reps</div>
                                 <div className="col-span-2 italic">RPE</div>
-                                <div className="col-span-2 md:col-span-2 italic">Status</div>
+                                <div className="col-span-2 italic">Status</div>
                             </div>
 
                             <div className="space-y-3">
@@ -851,107 +866,140 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                                         <div
                                             key={setIndex}
                                             className={cn(
-                                                "grid grid-cols-12 gap-1 md:gap-3 p-2 md:p-3 rounded-2xl items-center transition-all duration-500 relative overflow-hidden group/set border",
+                                                "flex flex-col md:grid md:grid-cols-12 gap-2 md:gap-3 p-3 md:p-3 rounded-2xl md:items-center transition-all duration-500 relative overflow-hidden group/set border",
                                                 isCompleted
                                                     ? "bg-emerald-500/10 border-emerald-500/30 shadow-[0_0_30px_-10px_rgba(16,185,129,0.2)]"
                                                     : "bg-neutral-900 border-white/5 hover:border-white/10"
                                             )}
                                         >
-                                            <div className="hidden md:flex md:col-span-1 justify-center z-10">
-                                                <span className={cn(
-                                                    "text-[10px] font-black w-8 h-8 rounded-xl flex items-center justify-center border transition-all duration-300",
-                                                    isCompleted ? "bg-emerald-500 text-black border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.4)]" :
-                                                        set.type === 'warmup' ? "text-amber-500 bg-amber-500/10 border-amber-500/20" :
-                                                            set.type === 'failure' ? "text-red-500 bg-red-500/10 border-red-500/20" :
-                                                                "text-neutral-500 bg-neutral-950 border-white/5"
-                                                )}>
-                                                    {setIndex + 1}
-                                                </span>
-                                            </div>
+                                            {/* Header de la tarjeta en móvil / Columnas iniciales en desktop */}
+                                            <div className="flex justify-between items-center md:contents">
+                                                <div className="flex items-center gap-3 md:col-span-4 z-10 md:justify-start">
+                                                    {/* SQ / Indicador de Set */}
+                                                    <span className={cn(
+                                                        "text-[9px] md:text-[10px] font-black w-7 h-7 md:w-8 md:h-8 rounded-xl flex items-center justify-center border transition-all duration-300 md:ml-auto md:mr-4 shrink-0",
+                                                        isCompleted ? "bg-emerald-500 text-black border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.4)]" :
+                                                            set.type === 'warmup' ? "text-amber-500 bg-amber-500/10 border-amber-500/20" :
+                                                                set.type === 'failure' ? "text-red-500 bg-red-500/10 border-red-500/20" :
+                                                                    "text-neutral-500 bg-neutral-950 border-white/5"
+                                                    )}>
+                                                        {setIndex + 1}
+                                                    </span>
+                                                    
+                                                    {/* Objetivo */}
+                                                    <div className="text-left md:text-center min-w-0">
+                                                        <div className="text-white font-black text-xs md:text-base italic leading-tight uppercase tracking-wider truncate">
+                                                            OBJ: {set.reps} {set.rpeTarget && <span className="text-neutral-500 text-[9px] md:text-[10px] ml-1">@RPE {set.rpeTarget}</span>}
+                                                        </div>
+                                                    </div>
+                                                </div>
 
-                                            <div className="col-span-2 md:col-span-3 text-center z-10">
-                                                <div className="text-white font-black text-sm md:text-base italic leading-tight">{set.reps}</div>
-                                                {set.rpeTarget && <div className="text-[9px] text-neutral-500 font-black uppercase tracking-widest mt-0.5">RPE {set.rpeTarget}</div>}
-                                            </div>
-
-                                            <div className="col-span-3 md:col-span-2 relative z-10">
-                                                <Input
-                                                    type="text"
-                                                    inputMode="decimal"
-                                                    placeholder={historySet ? `${historySet.weight}` : "-"}
-                                                    value={logSet?.weight}
-                                                    onChange={(e) => {
-                                                        const val = e.target.value.replace(",", ".");
-                                                        if (val === "" || /^\d*\.?\d*$/.test(val)) {
-                                                            updateSet(currentExerciseIndex, setIndex, "weight", val);
-                                                        }
-                                                    }}
-                                                    className={cn(
-                                                        "h-12 md:h-14 px-0 text-center text-lg md:text-2xl font-black border-0 bg-neutral-950 rounded-xl focus:ring-2 focus:ring-white/10 transition-all placeholder:text-neutral-800 text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none italic",
-                                                        isCompleted && "text-emerald-400 bg-emerald-950/20 ring-1 ring-emerald-500/30"
-                                                    )}
-                                                />
-                                            </div>
-
-                                            <div className="col-span-3 md:col-span-2 relative z-10">
-                                                <Input
-                                                    type="text"
-                                                    inputMode="decimal"
-                                                    placeholder={historySet ? `${historySet.reps}` : "-"}
-                                                    value={logSet?.reps}
-                                                    onChange={(e) => {
-                                                        const val = e.target.value.replace(",", ".");
-                                                        if (val === "" || /^\d*\.?\d*$/.test(val)) {
-                                                            updateSet(currentExerciseIndex, setIndex, "reps", val);
-                                                        }
-                                                    }}
-                                                    className={cn(
-                                                        "h-12 md:h-14 px-0 text-center text-lg md:text-2xl font-black border-0 bg-neutral-950 rounded-xl focus:ring-2 focus:ring-white/10 transition-all placeholder:text-neutral-800 text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none italic",
-                                                        isCompleted && "text-emerald-400 bg-emerald-950/20 ring-1 ring-emerald-500/30"
-                                                    )}
-                                                />
-                                            </div>
-
-                                            <div className="col-span-2 relative z-10">
-                                                <Select
-                                                    value={logSet?.rpe?.toString() || ""}
-                                                    onValueChange={(val) => updateSet(currentExerciseIndex, setIndex, "rpe", val)}
-                                                >
-                                                    <SelectTrigger
+                                                {/* Check in mobile (hidden in md) */}
+                                                <div className="md:hidden flex justify-center z-10 shrink-0">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => toggleSetComplete(currentExerciseIndex, setIndex)}
                                                         className={cn(
-                                                            "h-12 md:h-14 w-full px-0 justify-center text-center text-lg md:text-2xl font-black border-0 bg-neutral-950 rounded-xl focus:ring-2 focus:ring-white/10 transition-all text-white [&>svg]:hidden italic",
-                                                            isCompleted && "text-emerald-400 bg-emerald-950/20 ring-1 ring-emerald-500/30"
+                                                            "h-9 w-9 rounded-xl transition-all duration-500 border",
+                                                            isCompleted
+                                                                ? "bg-emerald-500 text-black border-emerald-400 hover:bg-emerald-400 shadow-[0_0_25px_rgba(16,185,129,0.5)] scale-110"
+                                                                : "bg-neutral-950 text-neutral-700 border-white/5 hover:border-red-600/30"
                                                         )}
                                                     >
-                                                        <SelectValue placeholder={historySet ? `${historySet.rpe}` : "-"} />
-                                                    </SelectTrigger>
-                                                    <SelectContent className="bg-neutral-900 border-white/10 text-white min-w-[60px] rounded-2xl backdrop-blur-3xl">
-                                                        {[10, 9, 8, 7, 6, 5].map((val) => (
-                                                            <SelectItem
-                                                                key={val}
-                                                                value={val.toString()}
-                                                                className="justify-center focus:bg-red-600 focus:text-white font-black italic"
-                                                            >
-                                                                {val}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
+                                                        <Check className={cn("w-4 h-4 transition-transform", isCompleted ? "scale-110" : "scale-100", isCompleted ? "text-black" : "text-neutral-600 hover:text-white")} />
+                                                    </Button>
+                                                </div>
                                             </div>
 
-                                            <div className="col-span-2 md:col-span-2 flex justify-center z-10">
+                                            {/* Inputs row */}
+                                            <div className="grid grid-cols-3 gap-2 md:contents z-10 w-full">
+                                                {/* Carga */}
+                                                <div className="md:col-span-2 relative">
+                                                    <div className="text-[9px] text-neutral-500 uppercase font-black tracking-widest mb-1.5 px-1 truncate md:hidden">Carga (kg)</div>
+                                                    <Input
+                                                        type="text"
+                                                        inputMode="decimal"
+                                                        placeholder={historySet ? `${historySet.weight}` : "-"}
+                                                        value={logSet?.weight}
+                                                        onChange={(e) => {
+                                                            const val = e.target.value.replace(",", ".");
+                                                            if (val === "" || /^\d*\.?\d*$/.test(val)) {
+                                                                updateSet(currentExerciseIndex, setIndex, "weight", val);
+                                                            }
+                                                        }}
+                                                        className={cn(
+                                                            "h-11 md:h-14 px-0 text-center text-base md:text-2xl font-black border-0 bg-neutral-950 rounded-xl focus:ring-2 focus:ring-white/10 transition-all placeholder:text-neutral-800 text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none italic shadow-inner w-full",
+                                                            isCompleted && "text-emerald-400 bg-emerald-950/20 ring-1 ring-emerald-500/30"
+                                                        )}
+                                                    />
+                                                </div>
+
+                                                {/* Reps */}
+                                                <div className="md:col-span-2 relative">
+                                                    <div className="text-[9px] text-neutral-500 uppercase font-black tracking-widest mb-1.5 px-1 truncate md:hidden">Reps</div>
+                                                    <Input
+                                                        type="text"
+                                                        inputMode="decimal"
+                                                        placeholder={historySet ? `${historySet.reps}` : "-"}
+                                                        value={logSet?.reps}
+                                                        onChange={(e) => {
+                                                            const val = e.target.value.replace(",", ".");
+                                                            if (val === "" || /^\d*\.?\d*$/.test(val)) {
+                                                                updateSet(currentExerciseIndex, setIndex, "reps", val);
+                                                            }
+                                                        }}
+                                                        className={cn(
+                                                            "h-14 md:h-14 px-0 text-center text-lg md:text-2xl font-black border-0 bg-neutral-950 rounded-xl focus:ring-2 focus:ring-white/10 transition-all placeholder:text-neutral-800 text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none italic shadow-inner w-full",
+                                                            isCompleted && "text-emerald-400 bg-emerald-950/20 ring-1 ring-emerald-500/30"
+                                                        )}
+                                                    />
+                                                </div>
+
+                                                {/* RPE */}
+                                                <div className="md:col-span-2 relative">
+                                                    <div className="text-[9px] text-neutral-500 uppercase font-black tracking-widest mb-1.5 px-1 truncate md:hidden">RPE</div>
+                                                    <Select
+                                                        value={logSet?.rpe?.toString() || ""}
+                                                        onValueChange={(val) => updateSet(currentExerciseIndex, setIndex, "rpe", val)}
+                                                    >
+                                                        <SelectTrigger
+                                                            className={cn(
+                                                                "h-11 md:h-14 w-full px-0 justify-center text-center text-base md:text-2xl font-black border-0 bg-neutral-950 rounded-xl focus:ring-2 focus:ring-white/10 transition-all text-white [&>svg]:hidden italic shadow-inner",
+                                                                isCompleted && "text-emerald-400 bg-emerald-950/20 ring-1 ring-emerald-500/30"
+                                                            )}
+                                                        >
+                                                            <SelectValue placeholder={historySet ? `${historySet.rpe}` : "-"} />
+                                                        </SelectTrigger>
+                                                        <SelectContent className="bg-neutral-900 border border-white/10 text-white min-w-[60px] rounded-2xl backdrop-blur-3xl shadow-2xl">
+                                                            {[10, 9, 8, 7, 6, 5].map((val) => (
+                                                                <SelectItem
+                                                                    key={val}
+                                                                    value={val.toString()}
+                                                                    className="justify-center focus:bg-red-600 focus:text-white font-black italic rounded-xl mx-1"
+                                                                >
+                                                                    {val}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                            </div>
+
+                                            {/* Status Button in Desktop (hidden in Mobile) */}
+                                            <div className="hidden md:col-span-2 md:flex justify-center z-10 md:ml-auto">
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
                                                     onClick={() => toggleSetComplete(currentExerciseIndex, setIndex)}
                                                     className={cn(
-                                                        "h-12 w-12 md:h-14 md:w-14 rounded-xl transition-all duration-500 border",
+                                                        "h-14 w-14 rounded-xl transition-all duration-500 border",
                                                         isCompleted
                                                             ? "bg-emerald-500 text-black border-emerald-400 hover:bg-emerald-400 shadow-[0_0_25px_rgba(16,185,129,0.5)] scale-110"
                                                             : "bg-neutral-950 text-neutral-700 border-white/5 hover:border-red-600/30 hover:text-white"
                                                     )}
                                                 >
-                                                    <Check className={cn("w-6 h-6 md:w-8 md:h-8 transition-transform", isCompleted ? "scale-110" : "scale-100")} />
+                                                    <Check className={cn("w-6 h-6 transition-transform", isCompleted ? "scale-110" : "scale-100")} />
                                                 </Button>
                                             </div>
                                         </div>
@@ -995,20 +1043,20 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
             )}
 
             {/* Navigation Footer */}
-            <div className="fixed bottom-0 left-0 right-0 p-6 bg-black/40 backdrop-blur-3xl border-t border-white/5 flex justify-between items-center gap-6 z-50 animate-in slide-in-from-bottom-full duration-700 shadow-[0_-20px_40px_rgba(0,0,0,0.5)]">
-                <div className="max-w-3xl mx-auto w-full flex justify-between items-center gap-6">
+            <div className="fixed bottom-0 left-0 right-0 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] md:pb-6 md:p-6 bg-black/80 backdrop-blur-3xl border-t border-white/10 flex justify-between items-center gap-6 z-40 animate-in slide-in-from-bottom-full duration-700 shadow-[0_-20px_40px_rgba(0,0,0,0.5)]">
+                <div className="max-w-3xl mx-auto w-full flex justify-between items-center gap-4 md:gap-6">
                     <Button
                         onClick={handlePrevExercise}
                         disabled={currentExerciseIndex === 0}
-                        className="h-14 w-14 md:h-16 md:w-16 rounded-2xl bg-neutral-900/50 border border-white/5 text-white hover:bg-white/10 disabled:opacity-20 transition-all shadow-xl group"
+                        className="h-12 w-12 md:h-16 md:w-16 rounded-2xl bg-neutral-900/50 border border-white/5 text-white hover:bg-white/10 disabled:opacity-20 transition-all shadow-xl group shrink-0"
                     >
-                        <ChevronLeft className="w-6 h-6 md:w-8 md:h-8 group-hover:-translate-x-1 transition-transform" />
+                        <ChevronLeft className="w-5 h-5 md:w-8 md:h-8 group-hover:-translate-x-1 transition-transform" />
                     </Button>
 
-                    <div className="flex-1 flex flex-col items-center justify-center gap-1">
-                        <span className="text-[9px] uppercase font-black text-neutral-500 tracking-[0.3em] italic">Ejercicio Actual</span>
+                    <div className="flex-1 flex flex-col items-center justify-center gap-0">
+                        <span className="text-[8px] md:text-[9px] uppercase font-black text-neutral-500 tracking-[0.2em] md:tracking-[0.3em] italic">Ejercicio</span>
                         <div className="flex items-center gap-3">
-                            <span className="text-2xl font-black text-white italic tracking-tighter">
+                            <span className="text-base md:text-2xl font-black text-white italic tracking-tighter">
                                 <span className="text-red-600">{currentExerciseIndex + 1}</span>
                                 <span className="text-neutral-700 mx-1">/</span>
                                 {mutableExercises.length}
@@ -1019,7 +1067,7 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                     <Button
                         onClick={handleNextExercise}
                         className={cn(
-                            "h-14 md:h-16 px-6 md:px-8 rounded-2xl font-black text-xs md:text-sm uppercase tracking-[0.2em] transition-all shadow-2xl active:scale-95 flex items-center gap-3",
+                            "h-12 md:h-16 px-4 md:px-8 rounded-2xl font-black text-[10px] md:text-sm uppercase tracking-[0.15em] md:tracking-[0.2em] transition-all shadow-2xl active:scale-95 flex items-center gap-2 md:gap-3 shrink-0",
                             currentExerciseIndex === mutableExercises.length - 1
                                 ? "bg-red-600 text-white hover:bg-red-500 shadow-red-900/40"
                                 : "bg-white text-black hover:bg-neutral-200 shadow-white/20"
@@ -1027,9 +1075,9 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                     >
                         <span>{currentExerciseIndex === mutableExercises.length - 1 ? "Finalizar" : "Siguiente"}</span>
                         {currentExerciseIndex === mutableExercises.length - 1 ? (
-                            <Trophy className="w-4 h-4 md:w-5 md:h-5" />
+                            <Trophy className="w-3.5 h-3.5 md:w-5 md:h-5" />
                         ) : (
-                            <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
+                            <ChevronRight className="w-3.5 h-3.5 md:w-5 md:h-5" />
                         )}
                     </Button>
                 </div>

@@ -79,34 +79,34 @@ export function AIAssistantDialog({
             )}
             <DialogContent className="bg-neutral-950 border-neutral-800 text-white sm:max-w-[500px]">
                 <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
+                    <DialogTitle className="flex items-center gap-2 text-base md:text-lg">
                         <Brain className="w-5 h-5 text-red-500" />
                         Asistente de Entrenamiento
                     </DialogTitle>
-                    <DialogDescription className="text-neutral-400">
+                    <DialogDescription className="text-[10px] md:text-sm text-neutral-400">
                         Pide ayuda a la IA para optimizar tu sesión en tiempo real.
                     </DialogDescription>
                 </DialogHeader>
 
                 <Tabs defaultValue="warmup" className="w-full mt-2">
-                    <TabsList className="grid w-full grid-cols-2 bg-neutral-900">
-                        <TabsTrigger value="warmup">Calentamiento</TabsTrigger>
-                        <TabsTrigger value="substitute">Sustituir Ejercicio</TabsTrigger>
+                    <TabsList className="grid w-full grid-cols-2 bg-neutral-900 h-auto p-1">
+                        <TabsTrigger value="warmup" className="text-[10px] md:text-sm py-2 uppercase tracking-widest font-black italic">Calentamiento</TabsTrigger>
+                        <TabsTrigger value="substitute" className="text-[10px] md:text-sm py-2 uppercase tracking-widest font-black italic">Sustituir</TabsTrigger>
                     </TabsList>
 
                     {/* WARMUP TAB */}
                     <TabsContent value="warmup" className="space-y-4 pt-4">
-                        <div className="bg-neutral-900/50 p-4 rounded-xl border border-neutral-800">
-                            <p className="text-sm text-neutral-300 mb-4">
+                        <div className="bg-neutral-900/50 p-3 md:p-4 rounded-xl border border-neutral-800">
+                            <p className="text-xs md:text-sm text-neutral-300 mb-4">
                                 Genera una rutina de activación específica para los músculos de hoy: <span className="text-white font-bold">{muscleGroups.join(", ")}</span>.
                             </p>
                             {!warmupRoutine ? (
                                 <Button
                                     onClick={handleGenerateWarmup}
                                     disabled={loading}
-                                    className="w-full bg-white text-black hover:bg-neutral-200"
+                                    className="w-full h-9 md:h-10 bg-white text-black hover:bg-neutral-200 text-[10px] md:text-sm font-black uppercase tracking-[0.15em] md:tracking-[0.2em]"
                                 >
-                                    {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Dumbbell className="w-4 h-4 mr-2" />}
+                                    {loading ? <Loader2 className="w-3.5 h-3.5 md:w-4 md:h-4 animate-spin mr-2" /> : <Dumbbell className="w-3.5 h-3.5 md:w-4 md:h-4 mr-2" />}
                                     Generar Calentamiento
                                 </Button>
                             ) : (
@@ -139,9 +139,9 @@ export function AIAssistantDialog({
                     <TabsContent value="substitute" className="space-y-4 pt-4">
                         <div className="space-y-4">
                             <div className="space-y-2">
-                                <Label>Ejercicio a reemplazar</Label>
+                                <Label className="text-[10px] md:text-sm font-black uppercase tracking-widest text-neutral-500">Ejercicio a reemplazar</Label>
                                 <Select onValueChange={setSubExercise} value={subExercise}>
-                                    <SelectTrigger className="bg-neutral-900 border-neutral-800 text-white">
+                                    <SelectTrigger className="h-9 md:h-10 bg-neutral-900 border-neutral-800 text-white text-xs md:text-sm">
                                         <SelectValue placeholder="Selecciona..." />
                                     </SelectTrigger>
                                     <SelectContent className="bg-neutral-900 border-neutral-800 text-white">
@@ -153,7 +153,7 @@ export function AIAssistantDialog({
                             </div>
 
                             <div className="space-y-2">
-                                <Label>Motivo</Label>
+                                <Label className="text-[10px] md:text-sm font-black uppercase tracking-widest text-neutral-500">Motivo</Label>
                                 <div className="grid grid-cols-3 gap-2">
                                     {[
                                         { id: 'busy', label: "Ocupado", icon: AlertTriangle },
@@ -164,12 +164,12 @@ export function AIAssistantDialog({
                                             key={reason.id}
                                             onClick={() => setSubReason(reason.id)}
                                             className={`
-                                                cursor-pointer rounded-lg border p-2 flex flex-col items-center gap-1 text-center transition-all
+                                                cursor-pointer rounded-lg border p-1.5 md:p-2 flex flex-col items-center gap-1 text-center transition-all
                                                 ${subReason === reason.id ? 'bg-red-900/30 border-red-500 text-white' : 'bg-neutral-900 border-neutral-800 text-neutral-500 hover:bg-neutral-800'}
                                             `}
                                         >
-                                            <reason.icon className="w-4 h-4" />
-                                            <span className="text-[10px] font-bold">{reason.label}</span>
+                                            <reason.icon className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                                            <span className="text-[9px] md:text-[10px] font-bold">{reason.label}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -179,9 +179,9 @@ export function AIAssistantDialog({
                                 <Button
                                     onClick={handleSubstitute}
                                     disabled={loading || !subExercise}
-                                    className="w-full bg-white text-black hover:bg-neutral-200"
+                                    className="w-full h-9 md:h-10 bg-white text-black hover:bg-neutral-200 text-[10px] md:text-sm font-black uppercase tracking-[0.15em] md:tracking-[0.2em]"
                                 >
-                                    {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
+                                    {loading ? <Loader2 className="w-3.5 h-3.5 md:w-4 md:h-4 animate-spin mr-2" /> : <Sparkles className="w-3.5 h-3.5 md:w-4 md:h-4 mr-2" />}
                                     Buscar Alternativas
                                 </Button>
                             ) : (
