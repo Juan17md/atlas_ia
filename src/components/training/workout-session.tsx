@@ -689,7 +689,7 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                                                                                 if (val !== null) updateSet(currentExerciseIndex, setIndex, "weight", val);
                                                                             }}
                                                                             className={cn(
-                                                                                "h-11 md:h-14 px-0 text-center text-base md:text-2xl font-black border-0 bg-neutral-950 rounded-xl focus:ring-2 focus:ring-white/10 transition-all placeholder:text-neutral-800 text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none italic shadow-inner w-full",
+                                                                                "h-14 md:h-14 px-0 text-center text-lg md:text-2xl font-black border-0 bg-neutral-950 rounded-xl focus:ring-2 focus:ring-white/10 transition-all placeholder:text-neutral-800 text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none italic shadow-inner w-full",
                                                                                 isCompleted && "text-emerald-400 bg-emerald-950/20 ring-1 ring-emerald-500/30"
                                                                             )}
                                                                         />
@@ -721,7 +721,7 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                                                                         >
                                                                             <SelectTrigger
                                                                                 className={cn(
-                                                                                    "h-11 md:h-14 w-full px-0 justify-center text-center text-base md:text-2xl font-black border-0 bg-neutral-950 rounded-xl focus:ring-2 focus:ring-white/10 transition-all text-white [&>svg]:hidden italic shadow-inner",
+                                                                                    "h-14 md:h-14 w-full px-0 justify-center text-center text-lg md:text-2xl font-black border-0 bg-neutral-950 rounded-xl focus:ring-2 focus:ring-white/10 transition-all text-white [&>svg]:hidden italic shadow-inner",
                                                                                     isCompleted && "text-emerald-400 bg-emerald-950/20 ring-1 ring-emerald-500/30"
                                                                                 )}
                                                                             >
@@ -771,7 +771,7 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                                                         placeholder="Añadir observaciones técnicas..."
                                                         value={currentLogExercise.feedback}
                                                         onChange={(e) => updateFeedback(e.target.value)}
-                                                        className="bg-neutral-950/50 border border-white/5 rounded-2xl px-6 py-8 text-sm text-neutral-300 focus-visible:ring-1 focus-visible:ring-red-600/50 placeholder:text-neutral-700 transition-all"
+                                                        className="h-14 bg-neutral-950/50 border border-white/5 rounded-2xl px-6 text-sm text-neutral-300 focus-visible:ring-1 focus-visible:ring-red-600/50 placeholder:text-neutral-700 transition-all font-black italic tracking-tight"
                                                     />
                                                 </div>
                                             </div>
