@@ -13,7 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { MediaUpload } from "@/components/ui/media-upload";
-import { Loader2, Dumbbell, Tag, ImagePlay, Search, Eraser, Activity } from "lucide-react";
+import { Loader2, Dumbbell, Tag, ImagePlay, Search, Eraser, Activity, ChevronRight, ChevronLeft, Sparkles, Youtube, Check, ExternalLink as ExternalLinkIcon } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -57,10 +58,13 @@ interface ExerciseFormDialogProps {
 }
 
 export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: ExerciseFormDialogProps) {
+    const [step, setStep] = useState(1);
     const [isInternalOpen, setIsInternalOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
     const router = useRouter();
+
+    const TOTAL_STEPS = 4;
 
     // Controlado externa o internamente
     const isOpen = open !== undefined ? open : isInternalOpen;
@@ -87,6 +91,7 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
     // Efecto para actualizar el formulario si cambia el ejercicio o se abre el diálogo
     useEffect(() => {
         if (isOpen) {
+            setStep(1); // Reset to step 1 on open
             if (exercise) {
                 reset({
                     name: exercise.name,
@@ -150,14 +155,19 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
         try {
             const result = await generateExerciseDetails(name);
             if (result.success && result.data) {
-                // Actualizar campos
+                // Actualizar solo músculos según feedback del usuario
                 if (result.data.muscleGroups && Array.isArray(result.data.muscleGroups)) {
                     setValue("muscleGroups", result.data.muscleGroups);
                 }
                 if (result.data.specificMuscles && Array.isArray(result.data.specificMuscles)) {
                     setValue("specificMuscles", result.data.specificMuscles);
                 }
-                toast.success("Datos cargados con IA");
+                toast.success("Músculos identificados con IA");
+                
+                // Si estamos en el paso 1, sugerir avanzar al paso 2
+                if (step === 1) {
+                    setTimeout(() => setStep(2), 800);
+                }
             } else {
                 toast.error("No se pudieron encontrar detalles para este ejercicio");
             }
@@ -177,225 +187,275 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
     return (
         <Dialog open={isOpen} onOpenChange={setOpen}>
             {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-            <DialogContent className="sm:max-w-[650px] bg-neutral-950 border-neutral-800 text-white p-0 gap-0 rounded-3xl shadow-2xl shadow-black/50 max-h-[95vh] flex flex-col">
-
-                {/* Header Estilizado */}
-                <div className="bg-linear-to-br from-neutral-900 via-neutral-950 to-black p-6 md:p-8 border-b border-white/5 relative overflow-hidden">
+            <DialogContent className="sm:max-w-[650px] bg-neutral-950 border-neutral-800 text-white p-0 gap-0 sm:rounded-3xl shadow-2xl shadow-black/50 h-full sm:h-[95vh] sm:max-h-[850px] flex flex-col border-0 sm:border">
+                {/* Header Estilizado con Progress Bar */}
+                <div className="bg-linear-to-br from-neutral-900 via-neutral-950 to-black p-5 md:p-8 border-b border-white/5 relative overflow-hidden shrink-0">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+                    
                     <DialogHeader className="relative z-10">
-                        <DialogTitle className="flex items-center gap-3 md:gap-4 text-2xl md:text-3xl font-black uppercase tracking-tighter italic text-white">
-                            <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-red-600/10 flex items-center justify-center border border-red-600/20 shadow-2xl">
-                                <Dumbbell className="h-5 w-5 md:h-6 md:w-6 text-red-600" />
+                        <div className="flex justify-between items-center mb-4 md:mb-6">
+                            <DialogTitle className="flex items-center gap-3 md:gap-4 text-xl md:text-3xl font-black uppercase tracking-tighter italic text-white leading-none">
+                                <div className="h-8 w-8 md:h-12 md:w-12 rounded-lg md:rounded-2xl bg-red-600/10 flex items-center justify-center border border-red-600/20 shadow-2xl">
+                                    <Dumbbell className="h-4 w-4 md:h-6 md:w-6 text-red-600" />
+                                </div>
+                                {exercise ? "Editar Ejercicio" : "Nuevo Ejercicio"}
+                            </DialogTitle>
+                            
+                            <div className="flex items-center gap-1.5 md:gap-2">
+                                {[1, 2, 3, 4].map((i) => (
+                                    <div 
+                                        key={i} 
+                                        className={cn(
+                                            "h-1.5 transition-all duration-500 rounded-full",
+                                            step === i ? "w-6 bg-red-600" : step > i ? "w-2 bg-red-600/40" : "w-2 bg-neutral-800"
+                                        )}
+                                    />
+                                ))}
                             </div>
-                            {exercise ? "Editar Ejercicio" : "Nuevo Ejercicio"}
-                        </DialogTitle>
-                        <DialogDescription className="text-neutral-500 font-bold uppercase tracking-[0.2em] text-[8px] md:text-[10px] ml-13 md:ml-16 mt-1">
-                            Biblioteca Técnica <span className="text-red-500">/ Engine AI</span>
-                        </DialogDescription>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                            <span className="text-[10px] md:text-xs font-black text-red-500 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20 italic">PASO {step}</span>
+                            <DialogDescription className="text-neutral-500 font-bold uppercase tracking-widest text-[8px] md:text-[10px]">
+                                {step === 1 && "Identificación Técnica"}
+                                {step === 2 && "Arquitectura Muscular"}
+                                {step === 3 && "Objetivos Específicos"}
+                                {step === 4 && "Media & Referencias"}
+                            </DialogDescription>
+                        </div>
                     </DialogHeader>
                 </div>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col overflow-hidden">
-                    <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-10 max-h-[65vh] scrollbar-hide">
-                        <div className="space-y-8">
-                            {/* Nombre */}
-                            <div className="space-y-4">
-                                <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 ml-1">Identificador Técnico</Label>
-                                <div className="flex gap-3">
-                                    <Input
-                                        {...register("name")}
-                                        placeholder="Ej: Press de Banca"
-                                        className="bg-neutral-900/40 backdrop-blur-md border border-white/5 text-white h-14 md:h-16 rounded-xl md:rounded-2xl px-4 md:px-6 text-base md:text-lg font-black uppercase italic tracking-tight focus-visible:ring-red-600/30 focus-visible:border-red-600/50 transition-all placeholder:text-neutral-700 placeholder:not-italic flex-1 shadow-2xl"
-                                    />
-                                    <Button
-                                        type="button"
-                                        onClick={handleSearch}
-                                        disabled={isSearching || isSubmitting}
-                                        className="h-14 w-14 md:h-16 md:w-16 rounded-xl md:rounded-2xl bg-neutral-900 border border-white/5 hover:bg-neutral-800 text-white transition-all shadow-xl group shrink-0"
-                                        title="Buscar detalles con IA"
-                                    >
-                                        {isSearching ? <Loader2 className="w-5 h-5 md:w-6 md:h-6 animate-spin" /> : <Search className="w-5 h-5 md:w-6 md:h-6 group-hover:scale-110 transition-transform text-red-500" />}
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        onClick={handleClear}
-                                        disabled={isSearching || isSubmitting}
-                                        variant="outline"
-                                        className="h-14 w-14 md:h-16 md:w-16 rounded-xl md:rounded-2xl border-white/5 bg-neutral-900/20 hover:bg-neutral-800 text-neutral-500 hover:text-white transition-all shadow-xl shrink-0"
-                                        title="Limpiar datos de músculos"
-                                    >
-                                        <Eraser className="w-5 h-5 md:w-6 md:h-6" />
-                                    </Button>
-                                </div>
-                                {errors.name && <p className="text-red-500 text-[10px] font-black uppercase tracking-widest ml-2">{errors.name.message}</p>}
-                            </div>
-
-                            {/* Tags Muscles */}
-                            <div className="space-y-4">
-                                <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 ml-1 flex items-center gap-2">
-                                    <Tag className="w-3 h-3 text-red-500" /> Grupos Musculares Primarios
-                                </Label>
-                                <div className="flex flex-wrap gap-2 p-4 md:p-6 bg-black/40 backdrop-blur-md rounded-3xl md:rounded-4xl border border-white/5 shadow-inner">
-                                    {MUSCLE_GROUPS.map(group => {
-                                        const isSelected = selectedGroups?.includes(group);
-                                        return (
-                                            <div
-                                                key={group}
-                                                onClick={() => toggleMuscleGroup(group)}
-                                                className={cn(
-                                                    "px-3.5 md:px-5 py-2 md:py-2.5 rounded-lg md:rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-[0.15em] cursor-pointer transition-all border select-none shadow-sm",
-                                                    isSelected
-                                                        ? "bg-red-600 text-white border-red-500 shadow-xl shadow-red-900/40 -translate-y-0.5"
-                                                        : "bg-neutral-900/50 border-white/5 text-neutral-500 hover:bg-neutral-800 hover:text-white"
-                                                )}
-                                            >
-                                                {group}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                                {errors.muscleGroups && <p className="text-red-500 text-[10px] font-black uppercase tracking-widest ml-2">{errors.muscleGroups.message}</p>}
-                            </div>
-
-                            {/* Músculos Específicos */}
-                            <div className="space-y-4">
-                                <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 ml-1 flex items-center gap-2">
-                                    <Activity className="w-3 h-3 text-red-500" /> Músculos Específicos (Target)
-                                </Label>
-                                {selectedGroups && selectedGroups.length > 0 ? (
-                                    <div className="flex flex-wrap gap-2.5 p-6 bg-black/20 rounded-4xl border border-white/5 border-dashed">
-                                        {Array.from(new Set(selectedGroups.flatMap(group => SPECIFIC_MUSCLES_BY_GROUP[group] || []))).map(muscle => {
-                                            const isSelected = watch("specificMuscles")?.includes(muscle);
-                                            return (
-                                                <div
-                                                    key={muscle}
-                                                    onClick={() => {
-                                                        const current = watch("specificMuscles") || [];
-                                                        if (current.includes(muscle)) {
-                                                            setValue("specificMuscles", current.filter(m => m !== muscle));
-                                                        } else {
-                                                            setValue("specificMuscles", [...current, muscle]);
-                                                        }
-                                                    }}
-                                                    className={cn(
-                                                        "px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider cursor-pointer transition-all border select-none",
-                                                        isSelected
-                                                            ? "bg-red-600/10 text-red-500 border-red-500/30 shadow-lg shadow-red-900/10"
-                                                            : "bg-neutral-900/30 border-white/5 text-neutral-600 hover:bg-neutral-800 hover:text-white"
-                                                    )}
-                                                >
-                                                    {muscle}
+                <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 overflow-hidden">
+                    <div className="flex-1 overflow-y-auto p-5 md:p-10 scrollbar-hide">
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={step}
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                transition={{ duration: 0.3, ease: "easeOut" }}
+                                className="space-y-8"
+                            >
+                                {step === 1 && (
+                                    <div className="space-y-6">
+                                        <div className="space-y-4">
+                                            <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-500 ml-1">Nombre del Ejercicio</Label>
+                                            <div className="relative group">
+                                                <Input
+                                                    {...register("name")}
+                                                    placeholder="Ej: Press de Banca"
+                                                    className="bg-neutral-900/40 backdrop-blur-md border border-white/5 text-white h-14 md:h-20 rounded-xl md:rounded-3xl px-6 text-lg md:text-2xl font-black uppercase italic tracking-tight focus-visible:ring-red-600/30 focus-visible:border-red-600/50 transition-all placeholder:text-neutral-800 placeholder:not-italic shadow-2xl"
+                                                />
+                                                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex gap-2">
+                                                    <Button
+                                                        type="button"
+                                                        onClick={handleSearch}
+                                                        disabled={isSearching || isSubmitting}
+                                                        className={cn(
+                                                            "h-10 w-10 md:h-14 md:w-14 rounded-lg md:rounded-2xl transition-all shadow-xl group border relative overflow-hidden",
+                                                            isSearching ? "bg-neutral-800 border-white/5" : "bg-red-600 border-red-500 hover:bg-red-700 hover:scale-105 active:scale-95"
+                                                        )}
+                                                    >
+                                                        {isSearching ? (
+                                                            <Loader2 className="w-5 h-5 animate-spin text-red-500" />
+                                                        ) : (
+                                                            <>
+                                                                <div className="absolute inset-0 bg-linear-to-tr from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                                <Sparkles className="w-5 h-5 text-white animate-pulse" />
+                                                            </>
+                                                        )}
+                                                    </Button>
                                                 </div>
-                                            );
-                                        })}
-                                        {Array.from(new Set(selectedGroups.flatMap(group => SPECIFIC_MUSCLES_BY_GROUP[group] || []))).length === 0 && (
-                                            <p className="text-neutral-600 text-[10px] font-black uppercase tracking-widest italic opacity-50">No hay mapeo específico disponible</p>
-                                        )}
-                                    </div>
-                                ) : (
-                                    <div className="p-10 bg-black/20 rounded-4xl border border-white/5 border-dashed flex flex-col items-center justify-center text-neutral-700 gap-3 grayscale opacity-50">
-                                        <Activity className="w-8 h-8 opacity-20" />
-                                        <p className="text-[10px] font-black uppercase tracking-[0.3em]">Pendiente de Definición</p>
+                                            </div>
+                                            {errors.name && <p className="text-red-500 text-[10px] font-black uppercase tracking-widest ml-2">{errors.name.message}</p>}
+                                        </div>
+
+                                        <div className="p-6 bg-red-600/5 border border-red-600/10 rounded-2xl md:rounded-3xl space-y-3">
+                                            <div className="flex items-center gap-2 text-red-500">
+                                                <Sparkles className="w-4 h-4" />
+                                                <span className="text-[10px] font-black uppercase tracking-widest leading-none">Asistente Maestro</span>
+                                            </div>
+                                            <p className="text-[11px] md:text-xs text-neutral-400 font-medium leading-relaxed">
+                                                Escribe el nombre y usa el botón mágico para que la IA identifique automáticamente los <span className="text-white font-bold italic">grupos musculares</span> involucrados.
+                                            </p>
+                                        </div>
                                     </div>
                                 )}
-                            </div>
 
-                            {/* Multimedia */}
-                            <div className="space-y-4">
-                                <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 ml-1 flex items-center gap-2">
-                                    <ImagePlay className="w-3 h-3 text-red-500" /> Multimedia & Referencia
-                                </Label>
-
-                                <div className="p-6 md:p-8 bg-black/40 backdrop-blur-md rounded-3xl md:rounded-4xl border border-white/5 shadow-inner space-y-6">
-                                    <MediaUpload
-                                        value={watch("videoUrl") || ""}
-                                        onChange={(url) => setValue("videoUrl", url)}
-                                        onClear={() => setValue("videoUrl", "")}
-                                        disabled={isSubmitting}
-                                    />
-
-                                    <div className="relative group">
-                                        <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                                            <ExternalLink className="w-4 h-4 text-neutral-600 group-focus-within:text-red-500 transition-colors" />
+                                {step === 2 && (
+                                    <div className="space-y-6">
+                                        <div className="flex items-center justify-between px-1">
+                                            <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-500 flex items-center gap-2">
+                                                <Tag className="w-3 h-3 text-red-500" /> Grupos Musculares Primarios
+                                            </Label>
+                                            <Button 
+                                                type="button" 
+                                                variant="ghost" 
+                                                size="sm"
+                                                onClick={handleClear}
+                                                className="h-8 text-[9px] font-black uppercase tracking-widest text-neutral-600 hover:text-white"
+                                            >
+                                                <Eraser className="w-3 h-3 mr-2" /> Limpiar
+                                            </Button>
                                         </div>
-                                        <Input
-                                            {...register("videoUrl")}
-                                            placeholder="URL de referencia (YouTube...)"
-                                            className="bg-neutral-950/50 border border-white/5 text-white h-12 md:h-14 pl-12 rounded-xl md:rounded-2xl focus-visible:ring-red-600/20 focus-visible:border-red-600/30 transition-all font-medium text-[10px] md:text-xs placeholder:text-neutral-700"
-                                        />
+                                        <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 p-4 md:p-6 bg-black/40 backdrop-blur-md rounded-2xl md:rounded-3xl border border-white/5 shadow-inner">
+                                            {MUSCLE_GROUPS.map(group => {
+                                                const isSelected = selectedGroups?.includes(group);
+                                                return (
+                                                    <div
+                                                        key={group}
+                                                        onClick={() => toggleMuscleGroup(group)}
+                                                        className={cn(
+                                                            "px-3 py-3 rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-widest cursor-pointer transition-all border select-none text-center relative overflow-hidden",
+                                                            isSelected
+                                                                ? "bg-red-600 text-white border-red-500 shadow-lg shadow-red-900/30 scale-[1.02] z-10"
+                                                                : "bg-neutral-900/50 border-white/5 text-neutral-500 hover:bg-neutral-800 hover:text-white"
+                                                        )}
+                                                    >
+                                                        {isSelected && <Check className="absolute right-1.5 top-1.5 w-3 h-3 text-white/50" />}
+                                                        {group}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                        {errors.muscleGroups && <p className="text-red-500 text-[10px] font-black uppercase tracking-widest ml-2">{errors.muscleGroups.message}</p>}
                                     </div>
-                                </div>
-                            </div>
-                        </div>
+                                )}
+
+                                {step === 3 && (
+                                    <div className="space-y-6">
+                                        <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-500 ml-1 flex items-center gap-2">
+                                            <Activity className="w-3 h-3 text-red-500" /> Músculos Específicos (Target)
+                                        </Label>
+                                        {selectedGroups && selectedGroups.length > 0 ? (
+                                            <div className="flex flex-wrap gap-2 p-6 bg-black/20 rounded-3xl md:rounded-4xl border border-white/5 border-dashed min-h-[150px] content-start">
+                                                {Array.from(new Set(selectedGroups.flatMap(group => SPECIFIC_MUSCLES_BY_GROUP[group] || []))).map(muscle => {
+                                                    const isSelected = watch("specificMuscles")?.includes(muscle);
+                                                    return (
+                                                        <div
+                                                            key={muscle}
+                                                            onClick={() => {
+                                                                const current = watch("specificMuscles") || [];
+                                                                if (current.includes(muscle)) {
+                                                                    setValue("specificMuscles", current.filter(m => m !== muscle));
+                                                                } else {
+                                                                    setValue("specificMuscles", [...current, muscle]);
+                                                                }
+                                                            }}
+                                                            className={cn(
+                                                                "px-3.5 py-2 rounded-lg text-[9px] font-bold uppercase tracking-widest cursor-pointer transition-all border select-none",
+                                                                isSelected
+                                                                    ? "bg-red-600/20 text-red-500 border-red-500/40 shadow-sm shadow-red-900/5"
+                                                                    : "bg-neutral-900/30 border-white/5 text-neutral-600 hover:bg-neutral-800 hover:text-white"
+                                                            )}
+                                                        >
+                                                            {muscle}
+                                                        </div>
+                                                    );
+                                                })}
+                                                {Array.from(new Set(selectedGroups.flatMap(group => SPECIFIC_MUSCLES_BY_GROUP[group] || []))).length === 0 && (
+                                                    <div className="w-full flex flex-col items-center justify-center p-10 text-neutral-700 gap-2 opacity-50">
+                                                        <Activity className="w-6 h-6" />
+                                                        <p className="text-[9px] font-black uppercase tracking-widest">Sin mapeo disponible</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <div className="p-12 bg-black/20 rounded-3xl md:rounded-4xl border border-white/5 border-dashed flex flex-col items-center justify-center text-neutral-800 gap-4 grayscale opacity-50">
+                                                <Activity className="w-10 h-10 opacity-10" />
+                                                <p className="text-[10px] font-black uppercase tracking-widest">Define Grupos Primero</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {step === 4 && (
+                                    <div className="space-y-6">
+                                        <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-500 ml-1 flex items-center gap-2">
+                                            <ImagePlay className="w-3 h-3 text-red-500" /> Multimedia & Referencias
+                                        </Label>
+
+                                        <div className="p-5 md:p-8 bg-black/40 backdrop-blur-md rounded-2xl md:rounded-3xl border border-white/5 shadow-inner space-y-6">
+                                            <div className="space-y-4">
+                                                <Label className="text-[9px] font-black uppercase tracking-widest text-neutral-600 ml-1">Video Demo</Label>
+                                                <MediaUpload
+                                                    value={watch("videoUrl") || ""}
+                                                    onChange={(url) => setValue("videoUrl", url)}
+                                                    onClear={() => setValue("videoUrl", "")}
+                                                    disabled={isSubmitting}
+                                                />
+                                            </div>
+
+                                            <div className="space-y-4">
+                                                <Label className="text-[9px] font-black uppercase tracking-widest text-neutral-600 ml-1">Enlace Externo</Label>
+                                                <div className="relative group">
+                                                    <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                                                        <Youtube className="w-4 h-4 text-neutral-700 group-focus-within:text-red-500 transition-colors" />
+                                                    </div>
+                                                    <Input
+                                                        {...register("videoUrl")}
+                                                        placeholder="URL de YouTube, Vimeo..."
+                                                        className="bg-neutral-950/50 border border-white/5 text-white h-12 md:h-14 pl-12 rounded-xl focus-visible:ring-red-600/20 focus-visible:border-red-600/30 transition-all font-medium text-[10px] placeholder:text-neutral-800"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </motion.div>
+                        </AnimatePresence>
                     </div>
 
-                    <DialogFooter className="p-6 md:p-8 border-t border-white/5 gap-3 md:gap-4 bg-black/60 backdrop-blur-2xl flex-row">
+                    <DialogFooter className={cn(
+                        "p-5 md:p-8 border-t border-white/5 gap-3 md:gap-4 bg-black/80 backdrop-blur-3xl flex-row shrink-0",
+                        "sticky bottom-0 left-0 right-0 z-50"
+                    )}>
                         <Button
                             type="button"
                             variant="ghost"
-                            onClick={() => setOpen(false)}
-                            className="h-14 md:h-16 rounded-xl md:rounded-2xl text-neutral-500 hover:text-white hover:bg-white/5 font-black uppercase tracking-[0.2em] text-[9px] md:text-[10px] px-4 md:px-8 transition-all flex-1 md:flex-none"
+                            onClick={() => {
+                                if (step > 1) setStep(step - 1);
+                                else setOpen(false);
+                            }}
+                            className="h-14 md:h-16 rounded-xl md:rounded-2xl text-neutral-500 hover:text-white hover:bg-white/5 font-black uppercase tracking-widest text-[10px] px-6 transition-all border border-white/5 flex-1 md:flex-none"
                         >
-                            Cancelar
-                        </Button>
-                        <Button
-                            type="submit"
-                            disabled={isSubmitting}
-                            className="h-14 md:h-16 rounded-xl md:rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-[0.2em] text-[9px] md:text-[10px] px-6 md:px-10 shadow-2xl shadow-red-900/40 hover:shadow-red-600/40 hover:-translate-y-1 transition-all duration-500 flex-2 md:flex-none"
-                        >
-                            {isSubmitting ? (
-                                <Loader2 className="w-5 h-5 animate-spin" />
-                            ) : (
-                                <span className="flex items-center gap-2 md:gap-3">
-                                    {exercise ? "Actualizar" : "Publicar"}
-                                    <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
+                            {step === 1 ? "Cerrar" : (
+                                <span className="flex items-center gap-2">
+                                    <ChevronLeft className="w-4 h-4" /> Atrás
                                 </span>
                             )}
                         </Button>
+                        
+                        {step < TOTAL_STEPS ? (
+                            <Button
+                                type="button"
+                                onClick={() => setStep(step + 1)}
+                                className="h-14 md:h-16 rounded-xl md:rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest text-[10px] px-8 shadow-xl shadow-red-900/40 hover:-translate-y-1 transition-all duration-300 flex-2 md:flex-none"
+                            >
+                                <span className="flex items-center gap-2">
+                                    Siguiente <ChevronRight className="w-4 h-4" />
+                                </span>
+                            </Button>
+                        ) : (
+                            <Button
+                                type="submit"
+                                disabled={isSubmitting}
+                                className="h-14 md:h-16 rounded-xl md:rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest text-[10px] px-8 shadow-2xl shadow-red-900/60 hover:-translate-y-1 transition-all duration-500 flex-2 md:flex-none animate-pulse"
+                            >
+                                {isSubmitting ? (
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                ) : (
+                                    <span className="flex items-center gap-2">
+                                        {exercise ? "Actualizar" : "Publicar"}
+                                        <Check className="w-4 h-4" />
+                                    </span>
+                                )}
+                            </Button>
+                        )}
                     </DialogFooter>
                 </form>
             </DialogContent>
         </Dialog>
-    );
-}
-
-// Helper icons for the footer and labels
-function ExternalLink(props: any) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-            <polyline points="15 3 21 3 21 9" />
-            <line x1="10" y1="14" x2="21" y2="3" />
-        </svg>
-    );
-}
-
-function ChevronRight(props: any) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="m9 18 6-6-6-6" />
-        </svg>
     );
 }

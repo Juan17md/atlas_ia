@@ -7,7 +7,7 @@ import { generateRoutineDescription } from "@/actions/ai-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Plus, Trash2, Wand2, Sparkles, Save, ArrowLeft, Check, ChevronsUpDown, Dumbbell, CalendarDays, Clock, Copy, Activity } from "lucide-react";
+import { Loader2, Plus, Trash2, Wand2, Sparkles, Save, ArrowLeft, Check, ChevronsUpDown, Dumbbell, CalendarDays, Clock, Copy, Activity, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -129,7 +129,7 @@ function AIGenerator({ onGenerate, currentType }: { onGenerate: (routine: AIRout
                             </div>
                             <span>Inteligencia <span className="text-neutral-500">Generativa</span></span>
                         </DialogTitle>
-                        <DialogDescription className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 mt-4 italic">
+                        <DialogDescription className="text-[10px] font-black uppercase tracking-widest text-neutral-500 mt-4 italic">
                             Configuración Técnica de Parámetros de Entrenamiento
                         </DialogDescription>
                     </DialogHeader>
@@ -195,14 +195,14 @@ function AIGenerator({ onGenerate, currentType }: { onGenerate: (routine: AIRout
                                 placeholder="DESCRIBE TU ENFOQUE PERSONALIZADO..."
                                 value={criteria.userPrompt}
                                 onChange={(e) => setCriteria({ ...criteria, userPrompt: e.target.value })}
-                                className="bg-neutral-900/50 border border-white/5 rounded-4xl min-h-[120px] p-6 text-[10px] font-black text-white focus:ring-1 focus:ring-red-500/50 transition-all resize-none uppercase placeholder:text-neutral-700 italic tracking-[0.2em] leading-relaxed"
+                                className="bg-neutral-900/50 border border-white/5 rounded-4xl min-h-[120px] p-6 text-[10px] font-black text-white focus:ring-1 focus:ring-red-500/50 transition-all resize-none uppercase placeholder:text-neutral-700 italic tracking-widest leading-relaxed"
                             />
                         </div>
 
                         <Button
                             onClick={handleGenerate}
                             disabled={loading}
-                            className="w-full h-16 bg-white text-black hover:bg-neutral-200 font-black uppercase italic tracking-[0.3em] text-[10px] rounded-2xl shadow-2xl transition-all shadow-white/5 hover:-translate-y-1"
+                            className="w-full h-16 bg-white text-black hover:bg-neutral-200 font-black uppercase italic tracking-widest text-[10px] rounded-2xl shadow-2xl transition-all shadow-white/5 hover:-translate-y-1"
                         >
                             {loading ? <Loader2 className="w-5 h-5 animate-spin mr-3" /> : <Sparkles className="w-5 h-5 mr-3" />}
                             Iniciar Generación de Datos
@@ -301,6 +301,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
     const [isSaving, setIsSaving] = useState(false);
     const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
     const [activeDayIndex, setActiveDayIndex] = useState(initialDayIndex);
+    const [step, setStep] = useState(1);
 
     const DRAFT_KEY = "gymia-routine-draft";
 
@@ -401,27 +402,34 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
         setValue("schedule", updatedSchedule);
     };
 
-    const removeExercise = (dayIndex: number, exIndex: number) => {
+    const updateDayExercises = (dayIndex: number, exercises: any[]) => {
         const updatedSchedule = [...schedule];
-        updatedSchedule[dayIndex].exercises.splice(exIndex, 1);
-        setValue("schedule", updatedSchedule);
+        if (updatedSchedule[dayIndex]) {
+            updatedSchedule[dayIndex].exercises = exercises;
+            setValue("schedule", updatedSchedule);
+        }
     };
 
-    const updateExerciseField = (dayIndex: number, exIndex: number, field: string, value: string | ExerciseSet[]) => {
+    const updateExerciseField = (dayIndex: number, exIndex: number, field: string, value: string | any[]) => {
         const updatedSchedule = [...schedule];
-        // If updating name via Combobox, we might find the matching exercise ID
-        if (field === 'exerciseName') {
-            const found = availableExercises.find(ex => ex.name === value);
-            if (found) {
-                updatedSchedule[dayIndex].exercises[exIndex].exerciseId = found.id;
+        if (updatedSchedule[dayIndex] && updatedSchedule[dayIndex].exercises[exIndex]) {
+            if (field === 'exerciseName') {
+                const found = (availableExercises as any[]).find(ex => ex.name === value);
+                if (found) {
+                    updatedSchedule[dayIndex].exercises[exIndex].exerciseId = found.id;
+                }
             }
+            (updatedSchedule[dayIndex].exercises[exIndex] as any)[field] = value;
+            setValue("schedule", updatedSchedule);
         }
+    };
 
-        updatedSchedule[dayIndex].exercises[exIndex] = {
-            ...updatedSchedule[dayIndex].exercises[exIndex],
-            [field]: value
-        };
-        setValue("schedule", updatedSchedule);
+    const removeExercise = (dayIndex: number, exIndex: number) => {
+        const updatedSchedule = [...schedule];
+        if (updatedSchedule[dayIndex] && updatedSchedule[dayIndex].exercises) {
+            updatedSchedule[dayIndex].exercises.splice(exIndex, 1);
+            setValue("schedule", updatedSchedule);
+        }
     };
 
     const handleGenerateDescription = async () => {
@@ -530,590 +538,485 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
 
     const [isVariantMode, setIsVariantMode] = useState(false);
 
+    // Wizard Logic
+    const totalSteps = routineType === "daily" ? 3 : 4;
+    
+    const nextStep = () => {
+        if (step === 1 && !formData.name) {
+            toast.error("El nombre de la rutina es obligatorio");
+            return;
+        }
+        let next = step + 1;
+        if (routineType === "daily" && next === 2) next = 3; // Saltamos el calendario si es diaria
+        if (next <= 4) setStep(next);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    const prevStep = () => {
+        let prev = step - 1;
+        if (routineType === "daily" && prev === 2) prev = 1;
+        if (prev >= 1) setStep(prev);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
     return (
-        <div className="container mx-auto max-w-7xl pb-40 px-4 md:px-6 relative">
+        <div className="container mx-auto max-w-7xl px-0 md:px-6 relative flex flex-col h-dvh md:h-auto md:min-h-screen bg-black overflow-hidden">
             {/* Ambient Lighting */}
             <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-red-600/5 rounded-full blur-[100px] -z-10 animate-pulse pointer-events-none" />
 
-            {/* Header / Breadcrumbs */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-16 pt-10">
-                <div className="flex items-center gap-6">
-                    <Button
-                        variant="link"
-                        onClick={() => router.back()}
-                        className="h-14 w-14 rounded-2xl bg-neutral-900/40 backdrop-blur-3xl border border-white/5 text-neutral-500 hover:text-white hover:border-white/10 transition-all flex items-center justify-center p-0"
-                    >
-                        <ArrowLeft className="w-6 h-6" />
-                    </Button>
-                    <div className="space-y-1">
-                        <h1 className="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter italic leading-none">
-                            {isEditing ? "Editar" : "Crear"} <span className="text-neutral-500">Rutina</span>
-                        </h1>
+            {/* Header / Editor Toolbar */}
+            <div className="px-4 md:px-0 pt-6 md:pt-10 pb-4 md:pb-8 flex flex-col gap-4 bg-black/80 backdrop-blur-xl z-20 shrink-0 border-b border-white/5">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <Button
+                            variant="link"
+                            onClick={() => router.back()}
+                            className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-neutral-900/80 border border-white/5 text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all flex items-center justify-center p-0"
+                        >
+                            <ArrowLeft className="w-5 h-5" />
+                        </Button>
+                        <div>
+                            <h1 className="text-xl md:text-3xl font-black text-white uppercase tracking-tighter italic leading-none">
+                                {isEditing ? "Editar" : "Crear"} <span className="text-neutral-500">Rutina</span>
+                            </h1>
+                            <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest mt-1">
+                                Paso {step} de {totalSteps}
+                            </p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        {step === 1 && (
+                            <AIGenerator onGenerate={onAIResult} currentType={watch("type") as "weekly" | "daily"} />
+                        )}
+                        <RoutineImporter routines={availableRoutines} onImport={onAIResult} />
                     </div>
                 </div>
-                <div className="flex flex-wrap gap-4 items-center">
-                    <RoutineSafetyCheck routine={watch()} athleteId={athleteId} />
-                    <RoutineImporter routines={availableRoutines} onImport={onAIResult} />
-                    <AIGenerator onGenerate={onAIResult} currentType={watch("type") as "weekly" | "daily"} />
-                    <Button
-                        onClick={handleSubmit(onSubmit)}
-                        disabled={isSaving}
-                        className="h-14 px-10 bg-white text-black hover:bg-neutral-200 font-black uppercase italic tracking-widest text-[10px] rounded-2xl shadow-2xl transition-all shadow-white/5 hover:-translate-y-1"
-                    >
-                        {isSaving ? <Loader2 className="w-4 h-4 animate-spin mr-3" /> : <Save className="w-4 h-4 mr-3" />}
-                        Guardar
-                    </Button>
+
+                {/* Progress Bar */}
+                <div className="h-1.5 w-full bg-neutral-900 rounded-full overflow-hidden mt-2">
+                    <motion.div 
+                        className="h-full bg-red-600 rounded-full"
+                        initial={{ width: "0%" }}
+                        animate={{ width: `${(step / totalSteps) * 100}%` }}
+                        transition={{ duration: 0.3 }}
+                    />
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
 
-                {/* Left Column: Metadata & Day Selection (4 cols) */}
-                <div className="lg:col-span-4 space-y-12">
-                    {/* Basic Info Card */}
-                    <ClientMotionDiv
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="bg-neutral-900/30 backdrop-blur-3xl border border-white/5 rounded-4xl p-10 shadow-2xl relative overflow-hidden group"
-                    >
-                        <div className="absolute inset-0 bg-linear-to-b from-white/2 to-transparent pointer-events-none" />
+            <main className="flex-1 overflow-y-auto px-4 md:px-0 py-8 scrollbar-hide">
+                <AnimatePresence mode="wait">
+                    {step === 1 && (
+                        <motion.div
+                            key="step1"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            className="space-y-12 pb-24"
+                        >
+                            {/* Step 1: Metadata (Extracting from existing column) */}
+                            <div className="bg-neutral-900/30 backdrop-blur-3xl border border-white/5 rounded-4xl p-8 md:p-10 shadow-2xl relative overflow-hidden group">
+                                <div className="absolute inset-0 bg-linear-to-b from-white/2 to-transparent pointer-events-none" />
+                                
+                                <div className="space-y-10 relative z-10">
+                                    <div className="space-y-4">
+                                        <Label className="ml-1 text-[10px] font-black uppercase tracking-widest text-neutral-500 italic">Nombre de la Rutina</Label>
+                                        <Input
+                                            {...register("name")}
+                                            placeholder="NOMBRE DE LA RUTINA..."
+                                            className="bg-neutral-950/50 border border-white/5 h-16 rounded-2xl px-6 text-sm font-black text-white placeholder:text-neutral-800 transition-all focus-visible:ring-1 focus-visible:ring-red-500/50 uppercase italic tracking-widest"
+                                        />
+                                    </div>
 
-                        <div className="space-y-10 relative z-10">
-                            <div className="space-y-4">
-                                <Label className="ml-1 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 italic">Nombre de la Rutina</Label>
-                                <Input
-                                    {...register("name")}
-                                    placeholder="NOMBRE DE LA RUTINA..."
-                                    className="bg-neutral-950/50 border border-white/5 h-16 rounded-2xl px-6 text-sm font-black text-white placeholder:text-neutral-800 transition-all focus-visible:ring-1 focus-visible:ring-red-500/50 uppercase italic tracking-widest"
-                                />
-                            </div>
+                                    <div className="space-y-4">
+                                        <Label className="ml-1 text-[10px] font-black uppercase tracking-widest text-neutral-500 italic">Tipo de Rutina</Label>
+                                        <div className="grid grid-cols-2 gap-3 p-1.5 bg-neutral-950/80 rounded-2xl border border-white/5">
+                                            <button
+                                                type="button"
+                                                onClick={() => setValue("type", "weekly")}
+                                                className={cn(
+                                                    "flex items-center justify-center gap-3 py-4 rounded-xl text-[10px] font-black uppercase italic tracking-widest transition-all",
+                                                    routineType === "weekly" ? "bg-white text-black shadow-xl" : "text-neutral-600 hover:text-neutral-400"
+                                                )}
+                                            >
+                                                <CalendarDays className="w-4 h-4" /> Semanal
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setValue("type", "daily");
+                                                    if (schedule.length > 1) setValue("schedule", [schedule[0]]);
+                                                    setActiveDayIndex(0);
+                                                }}
+                                                className={cn(
+                                                    "flex items-center justify-center gap-3 py-4 rounded-xl text-[10px] font-black uppercase italic tracking-widest transition-all",
+                                                    routineType === "daily" ? "bg-white text-black shadow-xl" : "text-neutral-600 hover:text-neutral-400"
+                                                )}
+                                            >
+                                                <Clock className="w-4 h-4" /> Diario
+                                            </button>
+                                        </div>
+                                    </div>
 
-                            <div className="space-y-4">
-                                <Label className="ml-1 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 italic">Tipo de Rutina</Label>
-                                <div className="grid grid-cols-2 gap-3 p-1.5 bg-neutral-950/80 rounded-2xl border border-white/5">
-                                    <button
-                                        type="button"
-                                        onClick={() => setValue("type", "weekly")}
-                                        className={cn(
-                                            "flex items-center justify-center gap-3 py-4 rounded-xl text-[10px] font-black uppercase italic tracking-widest transition-all",
-                                            routineType === "weekly" ? "bg-white text-black shadow-xl scale-105" : "text-neutral-600 hover:text-neutral-400"
-                                        )}
-                                    >
-                                        <CalendarDays className="w-4 h-4" /> Semanal
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setValue("type", "daily");
-                                            if (schedule.length > 1) setValue("schedule", [schedule[0]]);
-                                            setActiveDayIndex(0);
-                                        }}
-                                        className={cn(
-                                            "flex items-center justify-center gap-3 py-4 rounded-xl text-[10px] font-black uppercase italic tracking-widest transition-all",
-                                            routineType === "daily" ? "bg-white text-black shadow-xl scale-105" : "text-neutral-600 hover:text-neutral-400"
-                                        )}
-                                    >
-                                        <Clock className="w-4 h-4" /> Diario
-                                    </button>
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-center mb-1">
+                                            <Label className="ml-1 text-[10px] font-black uppercase tracking-widest text-neutral-500 italic">Resumen Estratégico</Label>
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                onClick={handleGenerateDescription}
+                                                disabled={isGeneratingDescription}
+                                                className="h-8 px-4 bg-red-500/10 text-red-500 hover:bg-white hover:text-black rounded-full text-[9px] font-black uppercase italic tracking-widest transition-all border border-red-500/20"
+                                            >
+                                                <Sparkles className="w-3 h-3 mr-2" /> Generar con IA
+                                            </Button>
+                                        </div>
+                                        <Textarea
+                                            {...register("description")}
+                                            placeholder="DESCRIBE TU ENFOQUE PERSONALIZADO..."
+                                            className="bg-neutral-950/50 border border-white/5 rounded-3xl min-h-[160px] p-6 text-[10px] font-black text-white placeholder:text-neutral-800 transition-all focus-visible:ring-1 focus-visible:ring-red-500/40 resize-none uppercase italic leading-relaxed tracking-widest shadow-inner overflow-y-auto"
+                                        />
+                                    </div>
                                 </div>
                             </div>
+                        </motion.div>
+                    )}
 
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center mb-1">
-                                    <Label className="ml-1 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 italic">Resumen</Label>
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        onClick={handleGenerateDescription}
-                                        disabled={isGeneratingDescription}
-                                        className="h-8 px-4 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-full text-[9px] font-black uppercase italic tracking-widest transition-all border border-red-500/20"
-                                    >
-                                        <Sparkles className="w-3 h-3 mr-2" /> Generar con IA
-                                    </Button>
+                    {step === 2 && routineType === "weekly" && (
+                        <motion.div
+                            key="step2"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            className="space-y-8 pb-24"
+                        >
+                            <div className="flex flex-col gap-6">
+                                <div className="space-y-2">
+                                    <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">Estructura Semanal</h2>
+                                    <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest">Selecciona los días de entrenamiento</p>
                                 </div>
-                                <Textarea
-                                    {...register("description")}
-                                    placeholder="DESCRIPCIÓN DE LA RUTINA..."
-                                    className="bg-neutral-950/50 border border-white/5 rounded-3xl min-h-[160px] p-6 text-[10px] font-black text-white placeholder:text-neutral-800 transition-all focus-visible:ring-1 focus-visible:ring-red-500/50 resize-none uppercase italic leading-relaxed tracking-widest shadow-inner overflow-y-auto"
-                                />
-                            </div>
-                        </div>
-                    </ClientMotionDiv>
-
-                    {/* Week Structure / Day Management */}
-                    {(routineType === "weekly" || (routineType !== "daily" && schedule.length > 1)) && (
-                        <div className="space-y-6">
-                            <div className="flex items-center gap-4 mb-2">
-                                <div className="h-px flex-1 bg-linear-to-r from-white/10 to-transparent" />
-                                <span className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.3em] italic">Días</span>
-                            </div>
-                            <div className="flex items-center justify-between px-1">
-                                <Label className="text-xs font-bold uppercase tracking-widest text-neutral-500">Estructura Semanal</Label>
-                                <span className="text-xs text-neutral-600 font-mono bg-neutral-900 px-2 py-1 rounded-md">{schedule.length} Días</span>
-                            </div>
-
-                            <div className="space-y-4">
-                                {dayFields.map((field, index) => (
-                                    <motion.div
-                                        key={field.id}
-                                        initial={{ opacity: 0, x: -10 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: index * 0.05 }}
-                                        onClick={() => setActiveDayIndex(index)}
-                                        className={cn(
-                                            "group relative p-6 rounded-3xl cursor-pointer flex justify-between items-center transition-all duration-500 overflow-hidden",
-                                            activeDayIndex === index
-                                                ? "bg-white text-black shadow-[0_0_40px_-10px_rgba(255,255,255,0.2)] scale-[1.02] border-transparent"
-                                                : "bg-neutral-900/40 backdrop-blur-xl border border-white/5 hover:border-white/10 text-neutral-500 hover:text-neutral-300"
-                                        )}
-                                    >
-                                        <div className="flex items-center gap-5 relative z-10">
-                                            <div className={cn(
-                                                "w-12 h-12 rounded-2xl flex items-center justify-center text-xs font-black border transition-all duration-500",
-                                                activeDayIndex === index
-                                                    ? "bg-black border-black/10 text-white rotate-12"
-                                                    : "bg-neutral-950 border-white/5 text-neutral-600 group-hover:rotate-6 group-hover:text-red-500"
-                                            )}>
-                                                {String(index + 1).padStart(2, '0')}
-                                            </div>
-                                            <div>
-                                                <p className={cn(
-                                                    "text-[8px] font-black uppercase tracking-[0.4em] mb-1 italic transition-colors",
-                                                    activeDayIndex === index ? "text-black/40" : "text-neutral-600"
-                                                )}>
-                                                    {WEEKDAYS[index] || `DÍA ${index + 1}`}
-                                                </p>
-                                                <h3 className={cn(
-                                                    "font-black text-sm uppercase italic tracking-wider transition-colors",
-                                                    activeDayIndex === index ? "text-black" : "text-neutral-400 group-hover:text-white"
-                                                )}>
-                                                    {schedule[index]?.name || `DÍA ${index + 1}`}
-                                                </h3>
-                                                <div className="flex items-center gap-2 mt-1.5">
-                                                    <div className={cn("h-1 w-1 rounded-full", activeDayIndex === index ? "bg-black/20" : "bg-red-500/40")} />
-                                                    <p className={cn("text-[9px] font-black uppercase tracking-widest", activeDayIndex === index ? "text-black/60" : "text-neutral-600")}>
-                                                        {schedule[index]?.exercises?.length || 0} EJERCICIOS
-                                                    </p>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {dayFields.map((field, index) => (
+                                        <div
+                                            key={field.id}
+                                            className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 p-6 rounded-3xl flex justify-between items-center group hover:bg-neutral-900/60 transition-all"
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-10 h-10 rounded-2xl bg-neutral-950 border border-white/10 flex items-center justify-center text-xs font-black text-neutral-500 group-hover:text-red-500 transition-colors">
+                                                    {String(index + 1).padStart(2, '0')}
+                                                </div>
+                                                <div>
+                                                    <p className="text-[8px] font-black uppercase tracking-widest text-neutral-700 italic">{WEEKDAYS[index] || "DÍA"}</p>
+                                                    <input 
+                                                        value={schedule[index]?.name || ""}
+                                                        onChange={(e) => {
+                                                            const newSched = [...schedule];
+                                                            newSched[index].name = e.target.value;
+                                                            setValue("schedule", newSched);
+                                                        }}
+                                                        className="bg-transparent border-none p-0 text-sm font-black text-white focus:ring-0 uppercase italic tracking-widest w-full"
+                                                        placeholder="Nombre del día..."
+                                                    />
                                                 </div>
                                             </div>
-                                        </div>
-
-                                        <div className="flex items-center gap-2 relative z-10">
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                className={cn(
-                                                    "h-8 w-8 rounded-xl transition-all",
-                                                    activeDayIndex === index
-                                                        ? "text-black/20 hover:text-red-600 hover:bg-black/5"
-                                                        : "text-neutral-800 hover:text-red-500 opacity-0 group-hover:opacity-100"
-                                                )}
-                                                onClick={(e) => { e.stopPropagation(); removeDay(index); }}
+                                                className="h-8 w-8 text-neutral-700 hover:text-red-500 hover:bg-red-500/10 rounded-xl"
+                                                onClick={() => removeDay(index)}
                                             >
                                                 <Trash2 className="w-4 h-4" />
                                             </Button>
                                         </div>
-
-                                        {activeDayIndex === index && (
-                                            <div className="absolute top-0 right-0 w-32 h-32 bg-black/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
-                                        )}
-                                    </motion.div>
-                                ))}
-
-                                {dayFields.length < 5 && (
-                                    <Button
-                                        variant="outline"
-                                        className="w-full h-16 border border-dashed border-white/5 bg-transparent text-neutral-600 hover:text-white hover:bg-white/5 hover:border-white/20 rounded-3xl transition-all font-black uppercase italic tracking-[0.3em] text-[10px]"
-                                        onClick={() => appendDay({ name: WEEKDAYS[dayFields.length] || `Día ${dayFields.length + 1}`, exercises: [] })}
-                                    >
-                                        <Plus className="w-5 h-5 mr-3" /> Añadir Día
-                                    </Button>
-                                )}
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                <div className="lg:col-span-8">
-                    {schedule[activeDayIndex] ? (
-                        <div className="bg-neutral-900/40 backdrop-blur-3xl border border-white/5 rounded-[3rem] p-1.5 overflow-hidden min-h-[700px] shadow-2xl relative">
-                            <div className="absolute inset-x-0 top-0 h-40 bg-linear-to-b from-red-600/3 to-transparent pointer-events-none" />
-
-                            {/* Header Day */}
-                            <div className="bg-neutral-950/80 backdrop-blur-2xl border-b border-white/5 p-8 md:p-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 rounded-t-[2.8rem] relative z-10">
-                                <div className="flex items-center gap-4 flex-1 w-full">
-                                    <div className="h-2 w-2 rounded-full bg-red-600 animate-pulse shrink-0" />
-                                    <div className="relative group flex-1">
-                                        <Input
-                                            value={schedule[activeDayIndex].name}
-                                            onChange={(e) => {
-                                                const newSched = [...schedule];
-                                                newSched[activeDayIndex].name = e.target.value;
-                                                setValue("schedule", newSched);
-                                            }}
-                                            className="text-4xl md:text-5xl font-black bg-transparent border-none text-white p-0 h-auto focus-visible:ring-0 placeholder:text-neutral-800 w-full uppercase italic tracking-tighter"
-                                            placeholder="NOMBRE DEL DÍA..."
-                                        />
-                                        <div className="absolute bottom-0 left-0 w-0 h-px bg-red-600 group-hover:w-full transition-all duration-700" />
-                                    </div>
+                                    ))}
+                                    
+                                    {dayFields.length < 7 && (
+                                        <Button
+                                            variant="outline"
+                                            className="h-full min-h-[80px] border-dashed border-white/5 bg-transparent rounded-3xl flex flex-col items-center justify-center gap-2 hover:bg-white/5 transition-all text-neutral-600 hover:text-white"
+                                            onClick={() => appendDay({ name: WEEKDAYS[dayFields.length] || `Día ${dayFields.length + 1}`, exercises: [] })}
+                                        >
+                                            <Plus className="w-5 h-5" />
+                                            <span className="text-[9px] font-black uppercase tracking-widest">Añadir Día</span>
+                                        </Button>
+                                    )}
                                 </div>
-                                <Button
-                                    onClick={() => addExerciseToDay(activeDayIndex)}
-                                    className="w-full md:w-auto h-14 px-8 rounded-2xl bg-white text-black hover:bg-neutral-200 font-black uppercase italic tracking-widest text-[10px] shadow-xl transition-all hover:-translate-y-1"
-                                >
-                                    <Plus className="w-5 h-5 mr-3" /> Añadir Ejercicio
-                                </Button>
                             </div>
+                        </motion.div>
+                    )}
 
-                            <div className="p-6 md:p-8 space-y-8 relative z-10">
-                                {schedule[activeDayIndex].exercises?.length === 0 ? (
-                                    <div className="flex flex-col items-center justify-center py-32 text-center space-y-6 opacity-40">
-                                        <div className="w-24 h-24 bg-neutral-950 border border-white/5 rounded-full flex items-center justify-center text-neutral-700 shadow-inner">
-                                            <Dumbbell className="w-10 h-10 animate-pulse" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <p className="text-white font-black uppercase italic tracking-widest text-lg">Día vacío</p>
-                                            <p className="text-neutral-500 text-xs font-bold uppercase tracking-[0.2em]">Añade un ejercicio para comenzar</p>
-                                        </div>
+                    {step === 3 && (
+                        <motion.div
+                            key="step3"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            className="space-y-8 pb-32"
+                        >
+                            {/* Day Navigation Tabs for Weekly */}
+                            {routineType === "weekly" && (
+                                <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4 sticky top-0 bg-black/50 backdrop-blur-md z-10 py-4">
+                                    {schedule.map((day: ScheduleDay, idx: number) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => setActiveDayIndex(idx)}
+                                            className={cn(
+                                                "px-6 py-3 rounded-full text-[10px] font-black uppercase italic tracking-widest transition-all whitespace-nowrap border shrink-0",
+                                                activeDayIndex === idx 
+                                                    ? "bg-white text-black border-white shadow-xl shadow-white/5" 
+                                                    : "bg-neutral-900/50 text-neutral-500 border-white/5 hover:bg-neutral-800"
+                                            )}
+                                        >
+                                            {day.name || `Día ${idx + 1}`}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Exercises for Active Day */}
+                            <div className="space-y-6">
+                                <div className="flex items-center justify-between">
+                                    <div className="space-y-1">
+                                        <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">Ejercicios</h2>
+                                        <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest">Día: {schedule[activeDayIndex]?.name}</p>
+                                    </div>
+                                    <Button
+                                        onClick={() => addExerciseToDay(activeDayIndex)}
+                                        className="h-10 bg-white text-black hover:bg-neutral-200 font-black uppercase italic tracking-widest text-[9px] rounded-xl px-6"
+                                    >
+                                        <Plus className="w-4 h-4 mr-2" /> Añadir
+                                    </Button>
+                                </div>
+
+                                {schedule[activeDayIndex]?.exercises?.length === 0 ? (
+                                    <div className="py-20 border border-dashed border-white/5 rounded-3xl flex flex-col items-center justify-center opacity-40 gap-4">
+                                        <Dumbbell className="w-12 h-12 text-neutral-600" />
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-white italic">No hay ejercicios aún</p>
                                     </div>
                                 ) : (
-                                    <div className="space-y-8">
-                                        {schedule[activeDayIndex].exercises?.map((exercise: ScheduleExercise, exIndex: number) => (
-                                            <motion.div
-                                                key={exIndex}
-                                                initial={{ opacity: 0, scale: 0.98 }}
-                                                animate={{ opacity: 1, scale: 1 }}
-                                                className="bg-neutral-950/40 backdrop-blur-3xl rounded-[2.5rem] border border-white/5 overflow-hidden shadow-2xl group/ex relative"
+                                    <div className="space-y-4">
+                                        {schedule[activeDayIndex]?.exercises?.map((exercise: ScheduleExercise, exIdx: number) => (
+                                            <div 
+                                                key={exIdx} 
+                                                className="bg-neutral-950 border border-white/5 rounded-3xl overflow-hidden shadow-2xl relative"
                                             >
-                                                <div className="absolute inset-0 bg-linear-to-b from-white/1 to-transparent pointer-events-none" />
-
-                                                {/* Exercise Header */}
-                                                <div className="p-5 md:p-6 bg-white/2 border-b border-white/5 flex flex-row gap-4 justify-between items-center relative z-10">
-                                                    <div className="flex-1 min-w-0 flex items-center gap-4">
-                                                        <div className="w-10 h-10 rounded-2xl bg-black border border-white/5 flex items-center justify-center text-red-500 text-xs font-black shadow-inner">
-                                                            {String(exIndex + 1).padStart(2, '0')}
+                                                {/* Card Header Compact */}
+                                                <div className="p-4 bg-white/2 border-b border-white/5 flex items-center justify-between gap-4">
+                                                    <div className="flex items-center gap-3 min-w-0">
+                                                        <div className="w-8 h-8 rounded-xl bg-black border border-white/5 flex items-center justify-center text-[10px] font-black text-red-500 shadow-inner">
+                                                            {String(exIdx + 1).padStart(2, '0')}
                                                         </div>
-                                                        <div className="flex-1 min-w-0 relative">
-                                                            <Button
-                                                                variant="ghost"
-                                                                className="w-full justify-between items-center text-left text-lg md:text-xl font-black text-white hover:bg-white/5 hover:text-white px-3 h-auto py-3 rounded-2xl transition-all uppercase italic tracking-tighter"
-                                                                onClick={() => openExerciseSelector(activeDayIndex, exIndex)}
-                                                            >
-                                                                <span className="mr-4 leading-none truncate">
-                                                                    {exercise.exerciseName || "SELECCIONAR EJERCICIO"}
-                                                                </span>
-                                                                <ChevronsUpDown className="ml-auto h-5 w-5 shrink-0 text-neutral-600" />
-                                                            </Button>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="flex items-center gap-1 md:gap-2">
                                                         <Button
                                                             variant="ghost"
-                                                            size="sm"
-                                                            onClick={() => addExerciseToDay(activeDayIndex, exIndex)}
-                                                            className="h-10 px-3 text-[10px] font-black uppercase text-neutral-500 hover:text-white hover:bg-white/10 rounded-xl transition-all flex items-center"
+                                                            className="text-xs font-black text-white hover:bg-white/5 p-0 h-auto justify-start uppercase italic tracking-widest truncate max-w-[180px]"
+                                                            onClick={() => openExerciseSelector(activeDayIndex, exIdx)}
                                                         >
-                                                            <Plus className="w-4 h-4 md:mr-1" />
-                                                            <span className="hidden md:inline">Insertar Antes</span>
-                                                            <span className="md:hidden ml-1">Antes</span>
+                                                            {exercise.exerciseName || "SELECCIONAR..."}
+                                                        </Button>
+                                                    </div>
+                                                    <div className="flex items-center gap-1">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8 text-neutral-700 hover:text-white"
+                                                            onClick={() => {
+                                                                if (exIdx > 0) {
+                                                                    const newExs = [...schedule[activeDayIndex].exercises];
+                                                                    [newExs[exIdx - 1], newExs[exIdx]] = [newExs[exIdx], newExs[exIdx - 1]];
+                                                                    updateDayExercises(activeDayIndex, newExs);
+                                                                }
+                                                            }}
+                                                            disabled={exIdx === 0}
+                                                        >
+                                                            <ChevronUp className="w-4 h-4" />
                                                         </Button>
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
-                                                            onClick={() => removeExercise(activeDayIndex, exIndex)}
-                                                            className="h-10 w-10 text-neutral-600 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"
+                                                            className="h-8 w-8 text-neutral-700 hover:text-white"
+                                                            onClick={() => {
+                                                                if (exIdx < schedule[activeDayIndex].exercises.length - 1) {
+                                                                    const newExs = [...schedule[activeDayIndex].exercises];
+                                                                    [newExs[exIdx], newExs[exIdx + 1]] = [newExs[exIdx + 1], newExs[exIdx]];
+                                                                    updateDayExercises(activeDayIndex, newExs);
+                                                                }
+                                                            }}
+                                                            disabled={exIdx === schedule[activeDayIndex].exercises.length - 1}
                                                         >
-                                                            <Trash2 className="w-5 h-5" />
+                                                            <ChevronDown className="w-4 h-4" />
                                                         </Button>
-                                                    </div>
-                                                </div>
-
-                                                <div className="p-6 md:p-8 space-y-8 relative z-10">
-                                                    <div className="relative group/note">
-                                                        <div className="flex items-center gap-2 mb-2 opacity-40">
-                                                            <Activity className="w-3 h-3 text-red-500" />
-                                                            <span className="text-[8px] font-black uppercase tracking-[0.3em] text-white italic">Notas</span>
-                                                        </div>
-                                                        <Input
-                                                            value={exercise.notes || ""}
-                                                            onChange={(e) => updateExerciseField(activeDayIndex, exIndex, "notes", e.target.value)}
-                                                            placeholder="AÑADIR NOTAS (OPCIONAL)..."
-                                                            className="bg-neutral-950/60 border border-white/5 rounded-2xl px-5 h-12 text-xs font-black text-white placeholder:text-neutral-800 focus-visible:ring-1 focus-visible:ring-red-500/40 uppercase italic tracking-widest shadow-inner transition-all w-full"
-                                                        />
-                                                    </div>
-
-                                                    {/* Variantes Section */}
-                                                    <div className="space-y-4 bg-black/20 p-6 rounded-3xl border border-white/2">
-                                                        <div className="flex items-center justify-between">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="h-1 w-5 bg-red-600 rounded-full" />
-                                                                <span className="text-[9px] uppercase font-black text-neutral-500 tracking-[0.3em] italic">Alternativas</span>
-                                                            </div>
-                                                            <Button
-                                                                type="button"
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                className="h-8 text-[9px] font-black text-red-500 hover:text-white hover:bg-red-500/10 rounded-full px-4 border border-red-500/10 uppercase italic tracking-widest transition-all"
-                                                                onClick={() => {
-                                                                    setIsVariantMode(true);
-                                                                    openExerciseSelector(activeDayIndex, exIndex);
-                                                                }}
-                                                            >
-                                                                <Plus className="w-3 h-3 mr-2" /> Añadir Variante
-                                                            </Button>
-                                                        </div>
-                                                        <div className="flex flex-wrap gap-3 min-h-[40px]">
-                                                            {exercise.variantIds && exercise.variantIds.length > 0 ? (
-                                                                exercise.variantIds.map((vId: string) => {
-                                                                    const vEx = availableExercises.find(ex => ex.id === vId);
-                                                                    return (
-                                                                        <motion.div
-                                                                            layout
-                                                                            initial={{ scale: 0.9, opacity: 0 }}
-                                                                            animate={{ scale: 1, opacity: 1 }}
-                                                                            key={vId}
-                                                                            className="bg-neutral-900/80 border border-white/5 rounded-xl px-4 py-2 flex items-center gap-4 group/var transition-all hover:bg-neutral-800"
-                                                                        >
-                                                                            <span className="text-[10px] text-neutral-300 font-black uppercase italic tracking-wider">{vEx?.name || "CARGANDO..."}</span>
-                                                                            <button
-                                                                                type="button"
-                                                                                onClick={() => removeVariant(activeDayIndex, exIndex, vId)}
-                                                                                className="text-neutral-600 hover:text-red-500 transition-colors"
-                                                                            >
-                                                                                <Trash2 className="w-3.5 h-3.5" />
-                                                                            </button>
-                                                                        </motion.div>
-                                                                    );
-                                                                })
-                                                            ) : (
-                                                                <div className="w-full py-4 border border-dashed border-white/5 rounded-2xl flex items-center justify-center opacity-20">
-                                                                    <p className="text-[8px] text-white font-black uppercase tracking-[0.4em] italic">Sin variantes</p>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Sets Area */}
-                                                    <div className="space-y-4">
-                                                        {/* Table Header */}
-                                                        <div className="hidden md:grid grid-cols-12 gap-4 px-6 text-[8px] font-black uppercase tracking-[0.5em] text-neutral-600 italic">
-                                                            <div className="col-span-1">#</div>
-                                                            <div className="col-span-3">Categoría</div>
-                                                            <div className="col-span-3 px-2">Reps</div>
-                                                            <div className="col-span-2 text-center">Intensidad</div>
-                                                            <div className="col-span-2 text-center">Descanso</div>
-                                                            <div className="col-span-1"></div>
-                                                        </div>
-
-                                                        <div className="space-y-4 md:space-y-2">
-                                                            <AnimatePresence mode="popLayout">
-                                                                {exercise.sets?.map((set: ExerciseSet, setIndex: number) => (
-                                                                    <motion.div
-                                                                        key={setIndex}
-                                                                        layout
-                                                                        initial={{ opacity: 0, y: 10 }}
-                                                                        animate={{ opacity: 1, y: 0 }}
-                                                                        exit={{ opacity: 0, scale: 0.9 }}
-                                                                        className="relative bg-neutral-900/40 backdrop-blur-3xl p-5 md:p-3 rounded-2xl md:rounded-3xl flex flex-col md:grid md:grid-cols-12 gap-5 md:gap-4 items-center group/set border border-white/5 shadow-inner"
-                                                                    >
-                                                                        {/* Mobile Header */}
-                                                                        <div className="flex md:hidden w-full justify-between items-center">
-                                                                            <div className="w-8 h-8 rounded-lg bg-black border border-white/5 flex items-center justify-center text-[10px] font-black text-red-500">
-                                                                                {String(setIndex + 1).padStart(2, '0')}
-                                                                            </div>
-                                                                            <div className="flex items-center gap-2">
-                                                                                <Button
-                                                                                    type="button"
-                                                                                    variant="ghost"
-                                                                                    size="icon"
-                                                                                    className="h-9 w-9 text-neutral-600 hover:text-white hover:bg-white/5 rounded-xl"
-                                                                                    onClick={() => {
-                                                                                        const newSets = [...exercise.sets];
-                                                                                        newSets.splice(setIndex + 1, 0, { ...set });
-                                                                                        updateExerciseField(activeDayIndex, exIndex, "sets", newSets);
-                                                                                    }}
-                                                                                >
-                                                                                    <Copy className="w-4 h-4" />
-                                                                                </Button>
-                                                                                <Button
-                                                                                    type="button"
-                                                                                    variant="ghost"
-                                                                                    size="icon"
-                                                                                    className="h-9 w-9 text-neutral-600 hover:text-red-500 hover:bg-red-500/10 rounded-xl"
-                                                                                    onClick={() => {
-                                                                                        const newSets = [...exercise.sets];
-                                                                                        newSets.splice(setIndex, 1);
-                                                                                        updateExerciseField(activeDayIndex, exIndex, "sets", newSets);
-                                                                                    }}
-                                                                                >
-                                                                                    <Trash2 className="w-4 h-4" />
-                                                                                </Button>
-                                                                            </div>
-                                                                        </div>
-
-                                                                        {/* Desktop Index */}
-                                                                        <div className="hidden md:flex col-span-1 justify-center">
-                                                                            <div className="w-1 h-3 bg-red-600/30 rounded-full" />
-                                                                        </div>
-
-                                                                        {/* Type Selector */}
-                                                                        <div className="col-span-3 w-full">
-                                                                            <Select
-                                                                                value={set.type}
-                                                                                onValueChange={(v) => {
-                                                                                    const newSets = [...exercise.sets];
-                                                                                    newSets[setIndex].type = v;
-                                                                                    updateExerciseField(activeDayIndex, exIndex, "sets", newSets);
-                                                                                }}
-                                                                            >
-                                                                                <SelectTrigger className="h-12 md:h-10 text-[10px] font-black uppercase italic tracking-widest bg-black border-white/5 text-white hover:border-white/20 px-4 rounded-xl md:rounded-2xl transition-all">
-                                                                                    <SelectValue />
-                                                                                </SelectTrigger>
-                                                                                <SelectContent className="bg-neutral-900 border-white/10 text-white rounded-2xl p-2">
-                                                                                    <SelectItem value="warmup" className="rounded-xl p-3 focus:bg-red-600 text-[10px] font-black uppercase italic tracking-widest">Calentamiento</SelectItem>
-                                                                                    <SelectItem value="working" className="rounded-xl p-3 focus:bg-red-600 text-[10px] font-black uppercase italic tracking-widest">Efectiva</SelectItem>
-                                                                                    <SelectItem value="failure" className="rounded-xl p-3 focus:bg-red-600 text-[10px] font-black uppercase italic tracking-widest">Al Fallo</SelectItem>
-                                                                                    <SelectItem value="drop" className="rounded-xl p-3 focus:bg-red-600 text-[10px] font-black uppercase italic tracking-widest">Drop Set</SelectItem>
-                                                                                </SelectContent>
-                                                                            </Select>
-                                                                        </div>
-
-                                                                        {/* Inputs Grid */}
-                                                                        <div className="grid grid-cols-3 md:contents gap-4 w-full">
-                                                                            {/* Reps */}
-                                                                            <div className="col-span-1 md:col-span-3 relative flex flex-col gap-1.5">
-                                                                                <span className="md:hidden text-[7px] font-black uppercase tracking-[0.4em] text-neutral-600 italic text-center">Reps</span>
-                                                                                <Input
-                                                                                    value={set.reps}
-                                                                                    onChange={(e) => {
-                                                                                        const newSets = [...exercise.sets];
-                                                                                        newSets[setIndex].reps = e.target.value;
-                                                                                        updateExerciseField(activeDayIndex, exIndex, "sets", newSets);
-                                                                                    }}
-                                                                                    className="h-12 md:h-10 text-xs bg-black border-white/5 text-center text-white font-black italic focus:ring-1 focus:ring-red-500/40 rounded-xl md:rounded-2xl shadow-inner placeholder:text-neutral-800"
-                                                                                    placeholder="10-12"
-                                                                                />
-                                                                            </div>
-
-                                                                            {/* RPE */}
-                                                                            <div className="col-span-1 md:col-span-2 flex flex-col gap-1.5">
-                                                                                <span className="md:hidden text-[7px] font-black uppercase tracking-[0.4em] text-neutral-600 italic text-center">Rpe</span>
-                                                                                <Select
-                                                                                    value={set.rpeTarget?.toString() || ""}
-                                                                                    onValueChange={(val) => {
-                                                                                        const newSets = [...exercise.sets];
-                                                                                        newSets[setIndex].rpeTarget = Number(val);
-                                                                                        updateExerciseField(activeDayIndex, exIndex, "sets", newSets);
-                                                                                    }}
-                                                                                >
-                                                                                    <SelectTrigger className="h-12 md:h-10 w-full justify-center text-xs bg-black border-white/5 text-white font-black italic focus:ring-1 focus:ring-red-500/40 rounded-xl md:rounded-2xl shadow-inner px-0 [&>svg]:hidden">
-                                                                                        <SelectValue placeholder="8" />
-                                                                                    </SelectTrigger>
-                                                                                    <SelectContent className="bg-neutral-900 border-white/10 text-white min-w-[60px] rounded-2xl">
-                                                                                        {[10, 9, 8, 7, 6, 5].map((val) => (
-                                                                                            <SelectItem key={val} value={val.toString()} className="justify-center focus:bg-red-600 rounded-xl">
-                                                                                                {val}
-                                                                                            </SelectItem>
-                                                                                        ))}
-                                                                                    </SelectContent>
-                                                                                </Select>
-                                                                            </div>
-
-                                                                            {/* Rest */}
-                                                                            <div className="col-span-1 md:col-span-2 flex flex-col gap-1.5">
-                                                                                <span className="md:hidden text-[7px] font-black uppercase tracking-[0.4em] text-neutral-600 italic text-center">Rest</span>
-                                                                                <div className="relative">
-                                                                                    <Input
-                                                                                        type="number"
-                                                                                        value={set.restSeconds}
-                                                                                        onChange={(e) => {
-                                                                                            const newSets = [...exercise.sets];
-                                                                                            newSets[setIndex].restSeconds = Number(e.target.value);
-                                                                                            updateExerciseField(activeDayIndex, exIndex, "sets", newSets);
-                                                                                        }}
-                                                                                        className="h-12 md:h-10 text-xs bg-black border-white/5 text-center text-white font-black italic focus:ring-1 focus:ring-red-500/40 rounded-xl md:rounded-2xl shadow-inner pr-6"
-                                                                                        placeholder="90"
-                                                                                    />
-                                                                                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[8px] font-black text-neutral-700">S</span>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-
-                                                                        {/* Desktop Actions */}
-                                                                        <div className="hidden md:flex col-span-1 justify-center gap-1 opacity-0 group-hover/set:opacity-100 transition-opacity">
-                                                                            <Button
-                                                                                type="button"
-                                                                                variant="ghost"
-                                                                                size="icon"
-                                                                                className="h-8 w-8 text-neutral-600 hover:text-white hover:bg-white/5 rounded-xl"
-                                                                                onClick={() => {
-                                                                                    const newSets = [...exercise.sets];
-                                                                                    newSets.splice(setIndex + 1, 0, { ...set });
-                                                                                    updateExerciseField(activeDayIndex, exIndex, "sets", newSets);
-                                                                                }}
-                                                                            >
-                                                                                <Copy className="w-3.5 h-3.5" />
-                                                                            </Button>
-                                                                            <Button
-                                                                                type="button"
-                                                                                variant="ghost"
-                                                                                size="icon"
-                                                                                className="h-8 w-8 text-neutral-600 hover:text-red-500 hover:bg-red-500/10 rounded-xl"
-                                                                                onClick={() => {
-                                                                                    const newSets = [...exercise.sets];
-                                                                                    newSets.splice(setIndex, 1);
-                                                                                    updateExerciseField(activeDayIndex, exIndex, "sets", newSets);
-                                                                                }}
-                                                                            >
-                                                                                <Trash2 className="w-3.5 h-3.5" />
-                                                                            </Button>
-                                                                        </div>
-                                                                    </motion.div>
-                                                                ))}
-                                                            </AnimatePresence>
-                                                        </div>
-
                                                         <Button
                                                             variant="ghost"
-                                                            size="sm"
-                                                            className="w-full h-12 text-[10px] font-black uppercase italic tracking-widest text-neutral-500 hover:text-white hover:bg-white/5 rounded-2xl border border-dashed border-white/5 transition-all mt-4"
-                                                            onClick={() => {
-                                                                const newSets = [...exercise.sets, { type: "working", reps: "8-12", rpeTarget: 8, restSeconds: 90 }];
-                                                                updateExerciseField(activeDayIndex, exIndex, "sets", newSets);
-                                                            }}
+                                                            size="icon"
+                                                            className="h-8 w-8 text-neutral-700 hover:text-red-500"
+                                                            onClick={() => removeExercise(activeDayIndex, exIdx)}
                                                         >
-                                                            <Plus className="w-3.5 h-3.5 mr-3" /> Añadir Serie
+                                                            <Trash2 className="w-4 h-4" />
                                                         </Button>
                                                     </div>
                                                 </div>
-                                            </motion.div>
+
+                                                {/* Compact Sets List */}
+                                                <div className="p-4 space-y-3">
+                                                    {exercise.sets?.map((set, sIdx) => (
+                                                        <div key={sIdx} className="grid grid-cols-12 gap-2 items-center">
+                                                            <div className="col-span-1 text-[8px] font-black text-neutral-700 text-center">{sIdx + 1}</div>
+                                                            <div className="col-span-4">
+                                                                <Select
+                                                                    value={set.type}
+                                                                    onValueChange={(v) => {
+                                                                        const newSets = [...exercise.sets];
+                                                                        newSets[sIdx].type = v;
+                                                                        updateExerciseField(activeDayIndex, exIdx, "sets", newSets);
+                                                                    }}
+                                                                >
+                                                                    <SelectTrigger className="h-9 text-[9px] font-black uppercase italic bg-black border-white/5 text-white rounded-lg px-2">
+                                                                        <SelectValue />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent className="bg-neutral-900 border-white/10 text-white">
+                                                                        <SelectItem value="warmup" className="text-[9px] font-black uppercase italic">Calent.</SelectItem>
+                                                                        <SelectItem value="working" className="text-[9px] font-black uppercase italic">Efect.</SelectItem>
+                                                                        <SelectItem value="failure" className="text-[9px] font-black uppercase italic">Fallo</SelectItem>
+                                                                        <SelectItem value="drop" className="text-[9px] font-black uppercase italic">Drop</SelectItem>
+                                                                    </SelectContent>
+                                                                </Select>
+                                                            </div>
+                                                            <div className="col-span-3">
+                                                                <Input
+                                                                    value={set.reps}
+                                                                    onChange={(e) => {
+                                                                        const newSets = [...exercise.sets];
+                                                                        newSets[sIdx].reps = e.target.value;
+                                                                        updateExerciseField(activeDayIndex, exIdx, "sets", newSets);
+                                                                    }}
+                                                                    placeholder="Reps"
+                                                                    className="h-9 text-[10px] font-black italic bg-black border-white/5 text-center text-white rounded-lg px-0"
+                                                                />
+                                                            </div>
+                                                            <div className="col-span-2">
+                                                                <Input
+                                                                    type="number"
+                                                                    value={set.rpeTarget}
+                                                                    onChange={(e) => {
+                                                                        const newSets = [...exercise.sets];
+                                                                        newSets[sIdx].rpeTarget = Number(e.target.value);
+                                                                        updateExerciseField(activeDayIndex, exIdx, "sets", newSets);
+                                                                    }}
+                                                                    placeholder="RPE"
+                                                                    className="h-9 text-[10px] font-black italic bg-black border-white/5 text-center text-white rounded-lg px-0"
+                                                                />
+                                                            </div>
+                                                            <div className="col-span-2 flex justify-end">
+                                                                <button 
+                                                                    onClick={() => {
+                                                                        const newSets = [...exercise.sets];
+                                                                        newSets.splice(sIdx, 1);
+                                                                        updateExerciseField(activeDayIndex, exIdx, "sets", newSets);
+                                                                    }}
+                                                                    className="text-neutral-700 hover:text-red-500 transition-colors"
+                                                                >
+                                                                    <X className="w-3.5 h-3.5" />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() => {
+                                                            const newSets = [...exercise.sets, { type: "working", reps: "8-12", rpeTarget: 8, restSeconds: 90 }];
+                                                            updateExerciseField(activeDayIndex, exIdx, "sets", newSets);
+                                                        }}
+                                                        className="w-full h-8 text-[8px] font-black uppercase italic text-neutral-600 hover:text-white hover:bg-white/5 border border-dashed border-white/5 rounded-xl mt-2"
+                                                    >
+                                                        <Plus className="w-3 h-3 mr-1" /> Añadir Serie
+                                                    </Button>
+                                                </div>
+                                            </div>
                                         ))}
                                     </div>
                                 )}
-
-                                {schedule[activeDayIndex].exercises?.length > 0 && (
-                                    <Button
-                                        onClick={() => addExerciseToDay(activeDayIndex)}
-                                        variant="outline"
-                                        className="w-full h-20 border border-white/5 bg-neutral-900/40 backdrop-blur-3xl text-neutral-500 hover:text-white hover:bg-white/5 hover:border-white/20 rounded-[2.5rem] transition-all group mt-8 relative overflow-hidden"
-                                    >
-                                        <div className="absolute inset-0 bg-linear-to-r from-red-600/2 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                                        <Plus className="w-6 h-6 mr-4 group-hover:scale-110 transition-transform relative z-10" />
-                                        <span className="text-sm font-black uppercase tracking-[0.3em] italic relative z-10">Añadir Ejercicio</span>
-                                    </Button>
-                                )}
                             </div>
-                        </div>
+                        </motion.div>
+                    )}
+
+                    {step === 4 && (
+                        <motion.div
+                            key="step4"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            className="space-y-8 pb-32"
+                        >
+                            <div className="space-y-6">
+                                <div className="space-y-1">
+                                    <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">Auditoría Final</h2>
+                                    <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest">Revisión de seguridad y balance</p>
+                                </div>
+
+                                <RoutineSafetyCheck routine={watch()} athleteId={athleteId} />
+
+                                <div className="bg-neutral-900/30 backdrop-blur-3xl border border-white/5 rounded-4xl p-8 space-y-6">
+                                    <div className="flex justify-between items-center border-b border-white/5 pb-4">
+                                        <span className="text-[10px] font-black text-neutral-500 uppercase tracking-widest italic">Rutina</span>
+                                        <span className="text-sm font-black text-white uppercase italic">{watch("name")}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center border-b border-white/5 pb-4">
+                                        <span className="text-[10px] font-black text-neutral-500 uppercase tracking-widest italic">Días Activos</span>
+                                        <span className="text-sm font-black text-neutral-500 uppercase italic">{schedule.length} Días</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-[10px] font-black text-neutral-500 uppercase tracking-widest italic">Total Ejercicios</span>
+                                        <span className="text-sm font-black text-red-500 uppercase italic">
+                                            {schedule.reduce((acc: number, curr: ScheduleDay) => acc + (curr.exercises?.length || 0), 0)}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </main>
+
+            {/* Sticky Navigation Footer */}
+            <div className="fixed bottom-0 inset-x-0 bg-black/80 backdrop-blur-3xl border-t border-white/5 p-4 z-40 md:relative md:bg-transparent md:border-none md:p-10">
+                <div className="flex items-center justify-between gap-4 max-w-7xl mx-auto">
+                    <Button
+                        variant="ghost"
+                        onClick={prevStep}
+                        disabled={step === 1}
+                        className={cn(
+                            "h-14 px-8 rounded-2xl font-black uppercase italic tracking-widest text-[10px] border border-white/5 text-neutral-500 hover:text-white transition-all",
+                            step === 1 && "opacity-0 pointer-events-none"
+                        )}
+                    >
+                        <ChevronLeft className="w-5 h-5 mr-3" /> Atrás
+                    </Button>
+                    
+                    {step < totalSteps ? (
+                        <Button
+                            onClick={nextStep}
+                            className="h-14 px-10 bg-white text-black hover:bg-neutral-200 font-black uppercase italic tracking-widest text-[10px] rounded-2xl shadow-xl shadow-white/5 transition-all hover:-translate-y-1"
+                        >
+                            Siguiente <ChevronRight className="w-5 h-5 ml-3" />
+                        </Button>
                     ) : (
-                        <div className="flex flex-col items-center justify-center h-full min-h-[600px] border border-dashed border-white/5 bg-neutral-950/20 rounded-[3rem] opacity-30 shadow-inner">
-                            <Label className="text-2xl font-black uppercase tracking-[0.6em] text-neutral-800 italic grayscale mb-4">Ningún día seleccionado</Label>
-                            <div className="w-12 h-px bg-neutral-800 mb-6" />
-                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-600 italic">Selecciona un día en el panel lateral para empezar</p>
-                        </div>
+                        <Button
+                            onClick={handleSubmit(onSubmit)}
+                            disabled={isSaving}
+                            className="h-14 px-12 bg-red-600 text-white hover:bg-red-700 font-black uppercase italic tracking-widest text-[10px] rounded-2xl shadow-xl shadow-red-600/20 transition-all hover:-translate-y-1 active:scale-95"
+                        >
+                            {isSaving ? (
+                                <Loader2 className="w-4 h-4 animate-spin mr-3" />
+                            ) : (
+                                <Save className="w-4 h-4 mr-3" />
+                            )}
+                            Finalizar Rutina
+                        </Button>
                     )}
                 </div>
-            </div >
+            </div>
 
             <ExerciseSelector
                 open={selectorOpen}
@@ -1126,6 +1029,6 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                 isVariantSelector={isVariantMode}
                 title={isVariantMode ? "VARIANTE" : "EJERCICIO"}
             />
-        </div >
+        </div>
     );
 }
