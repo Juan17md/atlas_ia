@@ -80,7 +80,7 @@ export function ViviAnalysisModal() {
                     </div>
                 </div>
 
-                <div className="p-8 space-y-8">
+                <div className="p-5 md:p-8 space-y-6 md:space-y-8">
                     {/* Status Cards */}
                     <div className="grid grid-cols-2 gap-4">
                         <motion.div 
@@ -152,7 +152,7 @@ export function ViviAnalysisModal() {
                         >
                             <Button 
                                 onClick={() => router.push("/dashboard")}
-                                className="w-full bg-white text-black hover:bg-neutral-200 font-black uppercase tracking-widest h-14 rounded-2xl transition-all active:scale-95 shadow-[0_10px_40px_rgba(255,255,255,0.1)] group overflow-hidden relative"
+                                className="w-full bg-white text-black hover:bg-neutral-200 font-black uppercase tracking-widest h-12 md:h-14 rounded-2xl transition-all active:scale-95 shadow-[0_10px_40px_rgba(255,255,255,0.1)] group overflow-hidden relative text-xs md:text-sm"
                             >
                                 <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
                                 Continuar al Dashboard

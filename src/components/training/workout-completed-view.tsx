@@ -23,11 +23,11 @@ export function WorkoutCompletedView() {
                 className="relative space-y-12 max-w-2xl w-full"
             >
                 {/* Victory Visual */}
-                <div className="relative mx-auto w-44 h-44 flex items-center justify-center group">
+                <div className="relative mx-auto w-36 h-36 md:w-44 md:h-44 flex items-center justify-center group">
                     <div className="absolute inset-0 bg-neutral-900/40 backdrop-blur-3xl border border-white/5 rounded-full shadow-2xl group-hover:scale-110 transition-transform duration-700" />
                     <div className="absolute inset-3 border border-emerald-500/20 rounded-full border-dashed animate-[spin_20s_linear_infinite]" />
                     <div className="absolute inset-10 bg-amber-500/10 rounded-full blur-2xl group-hover:bg-amber-500/20 transition-colors duration-500" />
-                    <Trophy className="w-20 h-20 text-amber-500 relative z-10 drop-shadow-[0_0_25px_rgba(245,158,11,0.5)] group-hover:scale-110 transition-transform duration-500" />
+                    <Trophy className="w-16 h-16 md:w-20 md:h-20 text-amber-500 relative z-10 drop-shadow-[0_0_25px_rgba(245,158,11,0.5)] group-hover:scale-110 transition-transform duration-500" />
 
                     {/* Floating Particles Shorthand */}
                     <div className="absolute -top-4 -right-2 animate-bounce transition-transform duration-1000">
@@ -47,7 +47,7 @@ export function WorkoutCompletedView() {
                     </ClientMotionDiv>
 
                     <div className="space-y-2">
-                        <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase italic leading-none">
+                        <h1 className="text-4xl md:text-7xl font-black text-white tracking-tighter uppercase italic leading-none">
                             OBJETIVO <span className="text-emerald-500">CONSEGUIDO</span>
                         </h1>
                         <p className="text-neutral-500 font-bold uppercase tracking-[0.4em] text-xs">
@@ -62,7 +62,7 @@ export function WorkoutCompletedView() {
 
                 <div className="pt-8 flex flex-col gap-6 max-w-md mx-auto">
                     <Link href="/dashboard" className="w-full">
-                        <Button className="w-full h-16 rounded-2xl bg-white text-black hover:bg-neutral-200 font-black text-sm uppercase tracking-[0.2em] shadow-2xl shadow-white/10 transition-all active:scale-95 group">
+                        <Button className="w-full h-13 md:h-16 rounded-2xl bg-white text-black hover:bg-neutral-200 font-black text-sm uppercase tracking-[0.15em] md:tracking-[0.2em] shadow-2xl shadow-white/10 transition-all active:scale-95 group">
                             <LayoutDashboard className="w-4 h-4 mr-3" />
                             Regresar a la Central
                         </Button>

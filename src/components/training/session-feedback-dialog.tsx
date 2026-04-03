@@ -57,8 +57,8 @@ export function SessionFeedbackDialog({ open, onOpenChange, onConfirm, isSubmitt
                     <div className="space-y-4">
                         <div className="flex justify-between items-end">
                             <Label className="text-sm font-bold uppercase tracking-wider text-neutral-300">Esfuerzo Global (RPE)</Label>
-                            <span className={cn("text-3xl font-black tabular-nums transition-colors", getRpeColor(rpe))}>
-                                {rpe}<span className="text-sm text-neutral-600 font-bold">/10</span>
+                            <span className={cn("text-2xl md:text-3xl font-black tabular-nums transition-colors", getRpeColor(rpe))}>
+                                {rpe}<span className="text-xs md:text-sm text-neutral-600 font-bold">/10</span>
                             </span>
                         </div>
 
@@ -89,11 +89,11 @@ export function SessionFeedbackDialog({ open, onOpenChange, onConfirm, isSubmitt
                 </div>
 
                 <DialogFooter className="flex-col sm:flex-row gap-3">
-                    <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={isSubmitting} className="w-full sm:w-auto h-14 hover:bg-white/5 hover:text-white rounded-xl text-xs font-black uppercase tracking-widest">
+                    <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={isSubmitting} className="w-full sm:w-auto h-12 md:h-14 hover:bg-white/5 hover:text-white rounded-xl text-[10px] md:text-xs font-black uppercase tracking-widest">
                         Atrás
                     </Button>
-                    <Button onClick={handleConfirm} disabled={isSubmitting} className="w-full sm:w-auto h-14 bg-white text-black hover:bg-neutral-200 rounded-xl text-xs font-black uppercase tracking-widest shadow-xl shadow-white/5">
-                        {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                    <Button onClick={handleConfirm} disabled={isSubmitting} className="w-full sm:w-auto h-12 md:h-14 bg-white text-black hover:bg-neutral-200 rounded-xl text-[10px] md:text-xs font-black uppercase tracking-widest shadow-xl shadow-white/10">
+                        {isSubmitting && <Loader2 className="w-3.5 h-3.5 md:w-4 md:h-4 mr-2 animate-spin" />}
                         Guardar Entrenamiento
                     </Button>
                 </DialogFooter>

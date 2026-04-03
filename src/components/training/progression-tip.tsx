@@ -42,18 +42,18 @@ export function ProgressionTip({ exerciseId, className }: ProgressionTipProps) {
     const isIncrease = diff > 0;
 
     return (
-        <div className={cn("flex items-center gap-2 px-3 py-2 bg-blue-900/20 border border-blue-500/20 rounded-lg text-sm mb-4", className)}>
+        <div className={cn("flex items-center gap-2 px-2.5 py-1.5 md:px-3 md:py-2 bg-blue-900/20 border border-blue-500/20 rounded-lg text-sm mb-4", className)}>
             <div className={cn("p-1.5 rounded-full flex items-center justify-center",
                 isIncrease ? "bg-green-500/20 text-green-500" : "bg-blue-500/20 text-blue-500"
             )}>
                 <TrendingUp className="w-3.5 h-3.5" />
             </div>
             <div className="flex-1">
-                <p className="font-bold text-white text-xs uppercase tracking-wider flex items-center gap-2">
+                <p className="font-bold text-white text-[10px] md:text-xs uppercase tracking-wider flex items-center gap-2">
                     Sugerencia IA
-                    {isIncrease && <span className="bg-green-500 text-black px-1.5 rounded text-[10px] font-black">+{diff}kg</span>}
+                    {isIncrease && <span className="bg-green-500 text-black px-1.5 rounded text-[9px] md:text-[10px] font-black">+{diff}kg</span>}
                 </p>
-                <p className="text-blue-200/80 text-xs leading-snug mt-0.5">
+                <p className="text-blue-200/80 text-[10px] md:text-xs leading-snug mt-0.5">
                     {suggestion.reason} (Último: {suggestion.lastWeight}kg)
                 </p>
             </div>

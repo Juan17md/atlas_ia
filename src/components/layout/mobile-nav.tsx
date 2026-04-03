@@ -111,15 +111,15 @@ export function MobileNav({ role, user }: MobileNavProps) {
                 <SheetContent side="bottom" className="bg-neutral-950/95 backdrop-blur-3xl border-white/5 rounded-t-[3rem] p-0 outline-none h-auto max-h-[90vh] overflow-y-auto scrollbar-none">
                     <div className="w-12 h-1.5 bg-neutral-800 rounded-full mx-auto mt-4 mb-2 opacity-50" />
 
-                    <div className="p-8 pb-16 space-y-6">
+                    <div className="p-5 pb-10 space-y-4">
                         <SheetTitle className="sr-only">Menú de Navegación</SheetTitle>
 
                         {/* Perfil Header en Menú */}
-                        <div className="flex items-center gap-4 p-6 bg-white/5 rounded-3xl border border-white/5">
-                            <OptimizedAvatar src={user?.image} alt={user?.name || "Juan"} size={60} className="border-2 border-red-500/30" />
+                        <div className="flex items-center gap-3 p-4 bg-white/5 rounded-3xl border border-white/5">
+                            <OptimizedAvatar src={user?.image} alt={user?.name || "Juan"} size={50} className="border-2 border-red-500/30" />
                             <div>
-                                <h3 className="text-xl font-black text-white uppercase italic tracking-tighter leading-none">{user?.name || "Premium User"}</h3>
-                                <div className={`mt-2 inline-flex items-center px-2 py-0.5 rounded-full border text-[9px] uppercase font-black tracking-widest ${roleInfo.color}`}>
+                                <h3 className="text-lg font-black text-white uppercase italic tracking-tighter leading-none">{user?.name || "Premium User"}</h3>
+                                <div className={`mt-1.5 inline-flex items-center px-2 py-0.5 rounded-full border text-[8px] uppercase font-black tracking-widest ${roleInfo.color}`}>
                                     {roleInfo.label}
                                 </div>
                             </div>
@@ -161,10 +161,10 @@ export function MobileNav({ role, user }: MobileNavProps) {
                         {/* Logout Section */}
                         <button
                             onClick={() => signOut({ redirectTo: "/" })}
-                            className="w-full flex items-center justify-between p-6 bg-red-950/20 border border-red-900/30 rounded-3xl group hover:bg-red-600 transition-all duration-500"
+                            className="w-full flex items-center justify-between p-4 bg-red-950/20 border border-red-900/30 rounded-2xl group hover:bg-red-600 transition-all duration-500"
                         >
-                            <span className="text-xs font-black text-red-500 group-hover:text-white uppercase tracking-[0.3em]">Cerrar Sesión</span>
-                            <LogOut className="w-5 h-5 text-red-500 group-hover:text-white group-hover:translate-x-1 transition-all" />
+                            <span className="text-[10px] font-black text-red-500 group-hover:text-white uppercase tracking-[0.3em]">Cerrar Sesión</span>
+                            <LogOut className="w-4 h-4 text-red-500 group-hover:text-white group-hover:translate-x-1 transition-all" />
                         </button>
                     </div>
                 </SheetContent>

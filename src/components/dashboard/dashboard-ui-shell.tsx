@@ -113,11 +113,11 @@ export function AthleteDashboardUI({ user, activityData, weeklyCompleted, weekly
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    className="lg:col-span-2 bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-3xl md:rounded-4xl p-6 md:p-10 flex flex-col shadow-2xl"
+                    className="lg:col-span-2 bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-3xl md:rounded-4xl p-5 md:p-10 flex flex-col shadow-2xl"
                 >
                     <div className="flex justify-between items-start mb-10">
                         <div className="space-y-1">
-                            <h3 className="text-2xl font-black text-white uppercase tracking-tight">Actividad Reciente</h3>
+                            <h3 className="text-xl md:text-2xl font-black text-white uppercase tracking-tight">Actividad Reciente</h3>
                             <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-widest">Volumen Acumulado por Sesión</p>
                         </div>
                         <div className="h-10 w-10 rounded-full bg-white/5 flex items-center justify-center">
@@ -135,10 +135,10 @@ export function AthleteDashboardUI({ user, activityData, weeklyCompleted, weekly
                         initial={{ opacity: 0, x: 20 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
-                        className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-3xl md:rounded-4xl p-6 md:p-8 shadow-2xl"
+                        className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-3xl md:rounded-4xl p-5 md:p-8 shadow-2xl"
                     >
                         <div className="mb-px">
-                            <h3 className="text-xl font-black text-white uppercase tracking-tight">Objetivo</h3>
+                            <h3 className="text-lg md:text-xl font-black text-white uppercase tracking-tight">Objetivo</h3>
                             <p className="text-[10px] text-neutral-500 font-black uppercase tracking-widest">Regularidad Semanal</p>
                         </div>
                         <ProgressChart completed={weeklyCompleted} target={weeklyTarget} />

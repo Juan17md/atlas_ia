@@ -25,7 +25,7 @@ export function SessionHeader({ onBack, disableRoutineName }: SessionHeaderProps
     } = useWorkoutLogger();
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 md:space-y-6">
             {/* Header Title */}
             <div className="flex items-center gap-3">
                 <Button
@@ -47,7 +47,7 @@ export function SessionHeader({ onBack, disableRoutineName }: SessionHeaderProps
             </div>
 
             {/* Session Metadata */}
-            <div className="bg-neutral-900/50 border border-neutral-800 rounded-3xl p-5 space-y-5 shadow-lg shadow-black/20">
+            <div className="bg-neutral-900/50 border border-neutral-800 rounded-3xl p-4 md:p-5 space-y-4 md:space-y-5 shadow-lg shadow-black/20">
                 <div className="flex items-center gap-2 text-neutral-400 text-xs font-bold uppercase tracking-wider">
                     <Dumbbell className="w-3.5 h-3.5" />
                     Detalles de la Sesión
@@ -66,7 +66,7 @@ export function SessionHeader({ onBack, disableRoutineName }: SessionHeaderProps
                                 onChange={(e) => setRoutineName(e.target.value)}
                                 disabled={disableRoutineName}
                                 placeholder="Ej: Push Day, Torso Pesado..."
-                                className="bg-neutral-950 border-neutral-800 text-white font-semibold rounded-xl focus:ring-1 focus:ring-white/20 h-12 pl-10 placeholder:text-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="bg-neutral-950 border-neutral-800 text-white font-semibold rounded-xl focus:ring-1 focus:ring-white/20 h-10 md:h-12 pl-10 placeholder:text-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
                             />
                         </div>
                     </div>
@@ -94,10 +94,10 @@ export function SessionHeader({ onBack, disableRoutineName }: SessionHeaderProps
                                     variant="outline"
                                     onClick={handleMarkRestWithConfirm}
                                     disabled={isSubmitting || isLoadingLog}
-                                    className="h-12 border-neutral-800 bg-neutral-950 text-neutral-400 hover:text-white hover:bg-neutral-900 rounded-xl px-4 shrink-0 transition-all active:scale-95"
+                                    className="h-10 md:h-12 border-neutral-800 bg-neutral-950 text-neutral-400 hover:text-white hover:bg-neutral-900 rounded-xl px-4 shrink-0 transition-all active:scale-95"
                                     title="Marcar como descanso"
                                 >
-                                    <Moon className="w-5 h-5" />
+                                    <Moon className="w-4 h-4 md:w-5 md:h-5" />
                                 </Button>
                             </div>
                         </div>

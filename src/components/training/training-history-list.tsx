@@ -35,24 +35,24 @@ function WorkoutLogItem({ log }: { log: TrainingLogData }) {
 
             {/* Header - Clickable */}
             <div
-                className="p-6 md:p-8 flex items-center justify-between cursor-pointer relative z-10"
+                className="p-4 md:p-8 flex items-center justify-between cursor-pointer relative z-10"
                 onClick={() => setExpanded(!expanded)}
             >
                 <div className="flex items-center gap-6 md:gap-8">
                     {/* Date Block */}
-                    <div className="h-16 w-16 md:h-20 md:w-20 rounded-2xl md:rounded-3xl bg-neutral-950 border border-white/5 flex flex-col items-center justify-center shadow-2xl group-hover:border-red-600/50 transition-all duration-500 shrink-0 relative overflow-hidden group/date">
+                    <div className="h-14 w-14 md:h-20 md:w-20 rounded-xl md:rounded-3xl bg-neutral-950 border border-white/5 flex flex-col items-center justify-center shadow-2xl group-hover:border-red-600/50 transition-all duration-500 shrink-0 relative overflow-hidden group/date">
                         <div className="absolute inset-0 bg-red-600/10 opacity-0 group-hover/date:opacity-100 transition-opacity duration-500" />
-                        <span className="text-2xl md:text-3xl font-black text-white leading-none tracking-tighter italic relative z-10">
+                        <span className="text-xl md:text-3xl font-black text-white leading-none tracking-tighter italic relative z-10">
                             {dateObj.getDate()}
                         </span>
-                        <span className="text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-red-500 font-black mt-2 relative z-10">
+                        <span className="text-[9px] md:text-[11px] uppercase tracking-[0.2em] text-red-500 font-black mt-1 md:mt-2 relative z-10">
                             {dateObj.toLocaleDateString('es', { month: 'short' }).toUpperCase()}
                         </span>
                     </div>
 
                     <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-2 md:mb-3">
-                            <h4 className="font-black text-white text-xl md:text-2xl tracking-tighter uppercase italic truncate leading-none">
+                        <div className="flex flex-wrap items-center gap-x-2 md:gap-x-3 gap-y-1 mb-1 md:mb-3">
+                            <h4 className="font-black text-white text-lg md:text-2xl tracking-tighter uppercase italic truncate leading-none">
                                 {log.routineName || "PROTOCOL_ALPHA"}
                             </h4>
                             {log.routineId && (
@@ -84,7 +84,7 @@ function WorkoutLogItem({ log }: { log: TrainingLogData }) {
                 <div className="flex items-center gap-6 pl-4">
                     <div className="hidden sm:flex flex-col items-end">
                         <div className={cn(
-                            "text-3xl font-black tabular-nums italic leading-none",
+                            "text-2xl md:text-3xl font-black tabular-nums italic leading-none",
                             completionRate >= 90 ? "text-emerald-500" : completionRate >= 50 ? "text-amber-500" : "text-red-500"
                         )}>
                             {completionRate}%
@@ -113,7 +113,7 @@ function WorkoutLogItem({ log }: { log: TrainingLogData }) {
                         transition={{ duration: 0.4, ease: "circOut" }}
                         className="overflow-hidden"
                     >
-                        <div className="border-t border-white/5 bg-white/2 p-4 sm:p-8 md:p-10 space-y-6 md:space-y-10 relative">
+                        <div className="border-t border-white/5 bg-white/2 p-4 md:p-10 space-y-6 md:space-y-10 relative">
                             {/* Session Feedback */}
                             {log.sessionFeedback && (
                                 <div className="flex gap-4 bg-red-600/5 group/feedback p-6 rounded-3xl border border-red-600/10 relative overflow-hidden">
@@ -146,7 +146,7 @@ function WorkoutLogItem({ log }: { log: TrainingLogData }) {
                                                 <div
                                                     key={j}
                                                     className={cn(
-                                                        "p-4 rounded-2xl text-center border transition-all duration-300 relative group/set overflow-hidden",
+                                                        "p-3 md:p-4 rounded-xl md:rounded-2xl text-center border transition-all duration-300 relative group/set overflow-hidden",
                                                         set.completed
                                                             ? "bg-red-600/10 border-red-600/30"
                                                             : "bg-neutral-950 border-white/5"
@@ -197,7 +197,7 @@ function WorkoutLogItem({ log }: { log: TrainingLogData }) {
 export function TrainingHistoryList({ logs }: TrainingHistoryListProps) {
     if (!logs || logs.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-32 text-center bg-neutral-900/20 backdrop-blur-3xl rounded-4xl border border-white/5 shadow-2xl relative overflow-hidden group">
+            <div className="flex flex-col items-center justify-center py-16 md:py-32 text-center bg-neutral-900/20 backdrop-blur-3xl rounded-4xl border border-white/5 shadow-2xl relative overflow-hidden group">
                 <div className="absolute inset-0 bg-red-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-[100px] pointer-events-none" />
                 <div className="w-24 h-24 bg-neutral-950 border border-white/10 rounded-3xl flex items-center justify-center mb-8 shadow-2xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
                     <Dumbbell className="w-10 h-10 text-neutral-700 group-hover:text-red-500 transition-colors" />

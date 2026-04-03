@@ -88,14 +88,14 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="sticky top-2 md:top-6 z-20 bg-black/40 backdrop-blur-2xl border border-white/5 rounded-3xl md:rounded-4xl p-1.5 md:p-2 shadow-2xl shadow-black/50 mx-1 md:mx-0"
+                className="sticky top-2 md:top-6 z-20 bg-black/40 backdrop-blur-2xl border border-white/5 rounded-3xl md:rounded-4xl p-1 md:p-2 shadow-2xl shadow-black/50 mx-1 md:mx-0"
             >
                 <div className="flex flex-col gap-2">
                     <div className="relative flex-1 group">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-500 group-focus-within:text-white transition-colors" />
                         <Input
                             placeholder="Buscar por nombre o músculo..."
-                            className="pl-12 h-12 md:h-14 bg-transparent border-transparent rounded-full text-white placeholder:text-neutral-500 focus-visible:ring-0 text-base md:text-lg font-medium"
+                            className="pl-12 h-10 md:h-14 bg-transparent border-transparent rounded-full text-white placeholder:text-neutral-500 focus-visible:ring-0 text-sm md:text-lg font-medium"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -221,14 +221,14 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
                                                 animate={{ opacity: 1, scale: 1 }}
                                                 transition={{ delay: (gIdx * 0.1) + (eIdx * 0.05) }}
                                                 whileHover={{ y: -5 }}
-                                                className="group flex flex-col bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-3xl md:rounded-[2.5rem] p-4 md:p-6 hover:border-red-500/30 transition-all duration-500 relative overflow-hidden h-full shadow-2xl"
+                                                className="group flex flex-col bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-3xl md:rounded-[2.5rem] p-3.5 md:p-6 hover:border-red-500/30 transition-all duration-500 relative overflow-hidden h-full shadow-2xl"
                                             >
                                                 {/* Gradient Blob Overlay */}
                                                 <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/5 rounded-full blur-3xl -mr-12 -mt-12 pointer-events-none group-hover:bg-red-600/15 transition-all duration-700"></div>
 
                                                 {/* Header Actions */}
                                                 <div className="flex justify-between items-start mb-4 md:mb-6 relative z-10 transition-transform duration-500 group-hover:-translate-y-1">
-                                                    <div className="h-12 w-12 md:h-14 md:w-14 bg-neutral-950 rounded-xl md:rounded-2xl flex items-center justify-center text-red-500 group-hover:scale-110 transition-transform duration-500 shadow-2xl border border-white/5 relative overflow-hidden">
+                                                    <div className="h-10 w-10 md:h-14 md:w-14 bg-neutral-950 rounded-xl md:rounded-2xl flex items-center justify-center text-red-500 group-hover:scale-110 transition-transform duration-500 shadow-2xl border border-white/5 relative overflow-hidden">
                                                         <div className="absolute inset-0 bg-red-600/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                                         <Dumbbell className="h-6 w-6 md:h-7 md:w-7 relative z-10" />
                                                     </div>

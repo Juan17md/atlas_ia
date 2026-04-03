@@ -97,7 +97,7 @@ export function RoutineCard({ routine, athletes }: RoutineCardProps) {
                 <Card className="relative h-full bg-neutral-900/20 backdrop-blur-3xl border border-white/5 hover:border-red-600/30 transition-all duration-500 rounded-4xl overflow-hidden shadow-2xl flex flex-col">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-linear-to-bl from-red-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
 
-                    <CardHeader className="p-6 pb-4 relative z-10">
+                    <CardHeader className="p-4 md:p-6 pb-2 md:pb-4 relative z-10">
                         <div className="flex justify-between items-start gap-4 mb-4">
                             <div className="flex flex-wrap gap-2">
                                 <span className={cn(
@@ -144,7 +144,7 @@ export function RoutineCard({ routine, athletes }: RoutineCardProps) {
                             </div>
                         </div>
 
-                        <CardTitle className="text-2xl font-black text-white leading-tight uppercase tracking-tighter italic group-hover:text-red-500 transition-colors duration-500">
+                        <CardTitle className="text-xl md:text-2xl font-black text-white leading-tight uppercase tracking-tighter italic group-hover:text-red-500 transition-colors duration-500">
                             {cleanName}
                         </CardTitle>
                         <p className="text-xs text-neutral-500 line-clamp-2 mt-3 font-bold uppercase tracking-wider opacity-60">
@@ -152,7 +152,7 @@ export function RoutineCard({ routine, athletes }: RoutineCardProps) {
                         </p>
                     </CardHeader>
 
-                    <CardContent className="p-6 pt-0 mt-auto relative z-10 flex flex-col gap-6">
+                    <CardContent className="p-4 md:p-6 pt-0 mt-auto relative z-10 flex flex-col gap-4 md:gap-6">
                         <div className="grid grid-cols-2 gap-3">
                             <div className="bg-black/40 backdrop-blur-md p-4 rounded-2xl border border-white/5 group-hover:border-red-600/10 transition-colors">
                                 <div className="flex flex-col">
