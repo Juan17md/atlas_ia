@@ -49,7 +49,7 @@ export function WorkoutHeader({
                         <h2 className="text-sm md:text-base font-bold text-white tracking-tight truncate uppercase italic">
                             {exerciseName}
                         </h2>
-                        {isAdvanced && (
+                        {(isAdvanced || isStarted && totalExercises === 1 && exerciseName === "Rutina Libre") && (
                             <Button
                                 variant="ghost"
                                 size="icon"
