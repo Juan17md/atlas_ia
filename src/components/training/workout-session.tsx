@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Check, Loader2, Play, Dumbbell, Sparkles, Plus, Trash2, RefreshCw, ChevronDown } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { logWorkoutSession, getLastSessionExerciseData, type WorkoutSessionData } from "@/actions/training-logs";
 import { cn, calculateRealTimeAdjustment } from "@/lib/utils";
@@ -715,31 +716,46 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
 
                                                                     <div className="md:col-span-2 relative">
                                                                         <div className="text-[9px] text-neutral-500 uppercase font-black tracking-widest mb-1.5 px-1 truncate md:hidden">RPE</div>
-                                                                        <Select
-                                                                            value={logSet?.rpe?.toString() || ""}
-                                                                            onValueChange={(val) => updateSet(currentExerciseIndex, setIndex, "rpe", val)}
-                                                                        >
-                                                                            <SelectTrigger
-                                                                                className={cn(
-                                                                                    "h-14 w-full px-4 justify-center text-center text-lg md:text-2xl font-black border-0 bg-neutral-950 rounded-xl focus:ring-2 focus:ring-white/10 transition-all text-white italic shadow-inner relative group",
-                                                                                    isCompleted && "text-emerald-400 bg-emerald-950/20 ring-1 ring-emerald-500/30"
-                                                                                )}
+                                                                        <Popover>
+                                                                            <PopoverTrigger asChild>
+                                                                                <Button
+                                                                                    variant="ghost"
+                                                                                    className={cn(
+                                                                                        "h-14 w-full px-4 justify-center text-center text-lg md:text-2xl font-black border-0 bg-neutral-950 rounded-xl focus:ring-2 focus:ring-white/10 transition-all text-white italic shadow-inner relative group",
+                                                                                        isCompleted && "text-emerald-400 bg-emerald-950/20 ring-1 ring-emerald-500/30"
+                                                                                    )}
+                                                                                >
+                                                                                    <span className="flex items-center justify-center gap-2">
+                                                                                        {logSet?.rpe || historySet?.rpe || "-"}
+                                                                                        <ChevronDown className="w-4 h-4 opacity-20 group-hover:opacity-100 transition-opacity" />
+                                                                                    </span>
+                                                                                </Button>
+                                                                            </PopoverTrigger>
+                                                                            <PopoverContent 
+                                                                                className="w-48 bg-neutral-900/90 border-white/10 backdrop-blur-2xl rounded-2xl p-2 shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-50"
+                                                                                side="bottom"
+                                                                                align="center"
                                                                             >
-                                                                                <SelectValue placeholder={historySet ? `${historySet.rpe}` : "-"} />
-                                                                                <ChevronDown className="w-4 h-4 ml-2 opacity-20 group-hover:opacity-100 transition-opacity absolute right-4" />
-                                                                            </SelectTrigger>
-                                                                            <SelectContent className="bg-neutral-900 border border-white/10 text-white min-w-[60px] rounded-2xl backdrop-blur-3xl shadow-2xl">
-                                                                                {[10, 9, 8, 7, 6, 5].map((val) => (
-                                                                                    <SelectItem
-                                                                                        key={val}
-                                                                                        value={val.toString()}
-                                                                                        className="justify-center focus:bg-red-600 focus:text-white font-black italic rounded-xl mx-1"
-                                                                                    >
-                                                                                        {val}
-                                                                                    </SelectItem>
-                                                                                ))}
-                                                                            </SelectContent>
-                                                                        </Select>
+                                                                                <div className="grid grid-cols-3 gap-1">
+                                                                                    {[10, 9, 8, 7, 6, 5].map((val) => (
+                                                                                        <Button
+                                                                                            key={val}
+                                                                                            variant="ghost"
+                                                                                            size="sm"
+                                                                                            onClick={() => updateSet(currentExerciseIndex, setIndex, "rpe", val.toString())}
+                                                                                            className={cn(
+                                                                                                "h-12 w-full text-lg font-black italic rounded-xl border border-transparent transition-all",
+                                                                                                logSet?.rpe === val.toString() 
+                                                                                                    ? "bg-red-600 text-white border-red-500 shadow-[0_0_15px_rgba(220,38,38,0.4)]" 
+                                                                                                    : "text-neutral-400 hover:text-white hover:bg-white/5 hover:border-white/10"
+                                                                                            )}
+                                                                                        >
+                                                                                            {val}
+                                                                                        </Button>
+                                                                                    ))}
+                                                                                </div>
+                                                                            </PopoverContent>
+                                                                        </Popover>
                                                                     </div>
                                                                 </div>
 
