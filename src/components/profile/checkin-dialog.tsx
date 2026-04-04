@@ -17,6 +17,7 @@ export function CheckinDialog() {
 
     const [weight, setWeight] = useState("");
     const [waist, setWaist] = useState("");
+    const [abdomen, setAbdomen] = useState("");
     const [biceps, setBiceps] = useState("");
 
     const handleSubmit = async () => {
@@ -30,6 +31,7 @@ export function CheckinDialog() {
             const result = await logBodyMeasurements({
                 weight: parseFloat(weight),
                 waist: waist ? parseFloat(waist) : undefined,
+                abdomen: abdomen ? parseFloat(abdomen) : undefined,
                 bicepsLeft: biceps ? parseFloat(biceps) : undefined,
                 bicepsRight: biceps ? parseFloat(biceps) : undefined
             });
@@ -39,6 +41,7 @@ export function CheckinDialog() {
                 setIsOpen(false);
                 setWeight("");
                 setWaist("");
+                setAbdomen("");
                 setBiceps("");
                 router.refresh();
             } else {
@@ -94,6 +97,25 @@ export function CheckinDialog() {
                                     const val = e.target.value.replace(",", ".");
                                     if (val === "" || /^\d*\.?\d*$/.test(val)) {
                                         setWaist(val);
+                                    }
+                                }}
+                                placeholder="Opcional"
+                            />
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label className="text-right text-red-500/80 font-bold">Abdomen</Label>
+                        <div className="col-span-3 relative">
+                            <Ruler className="absolute left-3 top-2.5 h-4 w-4 text-neutral-500" />
+                            <Input
+                                type="text"
+                                inputMode="decimal"
+                                className="pl-9 bg-neutral-900 border-neutral-800"
+                                value={abdomen}
+                                onChange={e => {
+                                    const val = e.target.value.replace(",", ".");
+                                    if (val === "" || /^\d*\.?\d*$/.test(val)) {
+                                        setAbdomen(val);
                                     }
                                 }}
                                 placeholder="Opcional"

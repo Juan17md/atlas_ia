@@ -7,6 +7,7 @@ import { ArrowLeft, History, Calendar, Scale, AlignLeft, Info } from "lucide-rea
 import { ClientMotionDiv } from "@/components/ui/client-motion";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { MeasurementHistoryActions } from "@/components/profile/measurement-history-actions";
 
 interface HistoryPageProps {
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -42,14 +43,16 @@ export default async function MeasurementHistoryPage({ searchParams }: HistoryPa
     // Sort descending by date
     const sortedHistory = [...history].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
+    const canEditGlobal = isCoach || session.user.role === "advanced_athlete";
+
     const measurementKeys = [
-        "chest", "waist", "hips", "shoulders", "glutes", "neck",
+        "chest", "waist", "abdomen", "hips", "shoulders", "glutes", "neck",
         "bicepsLeft", "bicepsRight", "forearmsLeft", "forearmsRight",
         "quadsLeft", "quadsRight", "calvesLeft", "calvesRight"
     ];
 
     const labels: Record<string, string> = {
-        chest: "Torso", hips: "Cadera", waist: "Cintura", shoulders: "Hombros", glutes: "Glúteos", neck: "Cuello",
+        chest: "Torso", hips: "Cadera", waist: "Cintura", abdomen: "Abdomen", shoulders: "Hombros", glutes: "Glúteos", neck: "Cuello",
         bicepsLeft: "Bíceps (I)", bicepsRight: "Bíceps (D)", forearmsLeft: "Antebrazo (I)", forearmsRight: "Antebrazo (D)",
         quadsLeft: "Muslo (I)", quadsRight: "Muslo (D)", calvesLeft: "Gemelo (I)", calvesRight: "Gemelo (D)",
     };
@@ -109,6 +112,15 @@ export default async function MeasurementHistoryPage({ searchParams }: HistoryPa
                                             <span className="text-xl md:text-2xl font-black text-white uppercase tracking-tighter italic">
                                                 {format(itemDate, "d 'de' MMMM, yyyy", { locale: es })}
                                             </span>
+                                            {canEditGlobal && (
+                                                <div className="ml-auto">
+                                                    <MeasurementHistoryActions 
+                                                        measurement={item} 
+                                                        targetUserId={targetUserId}
+                                                        canEdit={isCoach || (session.user.role === "advanced_athlete" && item.userId === session.user.id)}
+                                                    />
+                                                </div>
+                                            )}
                                         </div>
 
                                         <div className="bg-neutral-900/40 backdrop-blur-xl border border-white/10 rounded-4xl overflow-hidden shadow-2xl relative group hover:border-red-500/30 hover:shadow-[0_0_40px_rgba(239,68,68,0.1)] transition-all duration-500">

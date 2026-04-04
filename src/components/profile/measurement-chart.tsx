@@ -163,6 +163,7 @@ export function MeasurementChart({ data, metrics, title }: MeasurementChartProps
                                     label={(props) => <CustomizedLabel {...props} color={m.color} />}
                                     name={m.label}
                                     animationDuration={1500}
+                                    connectNulls={true}
                                 />
                             ))}
                         </LineChart>

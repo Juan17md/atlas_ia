@@ -35,6 +35,7 @@ export const BodyMeasurementsSchema = z.object({
     shoulders: z.number().min(30).max(200).optional(),
     glutes: z.number().min(40).max(200).optional(),
     neck: z.number().min(20).max(60).optional(),
+    abdomen: z.number().min(40).max(200).optional(),
     bodyFat: z.number().min(2).max(60).optional(),
 
     // Extremidades
@@ -107,6 +108,7 @@ export const OnboardingInputSchema = z.object({
         glutes: z.coerce.number().optional(),
         shoulders: z.coerce.number().optional(),
         neck: z.coerce.number().optional(),
+        abdomen: z.coerce.number().optional(),
 
         bicepsLeft: z.coerce.number().optional(),
         bicepsRight: z.coerce.number().optional(),
@@ -231,6 +233,7 @@ export const BodyMeasurementLogSchema = z.object({
     shoulders: z.number().min(30).max(200).optional(),
     glutes: z.number().min(40).max(200).optional(),
     neck: z.number().min(20).max(60).optional(),
+    abdomen: z.number().min(40).max(200).optional(),
     bodyFat: z.number().min(2).max(60).optional(),
 
     bicepsLeft: z.number().min(15).max(60).optional(),

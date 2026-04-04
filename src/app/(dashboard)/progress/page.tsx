@@ -344,7 +344,7 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                                     .filter(([key]) => !["weight", "bodyfat"].includes(key.toLowerCase()))
                                     .sort(([a], [b]) => {
                                         const order = [
-                                            "height", "neck", "shoulders", "chest", "waist", "hips", "glutes",
+                                            "height", "neck", "shoulders", "chest", "waist", "abdomen", "hips", "glutes",
                                             "bicepsleft", "bicepsright", "forearmsleft", "forearmsright",
                                             "quadsleft", "quadsright", "calvesleft", "calvesright"
                                         ];
@@ -361,6 +361,7 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                                             chest: "Torso",
                                             hips: "Cadera",
                                             waist: "Cintura",
+                                            abdomen: "Abdomen",
                                             shoulders: "Hombros",
                                             glutes: "Glúteos",
                                             neck: "Cuello",

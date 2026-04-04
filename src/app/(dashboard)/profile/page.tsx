@@ -42,6 +42,9 @@ export default async function ProfilePage() {
         onboardingCompleted: rawData.onboardingCompleted,
         injuries: rawData.injuries,
         medicalConditions: rawData.medicalConditions,
+        measurements: Object.fromEntries(
+            Object.entries(rawData.measurements || {}).filter(([_, v]) => typeof v === "number")
+        ) as Record<string, number>,
         // Explicitly converting dates if needed, though ProfileForm currently doesn't use them directly
         emailVerified: rawData.emailVerified?.toDate?.()?.toISOString() || null,
     };
@@ -56,6 +59,7 @@ export default async function ProfilePage() {
         hips?: number;
         shoulders?: number;
         neck?: number;
+        abdomen?: number;
         glutes?: number;
         bicepsLeft?: number;
         bicepsRight?: number;
@@ -163,7 +167,10 @@ export default async function ProfilePage() {
                                 <p className="text-neutral-500 font-bold italic text-sm">Registro técnico de evolución cronológica.</p>
                             </div>
                             <div className="w-full md:w-auto relative z-10">
-                                <LogMeasurementDialog />
+                                <LogMeasurementDialog 
+                                    initialWeight={userData.weight}
+                                    initialData={userData.measurements}
+                                />
                             </div>
                         </ClientMotionDiv>
 
@@ -180,6 +187,7 @@ export default async function ProfilePage() {
                                     { key: "chest", label: "Pecho", color: "#3b82f6" },
                                     { key: "shoulders", label: "Hombros", color: "#8b5cf6" },
                                     { key: "waist", label: "Cintura", color: "#10b981" },
+                                    { key: "abdomen", label: "Abdomen", color: "#ef4444" },
                                     { key: "hips", label: "Cadera", color: "#f59e0b" },
                                     { key: "glutes", label: "Glúteos", color: "#ec4899" }
                                 ]}

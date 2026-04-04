@@ -8,9 +8,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus } from "lucide-react";
+import { Plus, Minus } from "lucide-react";
 import { toast } from "sonner";
-import { logBodyMeasurements } from "@/actions/measurement-actions";
+import { logBodyMeasurements, updateBodyMeasurement } from "@/actions/measurement-actions";
 import { LoaderPremium } from "@/components/ui/loader-premium";
 
 const LogSchema = z.object({
@@ -22,6 +22,7 @@ const LogSchema = z.object({
     shoulders: z.coerce.number().optional(),
     neck: z.coerce.number().optional(),
     glutes: z.coerce.number().optional(),
+    abdomen: z.coerce.number().optional(),
 
     bicepsLeft: z.coerce.number().optional(),
     bicepsRight: z.coerce.number().optional(),
@@ -38,20 +39,35 @@ const LogSchema = z.object({
 interface LogMeasurementDialogProps {
     onLogSuccess?: () => void;
     children?: ReactNode;
-    initialData?: Record<string, number>;
+    initialData?: Record<string, any>;
     initialWeight?: number;
+    initialDate?: string;
+    initialNotes?: string;
     targetUserId?: string;
+    isEdit?: boolean;
+    measurementId?: string;
 }
 
-export function LogMeasurementDialog({ onLogSuccess, children, initialData, initialWeight, targetUserId }: LogMeasurementDialogProps) {
+export function LogMeasurementDialog({ 
+    onLogSuccess, 
+    children, 
+    initialData, 
+    initialWeight, 
+    initialDate,
+    initialNotes,
+    targetUserId,
+    isEdit = false,
+    measurementId
+}: LogMeasurementDialogProps) {
     const [open, setOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const form = useForm<z.infer<typeof LogSchema>>({
         resolver: zodResolver(LogSchema) as any,
         defaultValues: {
-            date: new Date().toISOString().split('T')[0],
+            date: initialDate || new Date().toISOString().split('T')[0],
             weight: initialWeight,
+            notes: initialNotes || "",
             ...initialData
         }
     });
@@ -60,32 +76,97 @@ export function LogMeasurementDialog({ onLogSuccess, children, initialData, init
     useEffect(() => {
         if (open) {
             form.reset({
-                date: new Date().toISOString().split('T')[0],
+                date: initialDate || new Date().toISOString().split('T')[0],
                 weight: initialWeight,
+                notes: initialNotes || "",
                 ...initialData,
-                notes: "" // Siempre resetear notes a vacío
             });
         }
-    }, [open, initialData, initialWeight, form]);
+    }, [open, initialData, initialWeight, initialDate, initialNotes, form]);
 
     const onSubmit = async (data: z.infer<typeof LogSchema>) => {
         setIsSubmitting(true);
         try {
-            const result = await logBodyMeasurements(data, targetUserId);
+            const result = isEdit && measurementId 
+                ? await updateBodyMeasurement(measurementId, targetUserId || "", data)
+                : await logBodyMeasurements(data, targetUserId);
+
             if (result.success) {
-                toast.success("Medidas registradas correctamente");
+                toast.success(isEdit ? "Registro actualizado" : "Medidas registradas correctamente");
                 setOpen(false);
-                // No llamamos a form.reset() aquí para evitar que se borren los datos antes de cerrar
-                // El useEffect se encargará de actualizar los datos la próxima vez que se abra
                 if (onLogSuccess) onLogSuccess();
             } else {
                 toast.error(result.error);
             }
         } catch (error) {
-            toast.error("Error al guardar medidas");
+            toast.error("Error al procesar la solicitud");
         } finally {
             setIsSubmitting(false);
         }
+    };
+
+    // Componente interno para campos de medida con incrementos/decrementos
+    const MeasurementField = ({ 
+        name, 
+        label, 
+        placeholder = "0", 
+        suffix = "cm", 
+        step = 0.5,
+        className = ""
+    }: { 
+        name: keyof z.infer<typeof LogSchema>, 
+        label?: string, 
+        placeholder?: string, 
+        suffix?: string, 
+        step?: number,
+        className?: string
+    }) => {
+        const value = form.watch(name);
+        
+        const adjust = (amount: number) => {
+            const current = parseFloat(String(value || 0).replace(",", "."));
+            const next = Math.round((current + amount) * 10) / 10;
+            form.setValue(name, next.toString() as any, { shouldDirty: true, shouldValidate: true });
+        };
+
+        return (
+            <div className={`space-y-2 ${className}`}>
+                {label && <Label className="text-xs font-medium text-neutral-400 pl-1 uppercase">{label}</Label>}
+                <div className="relative group">
+                    <button 
+                        type="button"
+                        onClick={() => adjust(-step)}
+                        className="absolute left-1 top-1/2 -translate-y-1/2 h-8 w-8 flex items-center justify-center text-neutral-600 hover:text-red-500 hover:bg-white/5 rounded-lg transition-all z-20"
+                    >
+                        <Minus className="w-3 h-3" />
+                    </button>
+                    
+                    <Input
+                        type="text"
+                        inputMode="decimal"
+                        {...form.register(name, { 
+                            onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } 
+                        })}
+                        className="bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 text-sm text-center text-white placeholder:text-neutral-700 rounded-xl px-10 transition-all group-hover:border-white/10"
+                        placeholder={placeholder}
+                    />
+
+                    <button 
+                        type="button"
+                        onClick={() => adjust(step)}
+                        className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 flex items-center justify-center text-neutral-600 hover:text-red-500 hover:bg-white/5 rounded-lg transition-all z-20"
+                    >
+                        <Plus className="w-3 h-3" />
+                    </button>
+
+                    {suffix && (
+                        <span className="absolute right-10 top-1/2 -translate-y-1/2 text-[8px] font-black text-neutral-700 uppercase tracking-widest pointer-events-none group-hover:text-neutral-600 transition-colors">
+                            {suffix}
+                        </span>
+                    )}
+                </div>
+            </div>
+        );
     };
 
     return (
@@ -99,7 +180,7 @@ export function LogMeasurementDialog({ onLogSuccess, children, initialData, init
             </DialogTrigger>
             <DialogContent className="bg-neutral-900 border-neutral-800 text-white sm:max-w-[700px] max-h-[90vh] overflow-hidden flex flex-col">
                 <DialogHeader>
-                    <DialogTitle>Registrar Progreso Corporal</DialogTitle>
+                    <DialogTitle>{isEdit ? "Editar Registro de Medidas" : "Registrar Progreso Corporal"}</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 pt-4 overflow-y-auto pr-2 flex-1 scrollbar-thin scrollbar-thumb-neutral-800">
 
@@ -108,30 +189,15 @@ export function LogMeasurementDialog({ onLogSuccess, children, initialData, init
                         <div className="grid grid-cols-2 gap-6">
                             <div className="space-y-2">
                                 <Label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest pl-1">Fecha</Label>
-                                <Input type="date" {...form.register("date")} className="bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 text-sm text-white placeholder:text-neutral-500 rounded-xl" />
+                                <Input type="date" {...form.register("date")} className="bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 text-sm text-white placeholder:text-neutral-500 rounded-xl px-4" />
                             </div>
-                            <div className="space-y-2">
-                                <Label className="text-xs font-bold text-neutral-400 uppercase tracking-widest pl-1">Peso (kg)</Label>
-                                <div className="relative">
-                                    <Input
-                                        type="text"
-                                        inputMode="decimal"
-                                        {...form.register("weight", {
-                                            onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-                                                const val = e.target.value.replace(",", ".");
-                                                if (val === "" || /^\d*\.?\d*$/.test(val)) {
-                                                    form.setValue("weight", val === "" ? undefined : parseFloat(val));
-                                                } else {
-                                                    e.target.value = form.getValues("weight")?.toString() || "";
-                                                }
-                                            }
-                                        })}
-                                        className="bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 text-sm text-white pl-5 placeholder:text-neutral-500 rounded-xl"
-                                        placeholder="0.0"
-                                    />
-                                    <span className="absolute right-5 top-1/2 -translate-y-1/2 text-neutral-600 text-[10px] font-black uppercase tracking-widest">kg</span>
-                                </div>
-                            </div>
+                            <MeasurementField 
+                                name="weight" 
+                                label="Peso" 
+                                suffix="kg" 
+                                step={0.1} 
+                                placeholder="0.0" 
+                            />
                         </div>
                     </div>
 
@@ -143,66 +209,13 @@ export function LogMeasurementDialog({ onLogSuccess, children, initialData, init
                             <span className="text-xs text-neutral-500 font-normal ml-auto">En centímetros</span>
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
-                            <div className="space-y-2">
-                                <Label className="text-xs font-medium text-neutral-400 pl-1 uppercase">Cuello</Label>
-                                <Input
-                                    type="text"
-                                    inputMode="decimal"
-                                    {...form.register("neck", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
-                                    className="bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 text-sm text-white placeholder:text-neutral-500 rounded-xl text-center"
-                                    placeholder="0"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="text-xs font-medium text-neutral-400 pl-1 uppercase">Pecho / Espalda</Label>
-                                <Input
-                                    type="text"
-                                    inputMode="decimal"
-                                    {...form.register("chest", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
-                                    className="bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 text-sm text-white placeholder:text-neutral-500 rounded-xl text-center"
-                                    placeholder="0"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="text-xs font-medium text-neutral-400 pl-1 uppercase">Hombros</Label>
-                                <Input
-                                    type="text"
-                                    inputMode="decimal"
-                                    {...form.register("shoulders", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
-                                    className="bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 text-sm text-white placeholder:text-neutral-500 rounded-xl text-center"
-                                    placeholder="0"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="text-xs font-medium text-neutral-400 pl-1 uppercase">Cintura</Label>
-                                <Input
-                                    type="text"
-                                    inputMode="decimal"
-                                    {...form.register("waist", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
-                                    className="bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 text-sm text-white placeholder:text-neutral-500 rounded-xl text-center"
-                                    placeholder="0"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="text-xs font-medium text-neutral-400 pl-1 uppercase">Cadera</Label>
-                                <Input
-                                    type="text"
-                                    inputMode="decimal"
-                                    {...form.register("hips", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
-                                    className="bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 text-sm text-white placeholder:text-neutral-500 rounded-xl text-center"
-                                    placeholder="0"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="text-xs font-medium text-neutral-400 pl-1 uppercase">Glúteos</Label>
-                                <Input
-                                    type="text"
-                                    inputMode="decimal"
-                                    {...form.register("glutes", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
-                                    className="bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 text-sm text-white placeholder:text-neutral-500 rounded-xl text-center"
-                                    placeholder="0"
-                                />
-                            </div>
+                            <MeasurementField name="neck" label="Cuello" />
+                            <MeasurementField name="chest" label="Pecho / Espalda" />
+                            <MeasurementField name="shoulders" label="Hombros" />
+                            <MeasurementField name="waist" label="Cintura" />
+                            <MeasurementField name="hips" label="Cadera" />
+                            <MeasurementField name="glutes" label="Glúteos" />
+                            <MeasurementField name="abdomen" label="Abdomen" className="col-span-1" />
                         </div>
                     </div>
 
@@ -225,77 +238,23 @@ export function LogMeasurementDialog({ onLogSuccess, children, initialData, init
                                 {/* Row Biceps */}
                                 <div className="grid grid-cols-12 gap-4 items-center group hover:bg-white/5 p-2 rounded-lg transition-colors -mx-2">
                                     <Label className="col-span-4 text-sm font-bold text-neutral-300 uppercase tracking-wide">Bíceps</Label>
-                                    <Input
-                                        type="text"
-                                        inputMode="decimal"
-                                        {...form.register("bicepsLeft", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
-                                        className="col-span-4 bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 rounded-xl text-sm text-center text-white placeholder:text-neutral-700 font-bold"
-                                        placeholder="-"
-                                    />
-                                    <Input
-                                        type="text"
-                                        inputMode="decimal"
-                                        {...form.register("bicepsRight", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
-                                        className="col-span-4 bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 rounded-xl text-sm text-center text-white placeholder:text-neutral-700 font-bold"
-                                        placeholder="-"
-                                    />
+                                    <MeasurementField name="bicepsLeft" className="col-span-4" label="" />
+                                    <MeasurementField name="bicepsRight" className="col-span-4" label="" />
                                 </div>
-
-                                {/* Row Antebrazos */}
                                 <div className="grid grid-cols-12 gap-4 items-center group hover:bg-white/5 p-2 rounded-lg transition-colors -mx-2">
                                     <Label className="col-span-4 text-sm font-bold text-neutral-300 uppercase tracking-wide">Antebrazos</Label>
-                                    <Input
-                                        type="text"
-                                        inputMode="decimal"
-                                        {...form.register("forearmsLeft", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
-                                        className="col-span-4 bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 rounded-xl text-sm text-center text-white placeholder:text-neutral-700 font-bold"
-                                        placeholder="-"
-                                    />
-                                    <Input
-                                        type="text"
-                                        inputMode="decimal"
-                                        {...form.register("forearmsRight", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
-                                        className="col-span-4 bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 rounded-xl text-sm text-center text-white placeholder:text-neutral-700 font-bold"
-                                        placeholder="-"
-                                    />
+                                    <MeasurementField name="forearmsLeft" className="col-span-4" label="" />
+                                    <MeasurementField name="forearmsRight" className="col-span-4" label="" />
                                 </div>
-
-                                {/* Row Cuádriceps */}
                                 <div className="grid grid-cols-12 gap-4 items-center group hover:bg-white/5 p-2 rounded-lg transition-colors -mx-2">
                                     <Label className="col-span-4 text-sm font-bold text-neutral-300 uppercase tracking-wide">Cuádriceps</Label>
-                                    <Input
-                                        type="text"
-                                        inputMode="decimal"
-                                        {...form.register("quadsLeft", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
-                                        className="col-span-4 bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 rounded-xl text-sm text-center text-white placeholder:text-neutral-700 font-bold"
-                                        placeholder="-"
-                                    />
-                                    <Input
-                                        type="text"
-                                        inputMode="decimal"
-                                        {...form.register("quadsRight", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
-                                        className="col-span-4 bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 rounded-xl text-sm text-center text-white placeholder:text-neutral-700 font-bold"
-                                        placeholder="-"
-                                    />
+                                    <MeasurementField name="quadsLeft" className="col-span-4" label="" />
+                                    <MeasurementField name="quadsRight" className="col-span-4" label="" />
                                 </div>
-
-                                {/* Row Pantorrillas */}
                                 <div className="grid grid-cols-12 gap-4 items-center group hover:bg-white/5 p-2 rounded-lg transition-colors -mx-2">
                                     <Label className="col-span-4 text-sm font-bold text-neutral-300 uppercase tracking-wide">Pantorrillas</Label>
-                                    <Input
-                                        type="text"
-                                        inputMode="decimal"
-                                        {...form.register("calvesLeft", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
-                                        className="col-span-4 bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 rounded-xl text-sm text-center text-white placeholder:text-neutral-700 font-bold"
-                                        placeholder="-"
-                                    />
-                                    <Input
-                                        type="text"
-                                        inputMode="decimal"
-                                        {...form.register("calvesRight", { onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } })}
-                                        className="col-span-4 bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 rounded-xl text-sm text-center text-white placeholder:text-neutral-700 font-bold"
-                                        placeholder="-"
-                                    />
+                                    <MeasurementField name="calvesLeft" className="col-span-4" label="" />
+                                    <MeasurementField name="calvesRight" className="col-span-4" label="" />
                                 </div>
                             </div>
                         </div>
@@ -308,7 +267,7 @@ export function LogMeasurementDialog({ onLogSuccess, children, initialData, init
 
                     <div className="flex justify-center pt-4 pb-2">
                         <Button type="submit" disabled={isSubmitting} className="bg-white text-black hover:bg-neutral-300 w-full md:w-auto font-black rounded-2xl px-12 h-14 text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-white/10 hover:scale-105 transition-all">
-                            {isSubmitting ? <LoaderPremium size="sm" /> : "Guardar Registro"}
+                            {isSubmitting ? <LoaderPremium size="sm" /> : (isEdit ? "Actualizar Registro" : "Guardar Registro")}
                         </Button>
                     </div>
                 </form>
