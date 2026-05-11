@@ -131,7 +131,7 @@ export async function checkCompletedWorkoutToday() {
     try {
         const hoyStr = obtenerFechaISOLocal();
         const snapshot = await adminDb.collection("training_logs").where("athleteId", "==", session.user.id).where("date", ">=", inicioDelDia(hoyStr)).where("date", "<=", finDelDia(hoyStr)).get();
-        return { success: true, completed: snapshot.docs.some(doc => doc.data().status !== "in_progress") };
+        return { success: true, completed: snapshot.docs.some(doc => doc.data().status === "completed") };
     } catch (error) {
         console.error("Error checking completed workout:", error);
         return { success: false, completed: false };

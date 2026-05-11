@@ -351,6 +351,22 @@ export async function createRoutine(data: Partial<RoutineInput>) {
         return { success: false, error: "Solo coaches y atletas avanzados pueden crear rutinas" };
     }
 
+    // Validar campos requeridos con Zod
+    const validation = RoutineSchema.safeParse({
+        ...data,
+        id: data.id || `temp-${Date.now()}`,
+        coachId: session.user.id,
+        athleteId: data.athleteId || "",
+        active: data.active ?? true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+    });
+
+    if (!validation.success) {
+        const firstIssue = validation.error.issues[0];
+        return { success: false, error: `Dato inválido: ${firstIssue?.path.join(".")} - ${firstIssue?.message}` };
+    }
+
     try {
         const newRoutine = {
             ...data,
@@ -446,10 +462,18 @@ export async function deleteRoutine(id: string) {
         console.log(">>> [DELETE ROUTINE] Marking routine as deleted and inactive...");
         
         // Si es una rutina del coach (plantilla), la eliminamos físicamente para limpiar la DB
-        // ya que los duplicados están causando confusión.
+        // y actualizamos las copias asignadas para romper la referencia
         if (isCoachOwner && !routineData?.athleteId) {
             console.log(">>> [DELETE ROUTINE] Hard deleting coach template:", id);
-            await docRef.delete();
+            const assignedCopies = await adminDb.collection("routines")
+                .where("originalRoutineId", "==", id)
+                .get();
+            const batch = adminDb.batch();
+            assignedCopies.docs.forEach(doc => {
+                batch.update(doc.ref, { originalRoutineId: null, updatedAt: new Date() });
+            });
+            batch.delete(docRef);
+            await batch.commit();
         } else {
             // Borrado suave para rutinas de atletas (historial)
             await docRef.update({

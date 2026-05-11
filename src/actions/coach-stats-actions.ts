@@ -8,26 +8,28 @@ import type { TrainingSetData, TrainingExerciseData } from "@/types";
 // Caché para estadísticas del coach (revalida cada 60 segundos)
 const getCachedCoachStats = unstable_cache(
     async (coachId: string) => {
-        // 1, 2, 3. Contar atletas, rutinas y ejercicios en paralelo (async-parallel)
-        const [athletesSnapshot, routinesSnapshot, exercisesSnapshot] = await Promise.all([
-            adminDb.collection("users").where("role", "==", "athlete").count().get(),
+        // Obtener IDs de atletas vinculados al coach
+        const athletesSnap = await adminDb.collection("users")
+            .where("coachId", "==", coachId)
+            .where("role", "in", ["athlete", "advanced_athlete"])
+            .get();
+        const athleteIds = athletesSnap.docs.map(d => d.id);
+        const totalAthletes = athleteIds.length;
+
+        // 1 y 2. Contar rutinas y ejercicios del coach en paralelo
+        const [routinesSnapshot, exercisesSnapshot] = await Promise.all([
             adminDb.collection("routines").where("coachId", "==", coachId).count().get(),
             adminDb.collection("exercises").where("coachId", "==", coachId).count().get()
         ]);
 
-        const totalAthletes = athletesSnapshot.data().count;
         const totalRoutines = routinesSnapshot.data().count;
         const totalExercises = exercisesSnapshot.data().count;
 
-        // 4. Calcular volumen semanal
+        // 3. Calcular volumen semanal SOLO de atletas del coach
         const now = new Date();
         const startOfWeek = new Date(now);
         startOfWeek.setDate(now.getDate() - now.getDay() + (now.getDay() === 0 ? -6 : 1));
         startOfWeek.setHours(0, 0, 0, 0);
-
-        const globalLogs = await adminDb.collection("training_logs")
-            .where("date", ">=", startOfWeek)
-            .get();
 
         let weeklyVolume = 0;
         const days = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
@@ -36,23 +38,35 @@ const getCachedCoachStats = unstable_cache(
 
         const DAYS_ES = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
-        globalLogs.docs.forEach(doc => {
-            const data = doc.data();
-            let sessionVol = 0;
+        if (athleteIds.length > 0) {
+            // Procesar en chunks de 30 (límite de Firestore para `in`)
+            const CHUNK_SIZE = 30;
+            for (let i = 0; i < athleteIds.length; i += CHUNK_SIZE) {
+                const chunk = athleteIds.slice(i, i + CHUNK_SIZE);
+                const globalLogs = await adminDb.collection("training_logs")
+                    .where("athleteId", "in", chunk)
+                    .where("date", ">=", startOfWeek)
+                    .get();
 
-            data.exercises?.forEach((ex: TrainingExerciseData) => {
-                ex.sets?.forEach((s: TrainingSetData) => {
-                    if (s.completed && s.weight && s.reps) {
-                        sessionVol += (s.weight * s.reps);
-                        weeklyVolume += (s.weight * s.reps);
-                    }
+                globalLogs.docs.forEach(doc => {
+                    const data = doc.data();
+                    let sessionVol = 0;
+
+                    data.exercises?.forEach((ex: TrainingExerciseData) => {
+                        ex.sets?.forEach((s: TrainingSetData) => {
+                            if (s.completed && s.weight && s.reps) {
+                                sessionVol += (s.weight * s.reps);
+                                weeklyVolume += (s.weight * s.reps);
+                            }
+                        });
+                    });
+
+                    const date = data.date?.toDate?.() || new Date();
+                    const dayName = DAYS_ES[date.getDay()];
+                    activityMap.set(dayName, (activityMap.get(dayName) || 0) + sessionVol);
                 });
-            });
-
-            const date = data.date?.toDate?.() || new Date();
-            const dayName = DAYS_ES[date.getDay()];
-            activityMap.set(dayName, (activityMap.get(dayName) || 0) + sessionVol);
-        });
+            }
+        }
 
         const weeklyChartData = days.map(d => ({ name: d, total: activityMap.get(d) || 0 }));
 
@@ -65,7 +79,7 @@ const getCachedCoachStats = unstable_cache(
         };
     },
     ["coach-stats"],
-    { revalidate: 60, tags: ["coach-stats"] } // Revalida cada 60 segundos
+    { revalidate: 60, tags: ["coach-stats"] }
 );
 
 export async function getCoachStats() {

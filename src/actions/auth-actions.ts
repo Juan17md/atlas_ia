@@ -41,7 +41,13 @@ export async function registerUser(data: z.infer<typeof RegisterInputSchemaServe
             onboardingCompleted: false,
         };
 
-        await adminDb.collection("users").doc(firebaseUser.uid).set(newUserData);
+        try {
+            await adminDb.collection("users").doc(firebaseUser.uid).set(newUserData);
+        } catch (firestoreError) {
+            console.error("Error creando documento en Firestore, revirtiendo usuario de Auth:", firestoreError);
+            await adminAuth.deleteUser(firebaseUser.uid);
+            return { success: false, error: "Error al crear perfil de usuario. Por favor intenta de nuevo." };
+        }
 
         return { success: true };
 
@@ -142,7 +148,7 @@ export async function completeOnboarding(data: z.infer<typeof OnboardingInputSch
                     weight: profileData.weight, // Incluir peso en el log
                     // Nota: Height es más estático, pero weight es clave para el gráfico
                 };
-                await adminDb.collection("body_measurements").doc(session.user.id).set(initialLog, { merge: true });
+                await adminDb.collection("body_measurements").add(initialLog);
             } catch (logError) {
                 console.error("Error guardando log inicial de medidas:", logError);
                 // No fallamos todo el onboarding si esto falla, es secundario

@@ -61,3 +61,5 @@ SKILL.md
 .cursor/
 design-system/
 skills-lock.json
+# obsidian docs (local only, never pushed)
+docs-obsidian/

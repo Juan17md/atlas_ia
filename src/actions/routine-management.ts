@@ -45,6 +45,20 @@ export async function startWorkout(routineId: string, dayIndex: number = 0) {
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
 
     try {
+        // Limpiar logs in_progress abandonados (más de 24h)
+        const staleDate = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        const staleLogs = await adminDb.collection("training_logs")
+            .where("athleteId", "==", session.user.id)
+            .where("status", "==", "in_progress")
+            .where("startTime", "<=", staleDate)
+            .get();
+        
+        if (!staleLogs.empty) {
+            const cleanupBatch = adminDb.batch();
+            staleLogs.docs.forEach(doc => cleanupBatch.delete(doc.ref));
+            await cleanupBatch.commit();
+        }
+
         const routineRef = adminDb.collection("routines").doc(routineId);
         const routineSnap = await routineRef.get();
         if (!routineSnap.exists) return { success: false, error: "Rutina no encontrada" };

@@ -158,9 +158,78 @@ export async function deleteUser(userId: string) {
     }
 
     try {
-        await adminDb.collection("users").doc(userId).delete();
+        const { adminAuth } = await import("@/lib/firebase-admin");
+        const batch = adminDb.batch();
+
+        // 1. Eliminar rutinas del atleta
+        const routinesSnap = await adminDb.collection("routines")
+            .where("athleteId", "==", userId)
+            .get();
+        routinesSnap.docs.forEach(doc => batch.delete(doc.ref));
+
+        // 2. Eliminar training_logs del atleta
+        const logsSnap = await adminDb.collection("training_logs")
+            .where("athleteId", "==", userId)
+            .get();
+        logsSnap.docs.forEach(doc => batch.delete(doc.ref));
+
+        // 3. Eliminar workout_sets del atleta
+        const setsSnap = await adminDb.collection("workout_sets")
+            .where("athleteId", "==", userId)
+            .get();
+        setsSnap.docs.forEach(doc => batch.delete(doc.ref));
+
+        // 4. Eliminar body_measurements del atleta
+        const measurementsSnap = await adminDb.collection("body_measurements")
+            .where("userId", "==", userId)
+            .get();
+        measurementsSnap.docs.forEach(doc => batch.delete(doc.ref));
+
+        // 5. Eliminar notificaciones del atleta
+        const notifSnap1 = await adminDb.collection("notifications")
+            .where("userId", "==", userId)
+            .get();
+        notifSnap1.docs.forEach(doc => batch.delete(doc.ref));
+        const notifSnap2 = await adminDb.collection("notifications")
+            .where("athleteId", "==", userId)
+            .get();
+        notifSnap2.docs.forEach(doc => batch.delete(doc.ref));
+
+        // 6. Eliminar vivi_intelligence del atleta
+        batch.delete(adminDb.collection("vivi_intelligence").doc(userId));
+
+        // 7. Eliminar documento del usuario en Firestore
+        batch.delete(adminDb.collection("users").doc(userId));
+
+        await batch.commit();
+
+        // 8. Eliminar usuario de Firebase Auth (Admin SDK)
+        try {
+            await adminAuth.deleteUser(userId);
+        } catch (authError: any) {
+            if (authError.code !== "auth/user-not-found") {
+                console.error("Error eliminando usuario de Firebase Auth:", authError);
+            }
+        }
+
+        // 9. Si el usuario eliminado era coach, desvincular sus atletas
+        const linkedAthletes = await adminDb.collection("users")
+            .where("coachId", "==", userId)
+            .get();
+        if (!linkedAthletes.empty) {
+            const unlinkBatch = adminDb.batch();
+            linkedAthletes.docs.forEach(doc => {
+                unlinkBatch.update(doc.ref, {
+                    coachId: null,
+                    coachName: null,
+                    linkedAt: null
+                });
+            });
+            await unlinkBatch.commit();
+        }
 
         revalidatePath("/users");
+        revalidatePath("/dashboard");
         return { success: true };
     } catch (error) {
         console.error("Error deleting user:", error);

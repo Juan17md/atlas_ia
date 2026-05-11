@@ -20,6 +20,7 @@ import { RoutineSafetyCheck } from "@/components/routines/routine-safety-check";
 import { ExerciseSelector } from "@/components/routines/exercise-selector";
 import { ClientMotionDiv } from "@/components/ui/client-motion";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSession } from "next-auth/react";
 
 import type { RoutineFormData, ScheduleDay, ScheduleExercise, AIRoutine } from "./routine-editor-types";
 import { WEEKDAYS } from "./routine-editor-types";
@@ -36,6 +37,8 @@ interface RoutineEditorProps {
 }
 
 export function RoutineEditor({ initialData, isEditing = false, availableExercises = [], athleteId, availableRoutines = [], initialDayIndex = 0 }: RoutineEditorProps) {
+    const { data: session } = useSession();
+    const canCreateExercises = session?.user?.role === "coach" || session?.user?.role === "advanced_athlete";
     const sortedExercises = useMemo(() => {
         return [...availableExercises].sort((a, b) => (a.name || "").localeCompare(b.name || ""));
     }, [availableExercises]);
@@ -848,6 +851,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                 onSelect={handleExerciseSelect}
                 availableExercises={availableExercises}
                 title={isVariantMode ? "Añadir Variante" : "Seleccionar Ejercicio"}
+                canCreateExercises={canCreateExercises}
             />
         </div>
     );

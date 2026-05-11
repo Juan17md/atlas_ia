@@ -17,6 +17,46 @@ const ExerciseInputSchema = ExerciseSchema.omit({
 
 export type ExerciseInput = z.infer<typeof ExerciseInputSchema>;
 
+// Schema rápido para crear ejercicio con mínimo de campos desde el editor de rutina
+const QuickExerciseSchema = z.object({
+    name: z.string().min(1, "El nombre del ejercicio es obligatorio"),
+    muscleGroups: z.array(z.string()).min(1, "Debe seleccionar al menos un grupo muscular"),
+    description: z.string().optional(),
+});
+
+export async function createQuickExercise(data: z.infer<typeof QuickExerciseSchema>) {
+    const session = await auth();
+    const role = session?.user?.role as string;
+    if (!session?.user?.id || (role !== "coach" && role !== "advanced_athlete")) {
+        return { success: false, error: "No autorizado" };
+    }
+
+    const validation = QuickExerciseSchema.safeParse(data);
+    if (!validation.success) {
+        return { success: false, error: "Datos inválidos" };
+    }
+
+    try {
+        const newExercise = {
+            ...validation.data,
+            coachId: session.user.id,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        };
+
+        const docRef = await adminDb.collection("exercises").add(newExercise);
+
+        revalidatePath("/exercises");
+        revalidatePath("/routines");
+        revalidateTag("exercises", "default");
+
+        return { success: true, id: docRef.id, name: validation.data.name };
+    } catch (error) {
+        console.error("Error creating quick exercise:", error);
+        return { success: false, error: "Error al crear ejercicio" };
+    }
+}
+
 export async function getExercises() {
     const session = await auth();
     const role = session?.user?.role as string;
@@ -172,25 +212,25 @@ export async function deleteExercise(id: string) {
             return { success: false, error: "No tienes permiso para eliminar este ejercicio" };
         }
 
-        // Verificar si el ejercicio está siendo usado en rutinas activas
+        // Verificar si el ejercicio está siendo usado en cualquier rutina
         const exerciseName = docSnap.data()?.name;
         const routinesUsingExercise = await adminDb.collection("routines")
-            .where("active", "==", true)
             .get();
         
         const usedInRoutines: string[] = [];
         for (const routineDoc of routinesUsingExercise.docs) {
             const routineData = routineDoc.data();
+            if (routineData.deletedAt) continue;
             const schedule = routineData.schedule || [];
             for (const day of schedule) {
                 const exercises = day.exercises || [];
                 for (const ex of exercises) {
                     if (ex.exerciseId === id || ex.exerciseName === exerciseName) {
-                        usedInRoutines.push(routineDoc.data().name || routineDoc.id);
+                        usedInRoutines.push(routineData.name || routineDoc.id);
                         break;
                     }
                 }
-                if (usedInRoutines.includes(routineDoc.data().name || routineDoc.id)) break;
+                if (usedInRoutines.includes(routineData.name || routineDoc.id)) break;
             }
         }
 

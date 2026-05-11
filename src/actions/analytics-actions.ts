@@ -2,6 +2,7 @@
 
 import { adminDb } from "@/lib/firebase-admin";
 import { auth } from "@/lib/auth";
+import { unstable_cache } from "next/cache";
 
 import type { TrainingSetData, TrainingExerciseData } from "@/types";
 
@@ -19,45 +20,49 @@ const DAYS_ES = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
 // --- ACTIONS ---
 
-// Función interna cacheada para actividad semanal
-// NOTA: Se eliminó unstable_cache porque la clave no puede incluir userId dinámicamente
-// Esto causa que usuarios diferentes compartan datos cacheados
-async function getWeeklyActivityData(targetUserId: string) {
-    const startOfWeek = getStartOfWeek(new Date());
+// Caché para actividad semanal por usuario
+// La clave estática ["weekly-activity"] permite invalidar todas las cachés con revalidateTag("weekly-activity")
+// Cada userId diferente crea una entrada de caché independiente
+const getCachedWeeklyActivity = unstable_cache(
+    async (targetUserId: string) => {
+        const startOfWeek = getStartOfWeek(new Date());
 
-    const logsSnapshot = await adminDb.collection("training_logs")
-        .where("athleteId", "==", targetUserId)
-        .where("date", ">=", startOfWeek)
-        .get();
+        const logsSnapshot = await adminDb.collection("training_logs")
+            .where("athleteId", "==", targetUserId)
+            .where("date", ">=", startOfWeek)
+            .get();
 
-    const activityMap = new Map<string, number>();
-    const days = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
-    days.forEach(d => activityMap.set(d, 0));
+        const activityMap = new Map<string, number>();
+        const days = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+        days.forEach(d => activityMap.set(d, 0));
 
-    logsSnapshot.docs.forEach(doc => {
-        const data = doc.data();
-        const date = data.date?.toDate?.() || new Date();
-        let dayName = DAYS_ES[date.getDay()];
-        if (date.getDay() === 0) dayName = "Dom";
+        logsSnapshot.docs.forEach(doc => {
+            const data = doc.data();
+            const date = data.date?.toDate?.() || new Date();
+            let dayName = DAYS_ES[date.getDay()];
+            if (date.getDay() === 0) dayName = "Dom";
 
-        let sessionVolume = 0;
-        data.exercises?.forEach((ex: TrainingExerciseData) => {
-            ex.sets?.forEach((s: TrainingSetData) => {
-                if (s.completed && s.weight && s.reps) {
-                    sessionVolume += (s.weight * s.reps);
-                }
+            let sessionVolume = 0;
+            data.exercises?.forEach((ex: TrainingExerciseData) => {
+                ex.sets?.forEach((s: TrainingSetData) => {
+                    if (s.completed && s.weight && s.reps) {
+                        sessionVolume += (s.weight * s.reps);
+                    }
+                });
             });
+
+            const current = activityMap.get(dayName) || 0;
+            activityMap.set(dayName, current + sessionVolume);
         });
 
-        const current = activityMap.get(dayName) || 0;
-        activityMap.set(dayName, current + sessionVolume);
-    });
-
-    return days.map(day => ({
-        name: day,
-        total: Math.round(activityMap.get(day) || 0)
-    }));
-}
+        return days.map(day => ({
+            name: day,
+            total: Math.round(activityMap.get(day) || 0)
+        }));
+    },
+    ["weekly-activity"],
+    { revalidate: 60, tags: ["weekly-activity", "training-logs"] }
+);
 
 export async function getWeeklyActivity(userId?: string) {
     const session = await auth();
@@ -66,7 +71,7 @@ export async function getWeeklyActivity(userId?: string) {
     const targetUserId = userId || session.user.id;
 
     try {
-        const data = await getWeeklyActivityData(targetUserId);
+        const data = await getCachedWeeklyActivity(targetUserId);
         return { success: true, data };
     } catch (error) {
         console.error("Error fetching activity:", error);

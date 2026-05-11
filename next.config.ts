@@ -1,10 +1,16 @@
 import type { NextConfig } from "next";
+import withSerwistInit from "@serwist/next";
+
+const withSerwist = withSerwistInit({
+  swSrc: "src/app/sw.ts",
+  swDest: "public/sw.js",
+  reloadOnOnline: true,
+  disable: process.env.NODE_ENV === "development",
+});
 
 const nextConfig: NextConfig = {
-  // Habilitar React Compiler para optimización automática
   reactCompiler: true,
 
-  // Configuración de imágenes remotas
   images: {
     remotePatterns: [
       {
@@ -14,26 +20,73 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "lh3.googleusercontent.com", // Google avatars
+        hostname: "lh3.googleusercontent.com",
         pathname: "/**",
       },
       {
         protocol: "https",
-        hostname: "**.ytimg.com", // YouTube thumbnails
+        hostname: "**.ytimg.com",
         pathname: "/**",
       },
     ],
+    formats: ["image/avif", "image/webp"],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
 
-  // Optimización de importaciones de paquetes
   experimental: {
-    optimizePackageImports: ["lucide-react"],
+    optimizePackageImports: [
+      "lucide-react",
+      "recharts",
+      "date-fns",
+      "react-day-picker",
+      "framer-motion",
+    ],
     staleTimes: {
-      dynamic: 30, // Páginas dinámicas cachean 30 segundos
-      static: 180, // Páginas estáticas cachean 3 minutos
+      dynamic: 30,
+      static: 180,
+    },
+  },
+
+  headers: async () => [
+    {
+      source: "/sw.js",
+      headers: [
+        {
+          key: "Cache-Control",
+          value: "public, max-age=0, must-revalidate",
+        },
+        {
+          key: "Service-Worker-Allowed",
+          value: "/",
+        },
+      ],
+    },
+    {
+      source: "/icons/:path*",
+      headers: [
+        {
+          key: "Cache-Control",
+          value: "public, max-age=31536000, immutable",
+        },
+      ],
+    },
+    {
+      source: "/_next/static/:path*",
+      headers: [
+        {
+          key: "Cache-Control",
+          value: "public, max-age=31536000, immutable",
+        },
+      ],
+    },
+  ],
+
+  logging: {
+    fetches: {
+      fullUrl: false,
     },
   },
 };
 
-export default nextConfig;
-
+export default withSerwist(nextConfig);

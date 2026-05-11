@@ -121,7 +121,7 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "createdBy",
+          "fieldPath": "coachId",
           "order": "ASCENDING"
         },
         {

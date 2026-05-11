@@ -1,0 +1,109 @@
+import type { MetadataRoute } from "next";
+
+export default function manifest(): MetadataRoute.Manifest {
+  return {
+    name: "Atlas IA - Entrenador Personal Inteligente",
+    short_name: "Atlas IA",
+    description: "Gestiona rutinas, seguimiento de progreso y entrenamientos personalizados con inteligencia artificial.",
+    id: "/?standalone=true",
+    start_url: "/?standalone=true",
+    display: "standalone",
+    display_override: ["standalone", "minimal-ui", "browser"],
+    background_color: "#0a0a0a",
+    theme_color: "#000000",
+    orientation: "any",
+    lang: "es",
+    dir: "ltr",
+    scope: "/",
+    categories: ["fitness", "health", "productivity"],
+    icons: [
+      {
+        src: "/icons/icon-72x72.png",
+        sizes: "72x72",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icons/icon-96x96.png",
+        sizes: "96x96",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icons/icon-128x128.png",
+        sizes: "128x128",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icons/icon-144x144.png",
+        sizes: "144x144",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icons/icon-152x152.png",
+        sizes: "152x152",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icons/icon-192x192.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icons/icon-384x384.png",
+        sizes: "384x384",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icons/icon-512x512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icons/icon-192x192.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "maskable",
+      },
+      {
+        src: "/icons/icon-512x512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "maskable",
+      },
+    ],
+    screenshots: [],
+    shortcuts: [
+      {
+        name: "Entrenar",
+        short_name: "Train",
+        description: "Ir a la sección de entrenamiento",
+        url: "/train",
+        icons: [{ src: "/icons/icon-96x96.png", sizes: "96x96" }],
+      },
+      {
+        name: "Mi Rutina",
+        short_name: "Rutina",
+        description: "Ver mi rutina de ejercicios",
+        url: "/my-routine",
+        icons: [{ src: "/icons/icon-96x96.png", sizes: "96x96" }],
+      },
+      {
+        name: "Progreso",
+        short_name: "Progreso",
+        description: "Ver mi progreso y estadísticas",
+        url: "/progress",
+        icons: [{ src: "/icons/icon-96x96.png", sizes: "96x96" }],
+      },
+    ],
+    related_applications: [],
+    prefer_related_applications: false,
+    protocol_handlers: [],
+  };
+}

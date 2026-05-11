@@ -108,7 +108,7 @@ export function MobileNav({ role, user }: MobileNavProps) {
                         </div>
                     </button>
                 </SheetTrigger>
-                <SheetContent side="bottom" className="bg-neutral-950/95 backdrop-blur-3xl border-white/5 rounded-t-[3rem] p-0 outline-none h-auto max-h-[90vh] overflow-y-auto scrollbar-none">
+                <SheetContent side="bottom" className="bg-neutral-950/95 backdrop-blur-3xl border-white/5 rounded-t-[3rem] p-0 outline-none h-auto max-h-[90vh] overflow-y-auto scrollbar-none pb-[env(safe-area-inset-bottom,0px)]">
                     <div className="w-12 h-1.5 bg-neutral-800 rounded-full mx-auto mt-4 mb-2 opacity-50" />
 
                     <div className="p-5 pb-10 space-y-4">

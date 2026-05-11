@@ -81,8 +81,10 @@ service cloud.firestore {
       allow read: if isAuthenticated() && isOwner(userId);
       
       // Permitir lectura de campos públicos a coaches (para ver sus atletas)
-      allow read: if isCoach() && 
-                     request.resource.data.keys().hasOnly(['name', 'role', 'photoUrl', 'image', 'goal']);
+      allow read: if isCoach() && (
+        resource.data.coachId == request.auth.uid ||
+        resource.data.role == 'coach'
+      );
 
       allow create: if isAuthenticated()
                     && isOwner(userId)
@@ -311,6 +313,22 @@ service cloud.firestore {
       
       allow delete: if isAuthenticated()
                     && resource.data.athleteId == request.auth.uid;
+    }
+
+    // ----------------------------------------
+    // VIVI_INTELLIGENCE (Memorias e insights de IA)
+    // ----------------------------------------
+    match /vivi_intelligence/{userId} {
+      allow read: if isAuthenticated() && (
+        userId == request.auth.uid ||
+        isCoachOfAthlete(userId)
+      );
+      
+      allow create, update: if isAuthenticated()
+                             && userId == request.auth.uid;
+      
+      allow delete: if isAuthenticated()
+                     && userId == request.auth.uid;
     }
 
     // ============================================

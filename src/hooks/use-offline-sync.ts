@@ -19,18 +19,14 @@ export function useOfflineSync() {
         const failedLogs: WorkoutSessionData[] = [];
         let successCount = 0;
 
-        // Procesar secuencialmente
         for (const log of pending) {
             try {
-                // Eliminar metadatos internos antes de enviar
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const { _savedAt, ...cleanLog } = log;
                 const res = await logWorkoutSession(cleanLog as WorkoutSessionData);
 
                 if (res.success) {
                     successCount++;
                 } else {
-                    // Si falló por lógica de negocio, lo guardamos para reintentar (podría ser temporal)
                     console.error("Sync failed for log:", res.error);
                     failedLogs.push(log);
                 }
@@ -52,42 +48,51 @@ export function useOfflineSync() {
     };
 
     useEffect(() => {
-        // Inicializar estado (asegurar que estamos en cliente)
-        if (typeof window !== 'undefined') {
-            setIsOnline(navigator.onLine);
+        if (typeof window === "undefined") return;
 
-            const handleOnline = () => {
-                setIsOnline(true);
-                toast.success("Conexión restaurada");
-                syncPendingLogs();
-            };
-            const handleOffline = () => {
-                setIsOnline(false);
-                toast.warning("Sin conexión. Modo Offline activado.");
-            };
+        setIsOnline(navigator.onLine);
 
-            window.addEventListener("online", handleOnline);
-            window.addEventListener("offline", handleOffline);
+        const handleOnline = () => {
+            setIsOnline(true);
+            toast.success("Conexión restaurada");
+            syncPendingLogs();
+        };
 
-            // Sync inicial si hay red
-            if (navigator.onLine) {
+        const handleOffline = () => {
+            setIsOnline(false);
+            toast.warning("Sin conexión. Modo Offline activado.");
+        };
+
+        const handleSwMessage = (event: MessageEvent) => {
+            if (event.data?.type === "SYNC_PENDING_LOGS") {
                 syncPendingLogs();
             }
+        };
 
-            return () => {
-                window.removeEventListener("online", handleOnline);
-                window.removeEventListener("offline", handleOffline);
-            };
+        window.addEventListener("online", handleOnline);
+        window.addEventListener("offline", handleOffline);
+        navigator.serviceWorker?.addEventListener("message", handleSwMessage);
+
+        if (navigator.onLine) {
+            syncPendingLogs();
         }
+
+        return () => {
+            window.removeEventListener("online", handleOnline);
+            window.removeEventListener("offline", handleOffline);
+            navigator.serviceWorker?.removeEventListener("message", handleSwMessage);
+        };
     }, []);
 
     const saveLogLocally = (logData: WorkoutSessionData) => {
         try {
             const pending = JSON.parse(localStorage.getItem("gymia_pending_logs") || "[]");
-            // Añadir timestamp para orden
             const logWithMeta = { ...logData, _savedAt: Date.now() };
             pending.push(logWithMeta);
             localStorage.setItem("gymia_pending_logs", JSON.stringify(pending));
+
+            registrarBackgroundSync();
+
             return true;
         } catch (e) {
             console.error("Error saving locally", e);
@@ -96,4 +101,17 @@ export function useOfflineSync() {
     };
 
     return { isOnline, saveLogLocally };
+}
+
+async function registrarBackgroundSync() {
+    if (!("serviceWorker" in navigator)) return;
+
+    try {
+        const registration = await navigator.serviceWorker.ready;
+        if ("sync" in registration) {
+            await (registration as any).sync.register("sync-pending-logs");
+        }
+    } catch {
+        // Background Sync no soportado
+    }
 }
