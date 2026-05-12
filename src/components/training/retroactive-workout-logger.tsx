@@ -81,6 +81,7 @@ function WorkoutLoggerContent({ onBack, userRole, routineDay }: { onBack?: () =>
                             exercise={exercise} 
                             exIndex={exIndex} 
                             canEdit={canEdit} 
+                            canDelete={exercises.length > 1}
                             isAdvanced={isAdvanced} 
                         />
                         
@@ -91,7 +92,7 @@ function WorkoutLoggerContent({ onBack, userRole, routineDay }: { onBack?: () =>
                                 <button
                                     type="button"
                                     onClick={() => openInsertSelector(exIndex + 1)}
-                                    className="relative w-7 h-7 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all hover:scale-110 active:scale-95 text-red-500 shadow-xl"
+                                    className="relative w-9 h-9 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all hover:scale-110 active:scale-95 text-red-500 shadow-xl p-1"
                                 >
                                     <Plus className="w-4 h-4" />
                                 </button>

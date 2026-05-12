@@ -95,7 +95,7 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-500 group-focus-within:text-white transition-colors" />
                         <Input
                             placeholder="Buscar por nombre o músculo..."
-                            className="pl-12 h-10 md:h-14 bg-transparent border-transparent rounded-full text-white placeholder:text-neutral-500 focus-visible:ring-0 text-sm md:text-lg font-medium"
+                            className="pl-12 h-10 md:h-14 bg-transparent border-transparent rounded-full text-white placeholder:text-neutral-500 focus-visible:ring-0 text-base md:text-lg font-medium"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -159,7 +159,7 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
 
             {/* Grid Grouped by Muscle */}
             <div className="space-y-12 pb-10">
-                <AnimatePresence mode="popLayout">
+                <AnimatePresence mode="sync">
                     {(() => {
                         const groupsToDisplay = filterGroup
                             ? [filterGroup]
@@ -224,7 +224,7 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
                                                 className="group flex flex-col bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-3xl md:rounded-[2.5rem] p-3.5 md:p-6 hover:border-red-500/30 transition-all duration-500 relative overflow-hidden h-full shadow-2xl"
                                             >
                                                 {/* Gradient Blob Overlay */}
-                                                <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/5 rounded-full blur-3xl -mr-12 -mt-12 pointer-events-none group-hover:bg-red-600/15 transition-all duration-700"></div>
+                                                <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/5 rounded-full blur-xl -mr-12 -mt-12 pointer-events-none group-hover:bg-red-600/15 transition-all duration-700"></div>
 
                                                 {/* Header Actions */}
                                                 <div className="flex justify-between items-start mb-4 md:mb-6 relative z-10 transition-transform duration-500 group-hover:-translate-y-1">

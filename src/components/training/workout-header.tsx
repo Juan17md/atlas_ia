@@ -54,7 +54,7 @@ export function WorkoutHeader({
                                 variant="ghost"
                                 size="icon"
                                 onClick={onSwapExercise}
-                                className="h-7 w-7 rounded-lg text-neutral-500 hover:text-amber-400 hover:bg-amber-400/10 transition-all shrink-0"
+                                className="h-10 w-10 rounded-lg text-neutral-500 hover:text-amber-400 hover:bg-amber-400/10 transition-all shrink-0 p-1.5"
                                 title="Cambiar ejercicio"
                             >
                                 <RefreshCw className="w-3.5 h-3.5" />

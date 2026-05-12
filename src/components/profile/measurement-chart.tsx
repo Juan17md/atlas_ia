@@ -162,7 +162,7 @@ export function MeasurementChart({ data, metrics, title }: MeasurementChartProps
                                     activeDot={{ r: 6, fill: m.color, stroke: "#fff", strokeWidth: 2 }}
                                     label={(props) => <CustomizedLabel {...props} color={m.color} />}
                                     name={m.label}
-                                    animationDuration={1500}
+                                    animationDuration={800}
                                     connectNulls={true}
                                 />
                             ))}

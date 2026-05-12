@@ -15,7 +15,7 @@ import {
 import { useWorkoutLogger } from "./workout-logger-context";
 import { cn } from "@/lib/utils";
 
-export function ViviAnalysisModal() {
+export const ViviAnalysisModal = React.memo(function ViviAnalysisModal() {
     const router = useRouter();
     const { 
         showAiModal, setShowAiModal, 
@@ -163,4 +163,4 @@ export function ViviAnalysisModal() {
             </AlertDialogContent>
         </AlertDialog>
     );
-}
+});

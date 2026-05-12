@@ -17,7 +17,7 @@ const MeasurementChart = dynamic(
     () => import("@/components/profile/measurement-chart").then((mod) => mod.MeasurementChart),
     {
         loading: () => (
-            <div className="bg-neutral-900/20 backdrop-blur-3xl border border-white/5 rounded-4xl h-[380px] w-full animate-pulse shadow-2xl" />
+            <div className="bg-neutral-900/20 backdrop-blur-xl border border-white/5 rounded-4xl h-[380px] w-full animate-pulse shadow-2xl" />
         )
     }
 );
@@ -85,8 +85,8 @@ export default async function ProfilePage() {
     return (
         <div className="max-w-4xl mx-auto space-y-12 pb-32 relative">
             {/* Ambient Background Glows */}
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-red-600/5 rounded-full blur-[150px] pointer-events-none -z-10" />
-            <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-blue-600/5 rounded-full blur-[120px] pointer-events-none -z-10" />
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-red-600/5 rounded-full blur-[60px] pointer-events-none -z-10" />
+            <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-blue-600/5 rounded-full blur-[50px] pointer-events-none -z-10" />
 
             {/* Header */}
             <ClientMotionDiv
@@ -114,7 +114,7 @@ export default async function ProfilePage() {
 
             <Tabs defaultValue="details" className="w-full">
                 <TabsList className={cn(
-                    "grid w-full bg-neutral-900/20 backdrop-blur-3xl border border-white/5 mb-12 rounded-3xl p-1.5 h-14 shadow-2xl",
+                    "grid w-full bg-neutral-900/20 backdrop-blur-xl border border-white/5 mb-12 rounded-3xl p-1.5 h-14 shadow-2xl",
                     isCoach ? "grid-cols-1" : "grid-cols-3"
                 )}>
                     <TabsTrigger value="details" className="rounded-2xl data-[state=active]:bg-white data-[state=active]:text-black transition-all text-neutral-500 font-black uppercase italic tracking-widest h-full text-[10px] px-1">
@@ -145,7 +145,7 @@ export default async function ProfilePage() {
                     <ClientMotionDiv
                         initial={{ opacity: 0, scale: 0.98 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="bg-neutral-900/20 backdrop-blur-3xl border border-white/5 rounded-4xl p-10 shadow-2xl relative overflow-hidden"
+                        className="bg-neutral-900/20 backdrop-blur-xl border border-white/5 rounded-4xl p-10 shadow-2xl relative overflow-hidden"
                     >
                         <div className="absolute inset-0 bg-linear-to-b from-white/5 to-transparent pointer-events-none" />
                         <div className="relative z-10">
@@ -159,7 +159,7 @@ export default async function ProfilePage() {
                         <ClientMotionDiv
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
-                            className="flex flex-col md:flex-row md:justify-between md:items-center bg-neutral-900/20 backdrop-blur-3xl border border-white/5 rounded-4xl p-10 shadow-2xl relative overflow-hidden gap-6"
+                            className="flex flex-col md:flex-row md:justify-between md:items-center bg-neutral-900/20 backdrop-blur-xl border border-white/5 rounded-4xl p-10 shadow-2xl relative overflow-hidden gap-6"
                         >
                             <div className="absolute inset-0 bg-linear-to-r from-red-600/5 to-transparent pointer-events-none" />
                             <div className="relative z-10 space-y-2">
@@ -221,7 +221,7 @@ export default async function ProfilePage() {
                         <ClientMotionDiv
                             initial={{ opacity: 0, scale: 0.98 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className="bg-neutral-900/20 backdrop-blur-3xl border border-white/5 rounded-4xl p-10 md:p-12 shadow-2xl relative overflow-hidden"
+                            className="bg-neutral-900/20 backdrop-blur-xl border border-white/5 rounded-4xl p-10 md:p-12 shadow-2xl relative overflow-hidden"
                         >
                             <div className="absolute inset-0 bg-linear-to-b from-blue-600/5 to-transparent pointer-events-none" />
 

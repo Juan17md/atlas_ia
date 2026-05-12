@@ -107,10 +107,10 @@ function WorkoutLogItem({ log }: { log: TrainingLogData }) {
             <AnimatePresence>
                 {expanded && (
                     <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.4, ease: "circOut" }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
                         className="overflow-hidden"
                     >
                         <div className="border-t border-white/5 bg-white/2 p-4 md:p-10 space-y-6 md:space-y-10 relative">

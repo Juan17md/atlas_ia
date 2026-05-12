@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Check, Loader2, Play, Dumbbell, Sparkles, Plus, Trash2, RefreshCw, ChevronDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Check, Loader2, Play, Dumbbell, Sparkles, Plus, Trash2, RefreshCw, ChevronDown, ArrowUp, ArrowDown, Timer, Repeat, CircuitBoard } from "lucide-react";
 import { RPESelector } from "@/components/training/rpe-selector";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -21,6 +21,9 @@ import { CancelWorkoutDialog } from "@/components/training/cancel-workout-dialog
 import { ClientMotionDiv } from "@/components/ui/client-motion";
 import { motion, AnimatePresence } from "framer-motion";
 import { ExerciseSelector } from "@/components/routines/exercise-selector";
+import { RestTimer } from "./rest-timer";
+import { ExerciseTimer } from "./exercise-timer";
+import { CircuitView } from "./circuit-view";
 
 import type { Routine, RoutineExercise, RoutineSet, SessionExercise, SessionSet } from "./workout-session-types";
 import { WorkoutHeader } from "./workout-header";
@@ -61,6 +64,10 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
     const [swapTargetIndex, setSwapTargetIndex] = useState<number>(-1);
     const [availableExercises, setAvailableExercises] = useState<{ id: string; name: string; muscleGroups?: string[] }[]>([]);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
+
+    const [mostrarDescanso, setMostrarDescanso] = useState(false);
+    const [segundosDescanso, setSegundosDescanso] = useState(0);
+    const [setIndexDescanso, setSetIndexDescanso] = useState(0);
 
     const activeDay = routine.schedule[0];
     const [historySets, setHistorySets] = useState<{ weight: number; reps: number; rpe?: number }[]>([]);
@@ -119,15 +126,18 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
         if (!activeDay || sessionLog.length === 0) return;
 
         const storageKey = `gymia_session_${routine.id}_${activeDay.name}`;
-        const state = {
-            sessionLog,
-            mutableExercises,
-            elapsedTime,
-            isStarted,
-            currentExerciseIndex,
-            timestamp: Date.now()
-        };
-        localStorage.setItem(storageKey, JSON.stringify(state));
+        const timer = setTimeout(() => {
+            const state = {
+                sessionLog,
+                mutableExercises,
+                elapsedTime,
+                isStarted,
+                currentExerciseIndex,
+                timestamp: Date.now()
+            };
+            localStorage.setItem(storageKey, JSON.stringify(state));
+        }, 500);
+        return () => clearTimeout(timer);
     }, [sessionLog, mutableExercises, elapsedTime, isStarted, currentExerciseIndex, routine.id, activeDay]);
 
     useEffect(() => {
@@ -345,6 +355,18 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                 }
             }
         }
+
+        // Temporizador de descanso automático después de completar un set
+        if (isTurningComplete && setIndex < currentLogEx.sets.length - 1) {
+            const nextSet = mutableExercises[exerciseIndex].sets[setIndex + 1];
+            const descanso = nextSet.restSeconds || nextSet.rest || mutableExercises[exerciseIndex].sets[setIndex]?.restSeconds || 0;
+            
+            if (descanso > 0) {
+                setSegundosDescanso(descanso);
+                setSetIndexDescanso(setIndex + 1);
+                setMostrarDescanso(true);
+            }
+        }
     };
 
     const handleFinishClick = () => {
@@ -512,9 +534,9 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                                             animate={{ opacity: 1, x: 0 }}
                                             exit={{ opacity: 0, x: -20 }}
                                             transition={{ duration: 0.4, ease: "circOut" }}
-                                            className="bg-neutral-900/40 backdrop-blur-3xl rounded-4xl border border-white/5 overflow-hidden shadow-2xl relative"
+                                            className="bg-neutral-900/40 backdrop-blur-xl rounded-4xl border border-white/5 overflow-hidden shadow-2xl relative"
                                         >
-                                            <div className="absolute top-0 right-0 w-64 h-64 bg-red-600/5 rounded-full blur-[100px] pointer-events-none -z-10" />
+                                            <div className="absolute top-0 right-0 w-64 h-64 bg-red-600/5 rounded-full blur-[40px] pointer-events-none -z-10" />
 
                                             <div className="bg-white/2 border-b border-white/5 p-6 md:p-8 space-y-4">
                                                 <div className="flex justify-between items-start gap-4">
@@ -530,7 +552,7 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                                                                         size="icon"
                                                                         onClick={() => handleMoveExercise(currentExerciseIndex, 'up')}
                                                                         disabled={currentExerciseIndex === 0}
-                                                                        className="h-8 w-8 rounded-lg text-neutral-600 hover:text-white disabled:opacity-20 transition-all"
+                                                                        className="h-10 w-10 rounded-lg text-neutral-600 hover:text-white disabled:opacity-20 transition-all"
                                                                         title="Mover arriba"
                                                                     >
                                                                         <ArrowUp className="w-4 h-4" />
@@ -540,7 +562,7 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                                                                         size="icon"
                                                                         onClick={() => handleMoveExercise(currentExerciseIndex, 'down')}
                                                                         disabled={currentExerciseIndex === mutableExercises.length - 1}
-                                                                        className="h-8 w-8 rounded-lg text-neutral-600 hover:text-white disabled:opacity-20 transition-all"
+                                                                        className="h-10 w-10 rounded-lg text-neutral-600 hover:text-white disabled:opacity-20 transition-all"
                                                                         title="Mover abajo"
                                                                     >
                                                                         <ArrowDown className="w-4 h-4" />
@@ -549,7 +571,7 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                                                                         variant="ghost"
                                                                         size="icon"
                                                                         onClick={() => openSwapSelector(currentExerciseIndex)}
-                                                                        className="h-8 w-8 rounded-lg text-neutral-600 hover:text-amber-400 hover:bg-amber-400/10 transition-all"
+                                                                        className="h-10 w-10 rounded-lg text-neutral-600 hover:text-amber-400 hover:bg-amber-400/10 transition-all"
                                                                         title="Cambiar ejercicio"
                                                                     >
                                                                         <RefreshCw className="w-4 h-4" />
@@ -560,7 +582,7 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                                                                                 variant="ghost"
                                                                                 size="sm"
                                                                                 onClick={() => handleRemoveExercise(currentExerciseIndex)}
-                                                                                className="h-7 px-2 text-[10px] font-black text-red-500 hover:bg-red-500/20 rounded-lg uppercase"
+                                                                                className="h-9 px-3 text-[10px] font-black text-red-500 hover:bg-red-500/20 rounded-lg uppercase"
                                                                             >
                                                                                 Sí
                                                                             </Button>
@@ -568,7 +590,7 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                                                                                 variant="ghost"
                                                                                 size="sm"
                                                                                 onClick={() => setShowDeleteConfirm(null)}
-                                                                                className="h-7 px-2 text-[10px] font-black text-neutral-500 hover:text-white rounded-lg uppercase"
+                                                                                className="h-9 px-3 text-[10px] font-black text-neutral-500 hover:text-white rounded-lg uppercase"
                                                                             >
                                                                                 No
                                                                             </Button>
@@ -578,8 +600,8 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                                                                             variant="ghost"
                                                                             size="icon"
                                                                             onClick={() => setShowDeleteConfirm(currentExerciseIndex)}
-                                                                            className="h-8 w-8 rounded-lg text-neutral-600 hover:text-red-500 hover:bg-red-500/10 transition-all"
-                                                                            title="Eliminar ejercicio"
+className="h-10 w-10 rounded-lg text-neutral-600 hover:text-red-500 hover:bg-red-500/10 transition-all"
+                                            title="Eliminar ejercicio"
                                                                         >
                                                                             <Trash2 className="w-4 h-4" />
                                                                         </Button>
@@ -591,9 +613,9 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                                                         {currentExercise.variantIds && currentExercise.variantIds.length > 0 && (
                                                             <Sheet>
                                                                 <SheetTrigger asChild>
-                                                                    <Button variant="outline" className="h-8 text-[10px] font-black uppercase tracking-[0.2em] bg-red-600/10 border-red-600/20 text-red-500 w-fit px-4 rounded-xl hover:bg-red-600/20 transition-all shadow-lg shadow-red-950/20 group">
-                                                                        <Dumbbell className="w-3 h-3 group-hover:rotate-12 transition-transform mr-2" />
-                                                                        Máquina Ocupada
+<Button variant="outline" className="h-9 text-[10px] font-black uppercase tracking-[0.2em] bg-red-600/10 border-red-600/20 text-red-500 w-fit px-4 rounded-xl hover:bg-red-600/20 transition-all shadow-lg shadow-red-950/20 group">
+                                                        <Dumbbell className="w-3 h-3 group-hover:rotate-12 transition-transform mr-2" />
+                                                        Máquina Ocupada
                                                                     </Button>
                                                                 </SheetTrigger>
                                                                 <SheetContent side="bottom" className="bg-neutral-950 border-white/10 rounded-t-3xl min-h-[40vh] max-h-[80vh] overflow-y-auto w-full md:max-w-md md:mx-auto md:rounded-3xl md:mb-4 px-4 py-6">
@@ -667,7 +689,43 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                                                 </div>
                                             </div>
 
-                                            <div className="p-2 md:p-6 md:pt-0">
+                                            {/* Temporizador de descanso entre sets */}
+                                            {mostrarDescanso && (
+                                                <RestTimer
+                                                    restSeconds={segundosDescanso}
+                                                    onSkip={() => {
+                                                        setMostrarDescanso(false);
+                                                        window.scrollTo({ top: 0, behavior: "smooth" });
+                                                    }}
+                                                    onComplete={() => {
+                                                        setMostrarDescanso(false);
+                                                        window.scrollTo({ top: 0, behavior: "smooth" });
+                                                    }}
+                                                />
+                                            )}
+
+                                            {!mostrarDescanso && (
+                                                <>
+                                                    {/* Ejercicio por tiempo: mostrar ExerciseTimer */}
+                                                    {(currentExercise.ejercicioTipo === "time") ? (
+                                                        <div className="p-2 md:p-6 md:pt-0">
+                                                            <ExerciseTimer
+                                                                duracionSegundos={currentExercise.duracionSegundos || currentExercise.sets[0]?.duracionSegundos || 60}
+                                                                onComplete={() => {
+                                                                    const newLog = [...sessionLog];
+                                                                    newLog[currentExerciseIndex].sets = newLog[currentExerciseIndex].sets.map(s => ({
+                                                                        ...s,
+                                                                        completed: true,
+                                                                        tiempoCompletado: currentExercise.duracionSegundos || currentExercise.sets[0]?.duracionSegundos || 60,
+                                                                    }));
+                                                                    setSessionLog(newLog);
+                                                                    toast.success("Ejercicio completado");
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    ) : (
+                                                        /* Sets grid normal con repeticiones */
+                                                        <div className="p-2 md:p-6 md:pt-0">
                                                 <div className="hidden md:grid md:grid-cols-12 md:gap-3 mb-4 px-4 text-[10px] font-black text-neutral-500 text-center uppercase tracking-[0.2em] bg-white/2 py-3 rounded-2xl border border-white/5">
                                                     <div className="col-span-1 italic">SQ</div>
                                                     <div className="col-span-3 italic">Obj.</div>
@@ -823,6 +881,9 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                                                     />
                                                 </div>
                                             </div>
+                                        )}
+                                    </>
+                                )}
                                         </motion.div>
                                     </AnimatePresence>
                                 </div>

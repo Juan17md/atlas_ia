@@ -69,7 +69,7 @@ export function Sidebar({ role, user }: SidebarProps) {
         <aside className="hidden md:flex md:fixed md:top-0 md:left-0 md:h-screen md:w-55 flex-col bg-black relative overflow-hidden z-50 pt-[env(safe-area-inset-top,0px)]">
             {/* Geometric Accents */}
             <div className="absolute top-0 left-0 w-full h-[500px] bg-linear-to-b from-red-600/5 to-transparent pointer-events-none" />
-            <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-red-600/5 rounded-full blur-[100px] pointer-events-none" />
+            <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-red-600/5 rounded-full blur-[40px] pointer-events-none" />
 
             {/* Logo Section */}
             <div className="p-8 relative z-10 shrink-0">

@@ -3,6 +3,11 @@
 import { adminDb } from "@/lib/firebase-admin";
 import { auth } from "@/lib/auth";
 import { getGroqClient, DEFAULT_AI_MODEL } from "@/lib/ai";
+import {
+  extraerConceptos,
+  similitudJaccard,
+  similitudSemantica,
+} from "@/lib/embeddings";
 
 export interface ViviInsight {
     type: "fatigue" | "pr" | "nutrition" | "memory" | "injury" | "motivation" | "technique";
@@ -100,31 +105,27 @@ export async function searchMemories(userId: string, query: string, limit: numbe
         if (!doc.exists) return [];
 
         const memories = (doc.data()?.memories || []) as ViviMemory[];
+
+        if (memories.length === 0) return [];
+
+        const queryConceptos = await extraerConceptos(query);
         
-        const queryLower = query.toLowerCase();
-        const queryWords = queryLower.split(" ").filter(w => w.length > 2);
-        
-        const scoredMemories = memories.map(mem => {
-            let score = 0;
-            const memContent = mem.content.toLowerCase();
-            
-            if (memContent.includes(queryLower)) score += 10;
-            
-            queryWords.forEach(word => {
-                if (memContent.includes(word)) score += 3;
-            });
-            
-            if (mem.tags) {
-                mem.tags.forEach(tag => {
-                    if (queryLower.includes(tag)) score += 5;
-                });
-            }
-            
-            if (mem.category === "injury" || mem.category === "health") score *= 1.5;
-            if (mem.importance === "high") score *= 1.3;
-            
-            return { memory: mem, score };
-        });
+        const scoredMemories = await Promise.all(
+            memories.map(async (mem) => {
+                const similitud = await similitudSemantica(
+                    mem.content,
+                    query,
+                    queryConceptos
+                );
+                
+                let score = similitud * 100;
+                
+                if (mem.category === "injury" || mem.category === "health") score *= 1.5;
+                if (mem.importance === "high") score *= 1.3;
+                
+                return { memory: mem, score };
+            })
+        );
         
         return scoredMemories
             .sort((a, b) => b.score - a.score)

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useForm, Path } from "react-hook-form";
+import { useForm, useWatch, Path } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { OnboardingInputSchema } from "@/lib/schemas";
@@ -66,8 +66,14 @@ export function OnboardingWizard({ authProvider }: OnboardingWizardProps) {
         },
     });
 
-    const { register, handleSubmit, setValue, watch, trigger, formState: { errors } } = form;
-    const formData = watch();
+    const { register, handleSubmit, setValue, trigger, control, formState: { errors } } = form;
+
+    const gender = useWatch({ control, name: "gender" });
+    const experienceLevel = useWatch({ control, name: "experienceLevel" });
+    const goal = useWatch({ control, name: "goal" });
+    const availableDays = useWatch({ control, name: "availableDays" });
+    const injuries = useWatch({ control, name: "injuries" });
+    const medicalConditions = useWatch({ control, name: "medicalConditions" });
 
     const nextStep = async () => {
         let isValid = false;
@@ -154,7 +160,7 @@ export function OnboardingWizard({ authProvider }: OnboardingWizardProps) {
 
     // Body Map Helper for Injuries (Simplificado)
     const toggleInjury = (injury: string) => {
-        const currentInjuries = formData.injuries || [];
+        const currentInjuries = injuries || [];
         if (currentInjuries.includes(injury)) {
             setValue("injuries", currentInjuries.filter((i) => i !== injury));
         } else {
@@ -252,7 +258,7 @@ export function OnboardingWizard({ authProvider }: OnboardingWizardProps) {
                                             </div>
                                             <div className="space-y-2">
                                                 <Label className="uppercase text-xs font-bold text-neutral-500">Género</Label>
-                                                <Select onValueChange={(v: string) => setValue("gender", v as "male" | "female")} defaultValue={formData.gender}>
+                                                <Select onValueChange={(v: string) => setValue("gender", v as "male" | "female")} defaultValue={gender || "male"}>
                                                     <SelectTrigger className="bg-black/50 border-neutral-800 h-[52px] rounded-xl text-white">
                                                         <SelectValue placeholder="Selecciona" />
                                                     </SelectTrigger>
@@ -303,7 +309,7 @@ export function OnboardingWizard({ authProvider }: OnboardingWizardProps) {
                                                             onClick={() => setValue("experienceLevel", level as "beginner" | "intermediate" | "advanced")}
                                                             className={cn(
                                                                 "flex flex-col items-center justify-center p-4 rounded-2xl border-2 cursor-pointer transition-all hover:bg-neutral-800",
-                                                                formData.experienceLevel === level
+                                                                experienceLevel === level
                                                                     ? "border-red-600 bg-red-600/10 text-white"
                                                                     : "border-neutral-800 bg-black/40 text-neutral-400"
                                                             )}
@@ -321,7 +327,7 @@ export function OnboardingWizard({ authProvider }: OnboardingWizardProps) {
 
                                             <div className="space-y-3">
                                                 <Label className="uppercase text-xs font-bold text-neutral-500">Objetivo Principal</Label>
-                                                <Select onValueChange={(v: string) => setValue("goal", v)} defaultValue={formData.goal}>
+                                                <Select onValueChange={(v: string) => setValue("goal", v)} value={goal}>
                                                     <SelectTrigger className="bg-black/50 border-neutral-800 h-[52px] rounded-xl text-white text-md">
                                                         <SelectValue placeholder="Selecciona tu meta" />
                                                     </SelectTrigger>
@@ -337,14 +343,14 @@ export function OnboardingWizard({ authProvider }: OnboardingWizardProps) {
                                             <div className="space-y-3">
                                                 <Label className="uppercase text-xs font-bold text-neutral-500 flex justify-between">
                                                     <span>Días Disponibles por Semana</span>
-                                                    <span className="text-red-500 text-lg font-black">{formData.availableDays} días</span>
+                                                    <span className="text-red-500 text-lg font-black">{availableDays} días</span>
                                                 </Label>
                                                 <input
                                                     type="range"
                                                     min="1"
                                                     max="7"
                                                     step="1"
-                                                    value={formData.availableDays || 5}
+                                                    value={availableDays || 5}
                                                     onChange={(e) => setValue("availableDays", parseInt(e.target.value))}
                                                     className="w-full h-2 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-red-600"
                                                 />
@@ -368,7 +374,7 @@ export function OnboardingWizard({ authProvider }: OnboardingWizardProps) {
                                                     "Hombros", "Rodillas", "Espalda Baja", "Espalda Alta",
                                                     "Muñecas", "Codos", "Tobillos", "Cadera", "Cuello"
                                                 ].map((part) => {
-                                                    const isSelected = formData.injuries?.includes(part);
+                                                    const isSelected = injuries?.includes(part);
                                                     return (
                                                         <div
                                                             key={part}
@@ -395,19 +401,19 @@ export function OnboardingWizard({ authProvider }: OnboardingWizardProps) {
                                                             e.preventDefault();
                                                             const val = (e.currentTarget as HTMLInputElement).value;
                                                             if (val) {
-                                                                setValue("medicalConditions", [...(formData.medicalConditions || []), val]);
+                                                                setValue("medicalConditions", [...(medicalConditions || []), val]);
                                                                 (e.currentTarget as HTMLInputElement).value = "";
                                                             }
                                                         }
                                                     }}
                                                 />
                                                 <div className="flex flex-wrap gap-2 mt-2">
-                                                    {formData.medicalConditions?.map((cond, i) => (
+                                                    {medicalConditions?.map((cond, i) => (
                                                         <span key={i} className="bg-neutral-800 text-white px-3 py-1 rounded-full text-xs flex items-center gap-2">
                                                             {cond}
                                                             <button
                                                                 type="button"
-                                                                onClick={() => setValue("medicalConditions", formData.medicalConditions?.filter((_, idx) => idx !== i) || [])}
+                                                                onClick={() => setValue("medicalConditions", medicalConditions?.filter((_, idx) => idx !== i) || [])}
                                                                 className="hover:text-red-500"
                                                             >
                                                                 ×

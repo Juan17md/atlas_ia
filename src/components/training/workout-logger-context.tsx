@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode, Dispatch, SetStateAction } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode, Dispatch, SetStateAction, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { logRetroactiveWorkout, getWorkoutLogByDate, TrainingLogDbData, markAsRestDay, RetroactiveWorkoutData } from "@/actions/training-logs";
@@ -26,44 +26,44 @@ export interface RetroExercise {
     sets: RetroSet[];
 }
 
-interface WorkoutLoggerContextType {
-    // Estado
+// --- STATE CONTEXT (cambia frecuentemente) ---
+
+interface WorkoutLoggerStateType {
     routineName: string;
-    setRoutineName: (v: string) => void;
     date: string;
-    setDate: (v: string) => void;
     sessionRpe: number;
-    setSessionRpe: (v: number) => void;
     sessionNotes: string;
-    setSessionNotes: (v: string) => void;
     exercises: RetroExercise[];
-    setExercises: Dispatch<SetStateAction<RetroExercise[]>>;
-    
     isSubmitting: boolean;
     isLoadingLog: boolean;
     existingLogId?: string;
     existingSessionId?: string;
-    
-    // IA & Selector
     aiFeedback: string | null;
     isAnalyzing: boolean;
     showAiModal: boolean;
-    setShowAiModal: (v: boolean) => void;
     showExerciseSelector: boolean;
-    setShowExerciseSelector: (v: boolean) => void;
     exerciseSelectorMode: "swap" | "add" | "insert";
-    setExerciseSelectorMode: (v: "swap" | "add" | "insert") => void;
     targetIndex: number;
-    setTargetIndex: (v: number) => void;
     availableExercises: { id: string; name: string; muscleGroups?: string[] }[];
-    
-    // Diálogos
     showConfirmDialog: boolean;
-    setShowConfirmDialog: (v: boolean) => void;
     pendingActionType: "save" | "rest" | null;
-    setPendingActionType: (v: "save" | "rest" | null) => void;
+    canUseSelector?: boolean;
+}
 
-    // Handlers
+// --- DISPATCH CONTEXT (referencias estables) ---
+
+interface WorkoutLoggerDispatchType {
+    setRoutineName: (v: string) => void;
+    setDate: (v: string) => void;
+    setSessionRpe: (v: number) => void;
+    setSessionNotes: (v: string) => void;
+    setExercises: Dispatch<SetStateAction<RetroExercise[]>>;
+    setShowAiModal: (v: boolean) => void;
+    setShowExerciseSelector: (v: boolean) => void;
+    setExerciseSelectorMode: (v: "swap" | "add" | "insert") => void;
+    setTargetIndex: (v: number) => void;
+    setShowConfirmDialog: (v: boolean) => void;
+    setPendingActionType: (v: "save" | "rest" | null) => void;
     addExercise: () => void;
     openAddSelector: () => void;
     openSwapSelector: (index: number) => void;
@@ -78,18 +78,33 @@ interface WorkoutLoggerContextType {
     handleMarkRestWithConfirm: () => Promise<void>;
     confirmOverwrite: () => void;
     triggerAIAnalysis: (p: RetroactiveWorkoutData) => Promise<void>;
-    canUseSelector?: boolean;
 }
 
-const WorkoutLoggerContext = createContext<WorkoutLoggerContextType | undefined>(undefined);
+// --- CONTEXTOS SEPARADOS ---
 
-export function useWorkoutLogger() {
-    const context = useContext(WorkoutLoggerContext);
-    if (!context) {
-        throw new Error("useWorkoutLogger must be used within a WorkoutLoggerProvider");
-    }
-    return context;
+const WorkoutLoggerStateContext = createContext<WorkoutLoggerStateType | undefined>(undefined);
+const WorkoutLoggerDispatchContext = createContext<WorkoutLoggerDispatchType | undefined>(undefined);
+
+// --- HOOKS ---
+
+export function useWorkoutLoggerState() {
+    const ctx = useContext(WorkoutLoggerStateContext);
+    if (!ctx) throw new Error("useWorkoutLoggerState must be used within a WorkoutLoggerProvider");
+    return ctx;
 }
+
+export function useWorkoutLoggerDispatch() {
+    const ctx = useContext(WorkoutLoggerDispatchContext);
+    if (!ctx) throw new Error("useWorkoutLoggerDispatch must be used within a WorkoutLoggerProvider");
+    return ctx;
+}
+
+// Hook combinado para compatibilidad (consumidores que necesitan ambos)
+export function useWorkoutLogger(): WorkoutLoggerStateType & WorkoutLoggerDispatchType {
+    return { ...useWorkoutLoggerState(), ...useWorkoutLoggerDispatch() };
+}
+
+// --- PROVIDER ---
 
 interface ProviderProps {
     children: ReactNode;
@@ -125,15 +140,14 @@ export function WorkoutLoggerProvider({ children, initialRoutineName, routineDay
     const [sessionNotes, setSessionNotes] = useState("");
     const { isOnline, saveLogLocally } = useOfflineSync();
 
-    const createEmptyExercise = (): RetroExercise => ({
+    const createEmptyExercise = useCallback((): RetroExercise => ({
         exerciseName: "",
         exerciseId: "",
         feedback: "",
         sets: [{ weight: "", reps: "", rpe: "8" }],
-    });
+    }), []);
 
     const [exercises, setExercises] = useState<RetroExercise[]>(() => {
-        // Primero intentar cargar borrador si es un entrenamiento nuevo
         if (typeof window !== "undefined" && !routineId) {
             const draft = localStorage.getItem("gymia_workout_draft");
             if (draft) {
@@ -181,7 +195,6 @@ export function WorkoutLoggerProvider({ children, initialRoutineName, routineDay
         }
     }, [exercises, routineName, sessionRpe, sessionNotes, date, existingLogId]);
 
-    // Intentar cargar otros campos del borrador al montar
     useEffect(() => {
         if (!existingLogId && !routineId && typeof window !== "undefined") {
             const draftStr = localStorage.getItem("gymia_workout_draft");
@@ -196,7 +209,6 @@ export function WorkoutLoggerProvider({ children, initialRoutineName, routineDay
         }
     }, [existingLogId, routineId]);
 
-    // Efecto para buscar si hay un log existente
     useEffect(() => {
         let isMounted = true;
         const checkExistingLog = async () => {
@@ -257,7 +269,7 @@ export function WorkoutLoggerProvider({ children, initialRoutineName, routineDay
         };
         checkExistingLog();
         return () => { isMounted = false; };
-    }, [date, initialRoutineName, routineDay]);
+    }, [date, initialRoutineName, routineDay, createEmptyExercise]);
 
     useEffect(() => {
         getExercises().then(res => {
@@ -271,28 +283,29 @@ export function WorkoutLoggerProvider({ children, initialRoutineName, routineDay
         });
     }, []);
 
-    // Handlers con useCallback
-    const addExercise = React.useCallback(() => setExercises(prev => [...prev, createEmptyExercise()]), []);
+    // --- DISPATCH FUNCTIONS (estables con useCallback) ---
+
+    const addExercise = useCallback(() => setExercises(prev => [...prev, createEmptyExercise()]), [createEmptyExercise]);
     
-    const openAddSelector = React.useCallback(() => { 
+    const openAddSelector = useCallback(() => { 
         setExerciseSelectorMode("add"); 
         setTargetIndex(-1); 
         setShowExerciseSelector(true); 
     }, []);
 
-    const openSwapSelector = React.useCallback((index: number) => { 
+    const openSwapSelector = useCallback((index: number) => { 
         setExerciseSelectorMode("swap"); 
         setTargetIndex(index); 
         setShowExerciseSelector(true); 
     }, []);
 
-    const openInsertSelector = React.useCallback((index: number) => { 
+    const openInsertSelector = useCallback((index: number) => { 
         setExerciseSelectorMode("insert"); 
         setTargetIndex(index); 
         setShowExerciseSelector(true); 
     }, []);
 
-    const handleExerciseSelected = React.useCallback((exercise: { id?: string; name: string }) => {
+    const handleExerciseSelected = useCallback((exercise: { id?: string; name: string }) => {
         setExercises(prev => {
             const copy = [...prev];
             if (exerciseSelectorMode === "swap" && targetIndex >= 0) {
@@ -308,22 +321,22 @@ export function WorkoutLoggerProvider({ children, initialRoutineName, routineDay
         setShowExerciseSelector(false);
     }, [exerciseSelectorMode, targetIndex]);
 
-    const removeExercise = React.useCallback((index: number) => { 
+    const removeExercise = useCallback((index: number) => { 
         setExercises(prev => prev.length > 1 ? prev.filter((_, i) => i !== index) : prev); 
     }, []);
 
-    const updateExercise = React.useCallback((index: number, field: keyof RetroExercise, value: string) => {
+    const updateExercise = useCallback((index: number, field: keyof RetroExercise, value: string) => {
         setExercises(prev => prev.map((ex, i) => i === index ? { ...ex, [field]: value } : ex));
     }, []);
 
-    const addSet = React.useCallback((exIndex: number) => setExercises(prev => {
+    const addSet = useCallback((exIndex: number) => setExercises(prev => {
         const copy = [...prev];
         const lastSet = copy[exIndex].sets[copy[exIndex].sets.length - 1];
         copy[exIndex].sets.push({ weight: lastSet?.weight || "", reps: lastSet?.reps || "", rpe: lastSet?.rpe || "8" });
         return copy;
     }), []);
 
-    const removeSet = React.useCallback((exIndex: number, setIndex: number) => {
+    const removeSet = useCallback((exIndex: number, setIndex: number) => {
         setExercises(prev => {
             if (prev[exIndex].sets.length <= 1) return prev;
             const copy = [...prev];
@@ -332,13 +345,13 @@ export function WorkoutLoggerProvider({ children, initialRoutineName, routineDay
         });
     }, []);
 
-    const updateSet = React.useCallback((exIndex: number, setIndex: number, field: keyof RetroSet, value: string) => setExercises(prev => {
+    const updateSet = useCallback((exIndex: number, setIndex: number, field: keyof RetroSet, value: string) => setExercises(prev => {
         const copy = [...prev];
         copy[exIndex].sets[setIndex] = { ...copy[exIndex].sets[setIndex], [field]: value };
         return copy;
     }), []);
 
-    const triggerAIAnalysis = async (p: RetroactiveWorkoutData) => {
+    const triggerAIAnalysis = useCallback(async (p: RetroactiveWorkoutData) => {
         setIsAnalyzing(true); setShowAiModal(true);
         try {
             const res = await analyzeWorkoutSession(p);
@@ -346,9 +359,9 @@ export function WorkoutLoggerProvider({ children, initialRoutineName, routineDay
         } catch {
             setAiFeedback("Error con Vivi, pero tus datos están a salvo.");
         } finally { setIsAnalyzing(false); }
-    };
+    }, []);
 
-    const handleSubmit = async () => {
+    const handleSubmit = useCallback(async () => {
         if (exercises.some(ex => !ex.exerciseName.trim())) { toast.error("Todos los ejercicios deben tener nombre."); return; }
         setIsSubmitting(true);
         const payload: RetroactiveWorkoutData = {
@@ -390,9 +403,9 @@ export function WorkoutLoggerProvider({ children, initialRoutineName, routineDay
             }
             finally { setIsSubmitting(false); }
         }
-    };
+    }, [exercises, existingLogId, existingSessionId, routineId, routineDay?.id, routineName, date, sessionRpe, sessionNotes, isOnline, saveLogLocally, router, triggerAIAnalysis]);
 
-    const handleMarkRestWithConfirm = async () => {
+    const handleMarkRestWithConfirm = useCallback(async () => {
         setIsSubmitting(true);
         if (existingLogId) { setPendingActionType("rest"); setShowConfirmDialog(true); setIsSubmitting(false); }
         else {
@@ -403,9 +416,9 @@ export function WorkoutLoggerProvider({ children, initialRoutineName, routineDay
             } catch { toast.error("Error de conexión"); }
             finally { setIsSubmitting(false); }
         }
-    };
+    }, [existingLogId, date, router]);
 
-    const confirmOverwrite = async () => {
+    const confirmOverwrite = useCallback(async () => {
         setShowConfirmDialog(false);
         setIsSubmitting(true);
         const payload: RetroactiveWorkoutData = {
@@ -427,30 +440,45 @@ export function WorkoutLoggerProvider({ children, initialRoutineName, routineDay
             }
         } catch { toast.error("Error"); }
         finally { setIsSubmitting(false); }
-    };
+    }, [existingLogId, existingSessionId, routineId, routineDay?.id, routineName, date, sessionRpe, sessionNotes, exercises, pendingActionType, router, triggerAIAnalysis]);
 
-    const contextValue = React.useMemo(() => ({
-        routineName, setRoutineName, date, setDate, sessionRpe, setSessionRpe, sessionNotes, setSessionNotes, exercises, setExercises,
+    // --- STATE CONTEXT VALUE (cambia cuando cambia el estado) ---
+
+    const stateValue = useMemo<WorkoutLoggerStateType>(() => ({
+        routineName, date, sessionRpe, sessionNotes, exercises,
         isSubmitting, isLoadingLog, existingLogId, existingSessionId,
-        aiFeedback, isAnalyzing, showAiModal, setShowAiModal,
-        showExerciseSelector, setShowExerciseSelector, exerciseSelectorMode, setExerciseSelectorMode, targetIndex, setTargetIndex, availableExercises,
-        showConfirmDialog, setShowConfirmDialog, pendingActionType, setPendingActionType,
-        addExercise, openAddSelector, openSwapSelector, openInsertSelector, handleExerciseSelected, removeExercise, updateExercise, addSet, removeSet, updateSet,
-        handleSubmit, handleMarkRestWithConfirm, confirmOverwrite, triggerAIAnalysis,
+        aiFeedback, isAnalyzing, showAiModal,
+        showExerciseSelector, exerciseSelectorMode, targetIndex, availableExercises,
+        showConfirmDialog, pendingActionType,
         canUseSelector: true
     }), [
         routineName, date, sessionRpe, sessionNotes, exercises,
         isSubmitting, isLoadingLog, existingLogId, existingSessionId,
         aiFeedback, isAnalyzing, showAiModal,
         showExerciseSelector, exerciseSelectorMode, targetIndex, availableExercises,
-        showConfirmDialog, pendingActionType,
-        addExercise, openAddSelector, openSwapSelector, openInsertSelector, handleExerciseSelected, removeExercise, updateExercise, addSet, removeSet, updateSet,
+        showConfirmDialog, pendingActionType
+    ]);
+
+    // --- DISPATCH CONTEXT VALUE (estable, memoizado) ---
+
+    const dispatchValue = useMemo<WorkoutLoggerDispatchType>(() => ({
+        setRoutineName, setDate, setSessionRpe, setSessionNotes, setExercises,
+        setShowAiModal, setShowExerciseSelector, setExerciseSelectorMode, setTargetIndex,
+        setShowConfirmDialog, setPendingActionType,
+        addExercise, openAddSelector, openSwapSelector, openInsertSelector,
+        handleExerciseSelected, removeExercise, updateExercise, addSet, removeSet, updateSet,
+        handleSubmit, handleMarkRestWithConfirm, confirmOverwrite, triggerAIAnalysis
+    }), [
+        addExercise, openAddSelector, openSwapSelector, openInsertSelector,
+        handleExerciseSelected, removeExercise, updateExercise, addSet, removeSet, updateSet,
         handleSubmit, handleMarkRestWithConfirm, confirmOverwrite, triggerAIAnalysis
     ]);
 
     return (
-        <WorkoutLoggerContext.Provider value={contextValue}>
-            {children}
-        </WorkoutLoggerContext.Provider>
+        <WorkoutLoggerStateContext.Provider value={stateValue}>
+            <WorkoutLoggerDispatchContext.Provider value={dispatchValue}>
+                {children}
+            </WorkoutLoggerDispatchContext.Provider>
+        </WorkoutLoggerStateContext.Provider>
     );
 }

@@ -124,7 +124,7 @@ export function ExerciseCardContent({
                                         variant="ghost"
                                         size="icon"
                                         onClick={onSwap}
-                                        className="h-8 w-8 rounded-lg text-neutral-600 hover:text-amber-400 hover:bg-amber-400/10 transition-all"
+                                        className="h-10 w-10 rounded-lg text-neutral-600 hover:text-amber-400 hover:bg-amber-400/10 transition-all"
                                         title="Cambiar ejercicio"
                                     >
                                         <RefreshCw className="w-4 h-4" />
@@ -135,7 +135,7 @@ export function ExerciseCardContent({
                                                 variant="ghost"
                                                 size="sm"
                                                 onClick={onRemove}
-                                                className="h-7 px-2 text-[10px] font-black text-red-500 hover:bg-red-500/20 rounded-lg uppercase"
+                                                className="h-9 px-3 text-[10px] font-black text-red-500 hover:bg-red-500/20 rounded-lg uppercase"
                                             >
                                                 Sí
                                             </Button>
@@ -143,7 +143,7 @@ export function ExerciseCardContent({
                                                 variant="ghost"
                                                 size="sm"
                                                 onClick={() => onSetRemoveConfirm(false)}
-                                                className="h-7 px-2 text-[10px] font-black text-neutral-500 hover:text-white rounded-lg uppercase"
+                                                className="h-9 px-3 text-[10px] font-black text-neutral-500 hover:text-white rounded-lg uppercase"
                                             >
                                                 No
                                             </Button>
@@ -153,7 +153,7 @@ export function ExerciseCardContent({
                                             variant="ghost"
                                             size="icon"
                                             onClick={() => onSetRemoveConfirm(true)}
-                                            className="h-8 w-8 rounded-lg text-neutral-600 hover:text-red-500 hover:bg-red-500/10 transition-all"
+                                            className="h-10 w-10 rounded-lg text-neutral-600 hover:text-red-500 hover:bg-red-500/10 transition-all"
                                             title="Eliminar ejercicio"
                                         >
                                             <Trash2 className="w-4 h-4" />
@@ -166,7 +166,7 @@ export function ExerciseCardContent({
                         {exercise.variantIds && exercise.variantIds.length > 0 && (
                             <Sheet>
                                 <SheetTrigger asChild>
-                                    <Button variant="outline" className="h-8 text-[10px] font-black uppercase tracking-[0.2em] bg-red-600/10 border-red-600/20 text-red-500 w-fit px-4 rounded-xl hover:bg-red-600/20 transition-all shadow-lg shadow-red-950/20 group">
+                                    <Button variant="outline" className="h-9 text-[10px] font-black uppercase tracking-[0.2em] bg-red-600/10 border-red-600/20 text-red-500 w-fit px-4 rounded-xl hover:bg-red-600/20 transition-all shadow-lg shadow-red-950/20 group">
                                         <Dumbbell className="w-3 h-3 group-hover:rotate-12 transition-transform mr-2" />
                                         Máquina Ocupada
                                     </Button>

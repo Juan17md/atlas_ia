@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getRoutines } from "@/actions/routine-actions";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Dumbbell, Target, RotateCcw, Hash } from "lucide-react";
+import { ChevronLeft, Dumbbell, Target, RotateCcw, Hash, Timer, Repeat, Link as LinkIcon } from "lucide-react";
 import Link from "next/link";
 
 // Interfaces
@@ -11,6 +11,7 @@ interface RoutineSet {
     reps?: string | number;
     rpeTarget?: number;
     restSeconds?: number;
+    duracionSegundos?: number;
 }
 
 interface ScheduleExercise {
@@ -18,6 +19,10 @@ interface ScheduleExercise {
     exerciseName: string;
     sets: RoutineSet[];
     notes?: string;
+    ejercicioTipo?: "reps" | "time";
+    duracionSegundos?: number;
+    comboTipo?: "superset" | "biserie" | "triserie";
+    comboGrupo?: string;
 }
 
 interface ScheduleDay {
@@ -126,9 +131,36 @@ export default async function RoutineDayDetailPage({ params }: { params: Promise
                             <div className="h-10 w-10 rounded-xl bg-neutral-800 flex items-center justify-center text-sm font-black text-neutral-400">
                                 {exIndex + 1}
                             </div>
-                            <h3 className="font-bold text-white text-base sm:text-lg flex-1">
-                                {exercise.exerciseName}
-                            </h3>
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                    <h3 className="font-bold text-white text-base sm:text-lg">
+                                        {exercise.exerciseName}
+                                    </h3>
+                                    {exercise.ejercicioTipo === "time" && (
+                                        <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-500/10 border border-purple-500/20 text-[10px] font-black text-purple-400 uppercase">
+                                            <Timer className="w-3 h-3" />
+                                            Tiempo
+                                        </span>
+                                    )}
+                                    {exercise.ejercicioTipo !== "time" && (
+                                        <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-500/10 border border-blue-500/20 text-[10px] font-black text-blue-400 uppercase">
+                                            <Repeat className="w-3 h-3" />
+                                            Reps
+                                        </span>
+                                    )}
+                                    {exercise.comboTipo && (
+                                        <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-[10px] font-black text-amber-400 uppercase">
+                                            <LinkIcon className="w-3 h-3" />
+                                            {exercise.comboTipo === "superset" ? "Superserie" : exercise.comboTipo === "biserie" ? "Biserie" : "Triserie"}
+                                        </span>
+                                    )}
+                                </div>
+                                {exercise.duracionSegundos && exercise.ejercicioTipo === "time" && (
+                                    <p className="text-xs text-neutral-500 mt-0.5">
+                                        {exercise.duracionSegundos}s por serie
+                                    </p>
+                                )}
+                            </div>
                         </div>
 
                         {/* Tabla de series */}
@@ -137,7 +169,9 @@ export default async function RoutineDayDetailPage({ params }: { params: Promise
                             <div className="grid grid-cols-12 gap-2 text-[10px] font-bold uppercase tracking-wider text-neutral-600 mb-2 px-1">
                                 <div className="col-span-1">#</div>
                                 <div className="col-span-3">Tipo</div>
-                                <div className="col-span-3 text-center">Reps</div>
+                                <div className="col-span-3 text-center">
+                                    {exercise.ejercicioTipo === "time" ? "Duración" : "Reps"}
+                                </div>
                                 <div className="col-span-2 text-center">RPE</div>
                                 <div className="col-span-3 text-center">Descanso</div>
                             </div>
@@ -157,10 +191,15 @@ export default async function RoutineDayDetailPage({ params }: { params: Promise
                                         </span>
                                     </div>
                                     <div className="col-span-3 text-center text-white font-bold">
-                                        {set.reps || "-"}
+                                        {exercise.ejercicioTipo === "time"
+                                            ? (set.duracionSegundos ? `${set.duracionSegundos}s` : "-")
+                                            : (set.reps || "-")
+                                        }
                                     </div>
                                     <div className="col-span-2 text-center">
-                                        {set.rpeTarget ? (
+                                        {exercise.ejercicioTipo === "time" ? (
+                                            <span className="text-neutral-700">-</span>
+                                        ) : set.rpeTarget ? (
                                             <span className="flex items-center justify-center gap-1 text-neutral-300 font-bold">
                                                 <Target className="w-3 h-3 text-red-500" />
                                                 {set.rpeTarget}

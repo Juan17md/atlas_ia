@@ -6,7 +6,14 @@ import {
     RoutineDaySchema,
     RoutineExerciseSchema,
     RoutineSetSchema,
-    TrainingLogSchema
+    TrainingLogSchema,
+    TrainingLogExerciseSchema,
+    TrainingLogSetSchema,
+    CircuitSchema,
+    CircuitExerciseSchema,
+    EjercicioTipoEnum,
+    ComboTipoEnum,
+    CircuitTipoEnum,
 } from "@/lib/schemas";
 
 export type User = z.infer<typeof UserSchema>;
@@ -16,6 +23,14 @@ export type RoutineDay = z.infer<typeof RoutineDaySchema>;
 export type RoutineExercise = z.infer<typeof RoutineExerciseSchema>;
 export type RoutineSet = z.infer<typeof RoutineSetSchema>;
 export type TrainingLog = z.infer<typeof TrainingLogSchema>;
+export type TrainingLogExercise = z.infer<typeof TrainingLogExerciseSchema>;
+export type TrainingLogSet = z.infer<typeof TrainingLogSetSchema>;
+export type Circuit = z.infer<typeof CircuitSchema>;
+export type CircuitExercise = z.infer<typeof CircuitExerciseSchema>;
+
+export type EjercicioTipo = z.infer<typeof EjercicioTipoEnum>;
+export type ComboTipo = z.infer<typeof ComboTipoEnum>;
+export type CircuitTipo = z.infer<typeof CircuitTipoEnum>;
 
 // Tipos de Rol y Género para uso directo
 export type UserRole = "athlete" | "coach" | "advanced_athlete";

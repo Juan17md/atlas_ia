@@ -241,6 +241,8 @@ export interface ExerciseListItem {
     equipment?: string[];
     videoUrl?: string | null;
     imageUrl?: string | null;
+    tipoEjercicio?: "reps" | "time";
+    duracionSegundos?: number;
 }
 
 // ============================================

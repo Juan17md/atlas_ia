@@ -75,7 +75,7 @@ export function ActivityChart({ data = defaultData }: { data?: any[] }) {
                         dataKey="total"
                         radius={[6, 6, 6, 6]}
                         barSize={20}
-                        animationDuration={1500}
+                        animationDuration={800}
                     >
                         {data.map((entry, index) => (
                             <Cell

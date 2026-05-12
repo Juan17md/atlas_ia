@@ -46,7 +46,7 @@ export function ProgressChart({ completed = 0, target = 3 }: { completed?: numbe
                         dataKey="value"
                         stroke="none"
                         cornerRadius={12}
-                        animationDuration={1500}
+                        animationDuration={800}
                     >
                         {data.map((entry, index) => (
                             <Cell

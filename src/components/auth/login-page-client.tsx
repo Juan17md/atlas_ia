@@ -21,37 +21,9 @@ export function LoginPageClient() {
                 BACKGROUND: LIQUID AURORA (Global)
             ============================================= */}
             <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-                {/* Orbe 1 (Rojo vibrante, sup-der) */}
-                <motion.div
-                    animate={{
-                        x: [0, -100, 50, 0],
-                        y: [0, 50, -100, 0],
-                        scale: [1, 1.2, 0.9, 1],
-                    }}
-                    transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                    className="absolute -top-[20%] -right-[10%] h-[60vw] w-[60vw] max-h-[800px] max-w-[800px] rounded-full bg-red-600/15 blur-[120px] mix-blend-screen"
-                />
-
-                {/* Orbe 2 (Carmesí oscuro, central-izq) */}
-                <motion.div
-                    animate={{
-                        x: [0, 80, -60, 0],
-                        y: [0, -80, 40, 0],
-                        scale: [1, 0.85, 1.15, 1],
-                    }}
-                    transition={{ duration: 25, repeat: Infinity, ease: "linear", delay: 1 }}
-                    className="absolute top-[40%] -left-[20%] h-[70vw] w-[70vw] max-h-[900px] max-w-[900px] rounded-full bg-red-800/20 blur-[150px] mix-blend-screen"
-                />
-
-                {/* Orbe 3 (Naranja sutil, inf-der) */}
-                <motion.div
-                    animate={{
-                        x: [0, -50, 30, 0],
-                        y: [0, -30, -80, 0],
-                    }}
-                    transition={{ duration: 18, repeat: Infinity, ease: "linear", delay: 2 }}
-                    className="absolute -bottom-[20%] right-[10%] h-[40vw] w-[40vw] max-h-[600px] max-w-[600px] rounded-full bg-orange-600/10 blur-[100px] mix-blend-screen"
-                />
+                <div className="absolute -top-[20%] -right-[10%] h-[60vw] w-[60vw] max-h-[800px] max-w-[800px] rounded-full bg-red-600/15 blur-[60px] mix-blend-screen" />
+                <div className="absolute top-[40%] -left-[20%] h-[70vw] w-[70vw] max-h-[900px] max-w-[900px] rounded-full bg-red-800/20 blur-[80px] mix-blend-screen" />
+                <div className="absolute -bottom-[20%] right-[10%] h-[40vw] w-[40vw] max-h-[600px] max-w-[600px] rounded-full bg-orange-600/10 blur-[50px] mix-blend-screen" />
 
                 {/* Ruido cinematográfico sobre luces */}
                 <div

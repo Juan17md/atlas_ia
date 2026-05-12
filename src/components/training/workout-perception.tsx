@@ -8,7 +8,7 @@ import { Zap } from "lucide-react";
 import { useWorkoutLogger } from "./workout-logger-context";
 import { cn } from "@/lib/utils";
 
-export function WorkoutPerception() {
+export const WorkoutPerception = React.memo(function WorkoutPerception() {
     const { sessionRpe, setSessionRpe, sessionNotes, setSessionNotes } = useWorkoutLogger();
 
     const getRpeColor = (value: number) => {
@@ -73,4 +73,4 @@ export function WorkoutPerception() {
             </div>
         </div>
     );
-}
+});

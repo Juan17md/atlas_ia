@@ -1,6 +1,7 @@
 export interface ExerciseSet {
     type?: string;
     reps?: string | number;
+    duracionSegundos?: number;
     rpeTarget?: number;
     restSeconds?: number;
 }
@@ -12,6 +13,14 @@ export interface ScheduleExercise {
     sets: ExerciseSet[];
     order?: number;
     variantIds?: string[];
+
+    ejercicioTipo?: "reps" | "time";
+    duracionSegundos?: number;
+
+    comboTipo?: "superset" | "biserie" | "triserie";
+    comboGrupo?: string;
+
+    circuitoId?: string;
 }
 
 export interface ScheduleDay {
@@ -38,6 +47,8 @@ export interface RoutineFormData {
 export interface AvailableExercise {
     id: string;
     name: string;
+    tipoEjercicio?: "reps" | "time";
+    duracionSegundos?: number;
 }
 
 export const WEEKDAYS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];

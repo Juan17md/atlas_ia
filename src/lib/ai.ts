@@ -34,7 +34,17 @@ function sanitizeArrayForAI(arr: string[] | undefined): string {
   return arr.map(sanitizeForAI).join(", ");
 }
 
+const cacheContexto = new Map<string, { contexto: string; timestamp: number }>();
+const TTL_CONTEXTO = 2 * 60 * 1000; // 2 minutos de caché
+
 export async function getAthleteContext(userId: string, currentContext?: string): Promise<string> {
+    const claveCache = `ctx_${userId}`;
+    const cacheado = cacheContexto.get(claveCache);
+
+    if (cacheado && Date.now() - cacheado.timestamp < TTL_CONTEXTO) {
+        return cacheado.contexto;
+    }
+
   try {
     const [userDoc, measurementsSnap, routinesSnap, logsSnap, viviIntel] = await Promise.all([
       adminDb.collection("users").doc(userId).get(),
@@ -189,7 +199,15 @@ export async function getAthleteContext(userId: string, currentContext?: string)
     parts.push("5. Sé motivador, empático y profesional en tus respuestas");
     parts.push("6. Si no tienes suficiente información para una recomendación específica, indícalo claramente");
 
-    return parts.join("\n");
+    const contexto = parts.join("\n");
+    cacheContexto.set(claveCache, { contexto, timestamp: Date.now() });
+
+    if (cacheContexto.size > 100) {
+        const primeraClave = cacheContexto.keys().next().value;
+        if (primeraClave) cacheContexto.delete(primeraClave);
+    }
+
+    return contexto;
   } catch (error) {
     console.error("Error fetching athlete context:", error);
     return "ERROR: No se pudo obtener el contexto del atleta. Por favor, intenta de nuevo más tarde.";

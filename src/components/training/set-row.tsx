@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trash2 } from "lucide-react";
-import { RetroSet, useWorkoutLogger } from "./workout-logger-context";
+import { RetroSet, useWorkoutLoggerDispatch } from "./workout-logger-context";
 
 interface SetRowProps {
     exIndex: number;
@@ -15,7 +15,7 @@ interface SetRowProps {
 }
 
 export const SetRow = React.memo(function SetRow({ exIndex, setIndex, set, canDelete }: SetRowProps) {
-    const { updateSet, removeSet } = useWorkoutLogger();
+    const { updateSet, removeSet } = useWorkoutLoggerDispatch();
 
     return (
         <div className="grid grid-cols-[20px_1fr_1fr_1fr_20px] sm:grid-cols-[28px_1fr_1fr_1fr_28px] gap-1 sm:gap-1.5 items-center group">
@@ -35,7 +35,7 @@ export const SetRow = React.memo(function SetRow({ exIndex, setIndex, set, canDe
                     }
                 }}
                 placeholder="-"
-                className="h-9 sm:h-11 text-center text-sm sm:text-base font-bold bg-neutral-900 border-neutral-800 focus:border-neutral-700 text-white rounded-lg sm:rounded-xl focus:ring-1 focus:ring-white/20 px-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-neutral-800 transition-all placeholder:font-normal"
+                className="h-9 sm:h-11 text-center text-base font-bold bg-neutral-900 border-neutral-800 focus:border-neutral-700 text-white rounded-lg sm:rounded-xl focus:ring-1 focus:ring-white/20 px-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-neutral-800 transition-all placeholder:font-normal"
             />
             <Input
                 type="text"
@@ -48,14 +48,14 @@ export const SetRow = React.memo(function SetRow({ exIndex, setIndex, set, canDe
                     }
                 }}
                 placeholder={set.targetReps || "-"}
-                className="h-9 sm:h-11 text-center text-sm sm:text-base font-bold bg-neutral-900 border-neutral-800 focus:border-neutral-700 text-white rounded-lg sm:rounded-xl focus:ring-1 focus:ring-white/20 px-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-neutral-600 transition-all placeholder:font-normal"
+                className="h-9 sm:h-11 text-center text-base font-bold bg-neutral-900 border-neutral-800 focus:border-neutral-700 text-white rounded-lg sm:rounded-xl focus:ring-1 focus:ring-white/20 px-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-neutral-600 transition-all placeholder:font-normal"
             />
             <Select
                 value={set.rpe || ""}
                 onValueChange={(val) => updateSet(exIndex, setIndex, "rpe", val)}
             >
                 <SelectTrigger
-                    className="h-9 sm:h-11 w-full justify-center text-center text-sm sm:text-base font-bold bg-neutral-900 border-neutral-800 focus:border-neutral-700 text-white rounded-lg sm:rounded-xl focus:ring-1 focus:ring-white/20 px-0 [&>svg]:hidden transition-all"
+                    className="h-9 sm:h-11 w-full justify-center text-center text-base font-bold bg-neutral-900 border-neutral-800 focus:border-neutral-700 text-white rounded-lg sm:rounded-xl focus:ring-1 focus:ring-white/20 px-0 [&>svg]:hidden transition-all"
                 >
                     <SelectValue placeholder={set.targetRpe || "-"} />
                 </SelectTrigger>
@@ -73,9 +73,9 @@ export const SetRow = React.memo(function SetRow({ exIndex, setIndex, set, canDe
                         variant="ghost"
                         size="icon"
                         onClick={() => removeSet(exIndex, setIndex)}
-                        className="h-6 w-6 sm:h-7 sm:w-7 text-neutral-700 hover:text-red-500 hover:bg-red-500/10 rounded-md sm:rounded-lg transition-colors shrink-0"
+                        className="h-10 w-10 text-neutral-700 hover:text-red-500 hover:bg-red-500/10 rounded-md sm:rounded-lg transition-colors shrink-0 p-1.5"
                     >
-                        <Trash2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                        <Trash2 className="w-4 h-4 sm:w-4 sm:h-4" />
                     </Button>
                 )}
             </div>

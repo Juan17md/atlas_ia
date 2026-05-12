@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { MediaUpload } from "@/components/ui/media-upload";
-import { Loader2, Dumbbell, Tag, ImagePlay, Search, Eraser, Activity, ChevronRight, ChevronLeft, Sparkles, Youtube, Check, ExternalLink as ExternalLinkIcon } from "lucide-react";
+import { Loader2, Dumbbell, Tag, ImagePlay, Search, Eraser, Activity, ChevronRight, ChevronLeft, Sparkles, Youtube, Check, ExternalLink as ExternalLinkIcon, Timer, Repeat } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -76,17 +76,22 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
             name: exercise.name,
             muscleGroups: exercise.muscleGroups || [],
             specificMuscles: exercise.specificMuscles || [],
-            videoUrl: exercise.videoUrl
+            videoUrl: exercise.videoUrl,
+            tipoEjercicio: exercise.tipoEjercicio || "reps",
+            duracionSegundos: exercise.duracionSegundos || undefined,
         } : {
             name: "",
             muscleGroups: [],
             specificMuscles: [],
-            videoUrl: ""
+            videoUrl: "",
+            tipoEjercicio: "reps",
+            duracionSegundos: undefined,
         },
     });
 
     const { register, handleSubmit, setValue, watch, getValues, reset, formState: { errors } } = form;
     const selectedGroups = watch("muscleGroups");
+    const tipoEjercicio = watch("tipoEjercicio");
 
     // Efecto para actualizar el formulario si cambia el ejercicio o se abre el diálogo
     useEffect(() => {
@@ -97,14 +102,18 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
                     name: exercise.name,
                     muscleGroups: exercise.muscleGroups || [],
                     specificMuscles: exercise.specificMuscles || [],
-                    videoUrl: exercise.videoUrl
+                    videoUrl: exercise.videoUrl,
+                    tipoEjercicio: exercise.tipoEjercicio || "reps",
+                    duracionSegundos: exercise.duracionSegundos || undefined,
                 });
             } else {
                 reset({
                     name: "",
                     muscleGroups: [],
                     specificMuscles: [],
-                    videoUrl: ""
+                    videoUrl: "",
+                    tipoEjercicio: "reps",
+                    duracionSegundos: undefined,
                 });
             }
         }
@@ -270,6 +279,69 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
                                             </div>
                                             {errors.name && <p className="text-red-500 text-[10px] font-black uppercase tracking-widest ml-2">{errors.name.message}</p>}
                                         </div>
+
+                                        <div className="space-y-4">
+                                            <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-500 ml-1">Tipo de Ejercicio</Label>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setValue("tipoEjercicio", "reps");
+                                                        setValue("duracionSegundos", undefined);
+                                                    }}
+                                                    className={cn(
+                                                        "p-4 md:p-5 rounded-2xl border-2 transition-all text-center cursor-pointer",
+                                                        tipoEjercicio === "reps"
+                                                            ? "border-red-500 bg-red-500/10 shadow-lg shadow-red-900/20"
+                                                            : "border-white/5 bg-neutral-900/30 hover:border-white/20"
+                                                    )}
+                                                >
+                                                    <Repeat className={cn("w-7 h-7 mx-auto mb-2", tipoEjercicio === "reps" ? "text-red-500" : "text-neutral-500")} />
+                                                    <span className={cn("text-xs font-black uppercase tracking-widest", tipoEjercicio === "reps" ? "text-white" : "text-neutral-500")}>
+                                                        Repeticiones
+                                                    </span>
+                                                    <p className="text-[9px] text-neutral-600 mt-1">Series con peso y reps</p>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setValue("tipoEjercicio", "time")}
+                                                    className={cn(
+                                                        "p-4 md:p-5 rounded-2xl border-2 transition-all text-center cursor-pointer",
+                                                        tipoEjercicio === "time"
+                                                            ? "border-red-500 bg-red-500/10 shadow-lg shadow-red-900/20"
+                                                            : "border-white/5 bg-neutral-900/30 hover:border-white/20"
+                                                    )}
+                                                >
+                                                    <Timer className={cn("w-7 h-7 mx-auto mb-2", tipoEjercicio === "time" ? "text-red-500" : "text-neutral-500")} />
+                                                    <span className={cn("text-xs font-black uppercase tracking-widest", tipoEjercicio === "time" ? "text-white" : "text-neutral-500")}>
+                                                        Tiempo
+                                                    </span>
+                                                    <p className="text-[9px] text-neutral-600 mt-1">Duración fija por serie</p>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {tipoEjercicio === "time" && (
+                                            <motion.div
+                                                initial={{ opacity: 0, height: 0 }}
+                                                animate={{ opacity: 1, height: "auto" }}
+                                                exit={{ opacity: 0, height: 0 }}
+                                                className="space-y-3"
+                                            >
+                                                <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-500 ml-1">
+                                                    Duración por Serie (segundos)
+                                                </Label>
+                                                <Input
+                                                    type="number"
+                                                    {...register("duracionSegundos", { valueAsNumber: true })}
+                                                    placeholder="Ej: 60"
+                                                    min={1}
+                                                    max={600}
+                                                    className="bg-neutral-900/40 backdrop-blur-md border border-white/5 text-white h-14 md:h-16 rounded-xl md:rounded-2xl px-6 text-lg font-black italic focus-visible:ring-red-600/30 focus-visible:border-red-600/50 transition-all placeholder:text-neutral-800 shadow-2xl"
+                                                />
+                                            </motion.div>
+                                        )}
+                                        <input type="hidden" {...register("tipoEjercicio")} />
 
                                         <div className="p-6 bg-red-600/5 border border-red-600/10 rounded-2xl md:rounded-3xl space-y-3">
                                             <div className="flex items-center gap-2 text-red-500">

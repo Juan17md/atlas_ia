@@ -135,6 +135,9 @@ export const OnboardingInputSchema = z.object({
     path: ["confirmPassword"],
 });
 
+// Tipo de ejercicio: reps (series con repeticiones) o time (duración fija)
+export const EjercicioTipoEnum = z.enum(["reps", "time"]);
+
 // Schema de Ejercicio
 export const ExerciseSchema = z.object({
     id: z.string(),
@@ -145,6 +148,9 @@ export const ExerciseSchema = z.object({
     videoUrl: z.string().optional(),
     coachId: z.string(), // ID del coach que creó o posee este ejercicio en su librería
 
+    tipoEjercicio: EjercicioTipoEnum.optional(), // Tipo: "reps" (series/repeticiones) o "time" (duración fija) - default "reps"
+    duracionSegundos: z.number().min(1).max(600).optional(), // Duración fija en segundos para ejercicios por tiempo
+
     createdAt: z.date(),
     updatedAt: z.date(),
 });
@@ -152,10 +158,14 @@ export const ExerciseSchema = z.object({
 // Schema de Serie (Set) dentro de una Rutina
 export const RoutineSetSchema = z.object({
     type: z.enum(["warmup", "working", "failure", "drop"]), // Tipo de serie
-    reps: z.string().optional(), // Rango de repeticiones sugerido (ej: "8-12")
+    reps: z.string().optional(), // Rango de repeticiones sugerido (ej: "8-12") - solo para ejercicios reps
+    duracionSegundos: z.number().min(1).max(600).optional(), // Duración fija en segundos - solo para ejercicios time
     rpeTarget: z.number().min(1).max(10).optional(), // RPE Objetivo
     restSeconds: z.number().optional(), // Descanso entre series
 });
+
+// Tipos de combo (agrupación de ejercicios consecutivos sin descanso entre ellos)
+export const ComboTipoEnum = z.enum(["superset", "biserie", "triserie"]);
 
 // Schema de Ejercicio dentro de una Rutina (RoutineItem)
 export const RoutineExerciseSchema = z.object({
@@ -165,6 +175,40 @@ export const RoutineExerciseSchema = z.object({
     sets: z.array(RoutineSetSchema),
     order: z.number(), // Orden en la sesión
     variantIds: z.array(z.string()).optional(), // IDs de ejercicios variantes
+
+    // Ejercicios por tiempo
+    ejercicioTipo: EjercicioTipoEnum.optional(), // Heredado del ejercicio o forzado en la rutina
+    duracionSegundos: z.number().optional(), // Duración para ejercicios tipo "time"
+
+    // Combos: superseries, biseries, triseries
+    comboTipo: ComboTipoEnum.optional(), // Tipo de combo si este ejercicio pertenece a uno
+    comboGrupo: z.string().optional(), // Identificador de grupo para agrupar ejercicios del mismo combo
+
+    // Circuitos
+    circuitoId: z.string().optional(), // ID del circuito al que pertenece
+});
+
+// Schema de Circuito (entidad independiente)
+export const CircuitTipoEnum = z.enum(["simple", "time"]);
+
+export const CircuitExerciseSchema = z.object({
+    exerciseId: z.string(),
+    exerciseName: z.string(),
+    duracionSegundos: z.number().optional(), // Solo para circuitos tipo "time"
+    orden: z.number(), // Orden dentro del circuito
+});
+
+export const CircuitSchema = z.object({
+    id: z.string(),
+    nombre: z.string().min(1, "El nombre del circuito es obligatorio"),
+    descripcion: z.string().optional(),
+    tipo: CircuitTipoEnum, // "simple" (reps secuenciales) o "time" (cada ejercicio por tiempo)
+    rondas: z.number().min(1).max(20), // Número de rondas
+    descansoEntreRondas: z.number().min(0).max(600).default(60), // Descanso entre rondas en segundos
+    ejercicios: z.array(CircuitExerciseSchema).min(1, "El circuito debe tener al menos un ejercicio"),
+    coachId: z.string(),
+    createdAt: z.date(),
+    updatedAt: z.date(),
 });
 
 // Schema de Día de Rutina (Workout Day)
@@ -172,6 +216,13 @@ export const RoutineDaySchema = z.object({
     id: z.string(),
     name: z.string(), // Ej: "Día 1 - Pecho/Bíceps"
     exercises: z.array(RoutineExerciseSchema),
+    isRest: z.boolean().optional(), // Si es día de descanso
+
+    // Circuito: si el día es un entrenamiento en circuito
+    esCircuito: z.boolean().optional(),
+    circuitoId: z.string().optional(), // Referencia a un circuito existente
+    circuitoRondas: z.number().optional(), // Override de rondas para este día específico
+    circuitoDescansoRondas: z.number().optional(), // Override de descanso entre rondas
 });
 
 // Schema de Rutina Completa
@@ -188,6 +239,9 @@ export const RoutineSchema = z.object({
     createdAt: z.date(),
     updatedAt: z.date(),
     deletedAt: z.date().optional(), // Soft delete
+    originalRoutineId: z.string().optional(), // ID de plantilla original (si es copia)
+    startDate: z.date().optional(), // Fecha de inicio de la rutina
+    type: z.enum(["weekly", "daily"]).optional(),
 });
 
 // Schema de Log de Entrenamiento (Ejecución real)
@@ -204,6 +258,18 @@ export const TrainingLogExerciseSchema = z.object({
     exerciseIdUsed: z.string().optional(), // ID del ejercicio específico realizado (puede ser el principal o una variante)
     sets: z.array(TrainingLogSetSchema),
     feedback: z.string().optional(), // Feedback del atleta sobre este ejercicio particular
+
+    // Para ejercicios por tiempo
+    ejercicioTipo: EjercicioTipoEnum.optional(), // "reps" o "time"
+    tiempoCompletado: z.number().optional(), // Segundos completados para ejercicios por tiempo
+
+    // Para combos
+    comboTipo: ComboTipoEnum.optional(),
+    comboGrupo: z.string().optional(),
+
+    // Para circuitos
+    circuitoId: z.string().optional(),
+    circuitoRonda: z.number().optional(), // Número de ronda del circuito
 });
 
 export const TrainingLogSchema = z.object({
@@ -216,7 +282,16 @@ export const TrainingLogSchema = z.object({
     exercises: z.array(TrainingLogExerciseSchema),
 
     sessionFeedback: z.string().optional(), // Feedback general de la sesión
+    sessionRpe: z.number().min(1).max(10).optional(), // RPE de sesión
     durationMinutes: z.number().optional(),
+    status: z.enum(["in_progress", "completed"]).optional(),
+
+    isRestDay: z.boolean().optional(),
+    isRetroactive: z.boolean().optional(),
+
+    // Circuito completado
+    circuitoId: z.string().optional(),
+    circuitoRondasCompletadas: z.number().optional(),
 
     createdAt: z.date(),
 });

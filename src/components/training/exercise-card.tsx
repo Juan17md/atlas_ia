@@ -4,24 +4,24 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, RefreshCw, Trash2 } from "lucide-react";
-import { useWorkoutLogger, RetroExercise } from "./workout-logger-context";
+import { useWorkoutLoggerDispatch, RetroExercise } from "./workout-logger-context";
 import { SetRow } from "./set-row";
 
 interface ExerciseCardProps {
     exercise: RetroExercise;
     exIndex: number;
     canEdit?: boolean;
+    canDelete?: boolean;
     isAdvanced?: boolean;
 }
 
-export const ExerciseCard = React.memo(function ExerciseCard({ exercise, exIndex, canEdit, isAdvanced }: ExerciseCardProps) {
+export const ExerciseCard = React.memo(function ExerciseCard({ exercise, exIndex, canEdit, canDelete, isAdvanced }: ExerciseCardProps) {
     const { 
         updateExercise, 
         removeExercise, 
         addSet, 
         openSwapSelector, 
-        exercises 
-    } = useWorkoutLogger();
+    } = useWorkoutLoggerDispatch();
 
     return (
         <div className="bg-neutral-950 border border-neutral-800 rounded-2xl overflow-hidden shadow-sm hover:border-neutral-700 transition-colors">
@@ -44,18 +44,18 @@ export const ExerciseCard = React.memo(function ExerciseCard({ exercise, exIndex
                             variant="ghost"
                             size="icon"
                             onClick={() => openSwapSelector(exIndex)}
-                            className="h-8 w-8 text-neutral-600 hover:text-amber-400 hover:bg-amber-400/10 shrink-0"
+                            className="h-10 w-10 text-neutral-600 hover:text-amber-400 hover:bg-amber-400/10 shrink-0"
                             title="Cambiar ejercicio"
                         >
                             <RefreshCw className="w-4 h-4" />
                         </Button>
                     )}
-                    {canEdit && exercises.length > 1 && (
+                    {canEdit && canDelete && (
                         <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => removeExercise(exIndex)}
-                            className="h-8 w-8 text-neutral-600 hover:text-red-500 hover:bg-red-500/10 shrink-0"
+                            className="h-10 w-10 text-neutral-600 hover:text-red-500 hover:bg-red-500/10 shrink-0"
                         >
                             <Trash2 className="w-4 h-4" />
                         </Button>
@@ -102,7 +102,7 @@ export const ExerciseCard = React.memo(function ExerciseCard({ exercise, exIndex
                     value={exercise.feedback}
                     onChange={(e) => updateExercise(exIndex, "feedback", e.target.value)}
                     placeholder="Notas del ejercicio (opcional)..."
-                    className="w-full bg-transparent border-0 border-b border-neutral-800 rounded-none px-0 text-sm text-neutral-400 focus-visible:ring-0 focus-visible:border-neutral-600 placeholder:text-neutral-700 py-2 sm:py-3 outline-hidden"
+                    className="w-full bg-transparent border-0 border-b border-neutral-800 rounded-none px-0 text-base text-neutral-400 focus-visible:ring-0 focus-visible:border-neutral-600 placeholder:text-neutral-700 py-2 sm:py-3 outline-hidden"
                 />
             </div>
         </div>

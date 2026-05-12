@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -78,8 +78,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
         }
     }
 
-    const height = form.watch("height");
-    const weight = form.watch("weight");
+    const height = useWatch({ control: form.control, name: "height" });
+    const weight = useWatch({ control: form.control, name: "weight" });
 
     const calculateBMI = (h?: string, w?: string) => {
         const heightVal = parseFloat(h || "0");
@@ -117,7 +117,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
                 <div className="text-center md:text-left space-y-3 flex-1">
                     <div className="flex flex-col md:flex-row md:items-center gap-3">
-                        <h2 className="text-4xl font-black text-white tracking-tighter uppercase italic">{user.name}</h2>
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tighter uppercase italic">{user.name}</h2>
                         <div className="flex items-center justify-center md:justify-start gap-2">
                             <span className={cn(
                                 "px-4 py-1.5 border rounded-xl text-[9px] font-black uppercase tracking-[0.2em] backdrop-blur-xl",
@@ -147,7 +147,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                             <Activity className="w-3.5 h-3.5 text-neutral-600" />
                             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-600">Índice Telemetría (IMC)</span>
                         </div>
-                        <span className={cn("text-4xl font-black tracking-tighter italic leading-none mb-1", bmi.color.split(' ')[1])}>{bmi.value}</span>
+                        <span className={cn("text-2xl sm:text-3xl md:text-4xl font-black tracking-tighter italic leading-none mb-1", bmi.color.split(' ')[1])}>{bmi.value}</span>
                         <div className="bg-black/40 px-3 py-1 rounded-xl border border-white/5">
                             <span className="text-[9px] font-black uppercase tracking-widest text-neutral-400 italic">{bmi.label}</span>
                         </div>

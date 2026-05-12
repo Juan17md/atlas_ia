@@ -325,7 +325,7 @@ export default async function AthleteDetailsPage({ params }: PageProps) {
                                             </div>
                                         </div>
                                         <div className="flex items-end gap-2 text-right mt-2">
-                                            <p className="text-4xl font-black text-amber-500 italic leading-none">{pr.weight}</p>
+                                            <p className="text-2xl sm:text-3xl md:text-4xl font-black text-amber-500 italic leading-none">{pr.weight}</p>
                                             <p className="text-[10px] font-black text-neutral-600 uppercase tracking-[0.2em] mb-1">kg</p>
                                         </div>
                                     </div>

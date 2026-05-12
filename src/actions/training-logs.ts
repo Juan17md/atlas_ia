@@ -18,6 +18,8 @@ export interface WorkoutSessionData {
         variantIds?: string[];
         sets: any[];
         feedback?: string;
+        ejercicioTipo?: "reps" | "time";
+        tiempoCompletado?: number;
     }>;
     totalSets?: number;
     notes?: string;
@@ -25,6 +27,7 @@ export interface WorkoutSessionData {
     sessionNotes?: string;
     dayId?: string;
     assignmentId?: string;
+    duracionMinutos?: number;
 }
 
 const RetroactiveSetSchema = z.object({

@@ -15,7 +15,7 @@ interface SessionHeaderProps {
     disableRoutineName?: boolean;
 }
 
-export function SessionHeader({ onBack, disableRoutineName }: SessionHeaderProps) {
+export const SessionHeader = React.memo(function SessionHeader({ onBack, disableRoutineName }: SessionHeaderProps) {
     const router = useRouter();
     const { 
         routineName, setRoutineName, 
@@ -66,7 +66,7 @@ export function SessionHeader({ onBack, disableRoutineName }: SessionHeaderProps
                                 onChange={(e) => setRoutineName(e.target.value)}
                                 disabled={disableRoutineName}
                                 placeholder="Ej: Push Day, Torso Pesado..."
-                                className="bg-neutral-950 border-neutral-800 text-white font-semibold rounded-xl focus:ring-1 focus:ring-white/20 h-10 md:h-12 pl-10 placeholder:text-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
+                                className="bg-neutral-950 border-neutral-800 text-white font-semibold rounded-xl focus:ring-1 focus:ring-white/20 h-10 md:h-12 pl-10 placeholder:text-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed text-base"
                             />
                         </div>
                     </div>
@@ -106,4 +106,4 @@ export function SessionHeader({ onBack, disableRoutineName }: SessionHeaderProps
             </div>
         </div>
     );
-}
+});

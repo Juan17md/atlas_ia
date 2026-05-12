@@ -84,7 +84,7 @@ export default async function HistoryPage() {
                             <div className="w-12 h-12 bg-neutral-950 border border-white/5 rounded-2xl flex items-center justify-center mb-6 shadow-2xl group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
                                 <stat.icon className={cn("w-6 h-6", stat.color)} />
                             </div>
-                            <p className="text-4xl font-black text-white italic tracking-tighter mb-1">{stat.value}</p>
+                            <p className="text-2xl sm:text-3xl md:text-4xl font-black text-white italic tracking-tighter mb-1">{stat.value}</p>
                             <p className="text-[10px] font-black text-neutral-600 uppercase tracking-[0.2em]">{stat.label}</p>
                         </div>
                     </ClientMotionDiv>

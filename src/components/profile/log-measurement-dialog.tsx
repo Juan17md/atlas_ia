@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, ReactNode, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch, UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -36,6 +36,75 @@ const LogSchema = z.object({
     notes: z.string().optional(),
 });
 
+type LogFormValues = z.infer<typeof LogSchema>;
+
+interface MeasurementFieldProps {
+    form: UseFormReturn<LogFormValues>;
+    name: keyof LogFormValues;
+    label?: string;
+    placeholder?: string;
+    suffix?: string;
+    step?: number;
+    className?: string;
+}
+
+function MeasurementField({
+    form,
+    name,
+    label,
+    placeholder = "0",
+    suffix = "cm",
+    step = 0.5,
+    className = ""
+}: MeasurementFieldProps) {
+    const value = useWatch({ control: form.control, name });
+
+    const adjust = (amount: number) => {
+        const current = parseFloat(String(value || 0).replace(",", "."));
+        const next = Math.round((current + amount) * 10) / 10;
+        form.setValue(name, next.toString() as any, { shouldDirty: true, shouldValidate: true });
+    };
+
+    return (
+        <div className={`space-y-2 ${className}`}>
+            {label && <Label className="text-xs font-medium text-neutral-400 pl-1 uppercase">{label}</Label>}
+            <div className="relative group">
+                <button
+                    type="button"
+                    onClick={() => adjust(-step)}
+                    className="absolute left-1 top-1/2 -translate-y-1/2 h-10 w-10 flex items-center justify-center text-neutral-600 hover:text-red-500 hover:bg-white/5 rounded-lg transition-all z-20"
+                >
+                    <Minus className="w-3 h-3" />
+                </button>
+
+                <Input
+                    type="text"
+                    inputMode="decimal"
+                    {...form.register(name, {
+                        onChange: (e) => { e.target.value = e.target.value.replace(",", "."); }
+                    })}
+                    className="bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 text-base text-center text-white placeholder:text-neutral-700 rounded-xl px-10 transition-all group-hover:border-white/10"
+                    placeholder={placeholder}
+                />
+
+                <button
+                    type="button"
+                    onClick={() => adjust(step)}
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-10 w-10 flex items-center justify-center text-neutral-600 hover:text-red-500 hover:bg-white/5 rounded-lg transition-all z-20"
+                >
+                    <Plus className="w-3 h-3" />
+                </button>
+
+                {suffix && (
+                    <span className="absolute right-10 top-1/2 -translate-y-1/2 text-[8px] font-black text-neutral-700 uppercase tracking-widest pointer-events-none group-hover:text-neutral-600 transition-colors">
+                        {suffix}
+                    </span>
+                )}
+            </div>
+        </div>
+    );
+}
+
 interface LogMeasurementDialogProps {
     onLogSuccess?: () => void;
     children?: ReactNode;
@@ -62,7 +131,7 @@ export function LogMeasurementDialog({
     const [open, setOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const form = useForm<z.infer<typeof LogSchema>>({
+    const form = useForm<LogFormValues>({
         resolver: zodResolver(LogSchema) as any,
         defaultValues: {
             date: initialDate || new Date().toISOString().split('T')[0],
@@ -82,9 +151,9 @@ export function LogMeasurementDialog({
                 ...initialData,
             });
         }
-    }, [open, initialData, initialWeight, initialDate, initialNotes, form]);
+    }, [open]);
 
-    const onSubmit = async (data: z.infer<typeof LogSchema>) => {
+    const onSubmit = async (data: LogFormValues) => {
         setIsSubmitting(true);
         try {
             const result = isEdit && measurementId 
@@ -103,70 +172,6 @@ export function LogMeasurementDialog({
         } finally {
             setIsSubmitting(false);
         }
-    };
-
-    // Componente interno para campos de medida con incrementos/decrementos
-    const MeasurementField = ({ 
-        name, 
-        label, 
-        placeholder = "0", 
-        suffix = "cm", 
-        step = 0.5,
-        className = ""
-    }: { 
-        name: keyof z.infer<typeof LogSchema>, 
-        label?: string, 
-        placeholder?: string, 
-        suffix?: string, 
-        step?: number,
-        className?: string
-    }) => {
-        const value = form.watch(name);
-        
-        const adjust = (amount: number) => {
-            const current = parseFloat(String(value || 0).replace(",", "."));
-            const next = Math.round((current + amount) * 10) / 10;
-            form.setValue(name, next.toString() as any, { shouldDirty: true, shouldValidate: true });
-        };
-
-        return (
-            <div className={`space-y-2 ${className}`}>
-                {label && <Label className="text-xs font-medium text-neutral-400 pl-1 uppercase">{label}</Label>}
-                <div className="relative group">
-                    <button 
-                        type="button"
-                        onClick={() => adjust(-step)}
-                        className="absolute left-1 top-1/2 -translate-y-1/2 h-8 w-8 flex items-center justify-center text-neutral-600 hover:text-red-500 hover:bg-white/5 rounded-lg transition-all z-20"
-                    >
-                        <Minus className="w-3 h-3" />
-                    </button>
-                    
-                    <Input
-                        type="text"
-                        inputMode="decimal"
-                        {...form.register(name, { 
-                            onChange: (e) => { e.target.value = e.target.value.replace(",", "."); } 
-                        })}
-                        className="bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 text-sm text-center text-white placeholder:text-neutral-700 rounded-xl px-10 transition-all group-hover:border-white/10"
-                        placeholder={placeholder}
-                    />
-
-                    <button 
-                        type="button"
-                        onClick={() => adjust(step)}
-                        className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 flex items-center justify-center text-neutral-600 hover:text-red-500 hover:bg-white/5 rounded-lg transition-all z-20"
-                    >
-                        <Plus className="w-3 h-3" />
-                    </button>
-
-                    {suffix && (
-                        <span className="absolute right-10 top-1/2 -translate-y-1/2 text-[8px] font-black text-neutral-700 uppercase tracking-widest pointer-events-none group-hover:text-neutral-600 transition-colors">
-                            {suffix}
-                        </span>
-                    )}
-                </div>
-            </div>
-        );
     };
 
     return (
@@ -191,7 +196,8 @@ export function LogMeasurementDialog({
                                 <Label className="text-[10px] font-black text-neutral-400 uppercase tracking-widest pl-1">Fecha</Label>
                                 <Input type="date" {...form.register("date")} className="bg-neutral-950 border-white/5 focus:border-red-500/50 h-14 text-sm text-white placeholder:text-neutral-500 rounded-xl px-4" />
                             </div>
-                            <MeasurementField 
+                            <MeasurementField
+                                form={form}
                                 name="weight" 
                                 label="Peso" 
                                 suffix="kg" 
@@ -209,13 +215,13 @@ export function LogMeasurementDialog({
                             <span className="text-xs text-neutral-500 font-normal ml-auto">En centímetros</span>
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
-                            <MeasurementField name="neck" label="Cuello" />
-                            <MeasurementField name="chest" label="Pecho / Espalda" />
-                            <MeasurementField name="shoulders" label="Hombros" />
-                            <MeasurementField name="waist" label="Cintura" />
-                            <MeasurementField name="hips" label="Cadera" />
-                            <MeasurementField name="glutes" label="Glúteos" />
-                            <MeasurementField name="abdomen" label="Abdomen" className="col-span-1" />
+                            <MeasurementField form={form} name="neck" label="Cuello" />
+                            <MeasurementField form={form} name="chest" label="Pecho / Espalda" />
+                            <MeasurementField form={form} name="shoulders" label="Hombros" />
+                            <MeasurementField form={form} name="waist" label="Cintura" />
+                            <MeasurementField form={form} name="hips" label="Cadera" />
+                            <MeasurementField form={form} name="glutes" label="Glúteos" />
+                            <MeasurementField form={form} name="abdomen" label="Abdomen" className="col-span-1" />
                         </div>
                     </div>
 
@@ -238,23 +244,23 @@ export function LogMeasurementDialog({
                                 {/* Row Biceps */}
                                 <div className="grid grid-cols-12 gap-4 items-center group hover:bg-white/5 p-2 rounded-lg transition-colors -mx-2">
                                     <Label className="col-span-4 text-sm font-bold text-neutral-300 uppercase tracking-wide">Bíceps</Label>
-                                    <MeasurementField name="bicepsLeft" className="col-span-4" label="" />
-                                    <MeasurementField name="bicepsRight" className="col-span-4" label="" />
+                                    <MeasurementField form={form} name="bicepsLeft" className="col-span-4" label="" />
+                                    <MeasurementField form={form} name="bicepsRight" className="col-span-4" label="" />
                                 </div>
                                 <div className="grid grid-cols-12 gap-4 items-center group hover:bg-white/5 p-2 rounded-lg transition-colors -mx-2">
                                     <Label className="col-span-4 text-sm font-bold text-neutral-300 uppercase tracking-wide">Antebrazos</Label>
-                                    <MeasurementField name="forearmsLeft" className="col-span-4" label="" />
-                                    <MeasurementField name="forearmsRight" className="col-span-4" label="" />
+                                    <MeasurementField form={form} name="forearmsLeft" className="col-span-4" label="" />
+                                    <MeasurementField form={form} name="forearmsRight" className="col-span-4" label="" />
                                 </div>
                                 <div className="grid grid-cols-12 gap-4 items-center group hover:bg-white/5 p-2 rounded-lg transition-colors -mx-2">
                                     <Label className="col-span-4 text-sm font-bold text-neutral-300 uppercase tracking-wide">Cuádriceps</Label>
-                                    <MeasurementField name="quadsLeft" className="col-span-4" label="" />
-                                    <MeasurementField name="quadsRight" className="col-span-4" label="" />
+                                    <MeasurementField form={form} name="quadsLeft" className="col-span-4" label="" />
+                                    <MeasurementField form={form} name="quadsRight" className="col-span-4" label="" />
                                 </div>
                                 <div className="grid grid-cols-12 gap-4 items-center group hover:bg-white/5 p-2 rounded-lg transition-colors -mx-2">
                                     <Label className="col-span-4 text-sm font-bold text-neutral-300 uppercase tracking-wide">Pantorrillas</Label>
-                                    <MeasurementField name="calvesLeft" className="col-span-4" label="" />
-                                    <MeasurementField name="calvesRight" className="col-span-4" label="" />
+                                    <MeasurementField form={form} name="calvesLeft" className="col-span-4" label="" />
+                                    <MeasurementField form={form} name="calvesRight" className="col-span-4" label="" />
                                 </div>
                             </div>
                         </div>

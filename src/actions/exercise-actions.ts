@@ -22,6 +22,8 @@ const QuickExerciseSchema = z.object({
     name: z.string().min(1, "El nombre del ejercicio es obligatorio"),
     muscleGroups: z.array(z.string()).min(1, "Debe seleccionar al menos un grupo muscular"),
     description: z.string().optional(),
+    tipoEjercicio: z.enum(["reps", "time"]).optional(),
+    duracionSegundos: z.number().optional(),
 });
 
 export async function createQuickExercise(data: z.infer<typeof QuickExerciseSchema>) {

@@ -123,7 +123,7 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
     if (isCoach && !targetUserId) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[70vh] px-6 text-center relative overflow-hidden">
-                <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-red-600/5 rounded-full blur-[120px] pointer-events-none -z-10" />
+                <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-red-600/5 rounded-full blur-[50px] pointer-events-none -z-10" />
 
                 <ClientMotionDiv
                     initial={{ opacity: 0, scale: 0.95 }}
@@ -131,7 +131,7 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                     className="relative space-y-12 max-w-md w-full"
                 >
                     <div className="relative mx-auto w-32 h-32 flex items-center justify-center group">
-                        <div className="absolute inset-0 bg-neutral-900/40 backdrop-blur-3xl border border-white/5 rounded-4xl rotate-6 group-hover:rotate-0 transition-transform duration-500" />
+                        <div className="absolute inset-0 bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-4xl rotate-6 group-hover:rotate-0 transition-transform duration-500" />
                         <Users className="w-12 h-12 text-neutral-600 relative z-10" />
                     </div>
 
@@ -169,8 +169,8 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
     return (
         <div className="flex flex-col gap-12 pb-32 relative overflow-hidden">
             {/* Ambient background glows */}
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-red-600/5 rounded-full blur-[150px] pointer-events-none -z-10" />
-            <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-blue-600/5 rounded-full blur-[120px] pointer-events-none -z-10" />
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-red-600/5 rounded-full blur-[60px] pointer-events-none -z-10" />
+            <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-blue-600/5 rounded-full blur-[50px] pointer-events-none -z-10" />
 
             {/* Header & Athlete Selector */}
             <div className="space-y-8">
@@ -213,7 +213,7 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                                     key={athlete.id}
                                     href={`/progress?athleteId=${athlete.id}`}
                                     className={cn(
-                                        "flex items-center gap-3 px-2 pr-5 py-2 rounded-2xl transition-all shrink-0 border backdrop-blur-3xl shadow-xl",
+                                        "flex items-center gap-3 px-2 pr-5 py-2 rounded-2xl transition-all shrink-0 border backdrop-blur-xl shadow-xl",
                                         isActive
                                             ? "bg-red-600 border-red-500 text-white translate-y-[-2px]"
                                             : "bg-neutral-900/40 border-white/5 text-neutral-500 hover:bg-white/5 hover:text-white hover:border-white/10"
@@ -246,14 +246,14 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                         initialData={metrics?.measurements}
                         targetUserId={targetUserId}
                     >
-                        <div className="bg-neutral-900/20 backdrop-blur-3xl border border-white/5 rounded-4xl p-8 relative overflow-hidden group hover:border-blue-500/30 transition-all cursor-pointer h-full flex flex-col items-center justify-center text-center shadow-2xl">
+                        <div className="bg-neutral-900/20 backdrop-blur-xl border border-white/5 rounded-4xl p-8 relative overflow-hidden group hover:border-blue-500/30 transition-all cursor-pointer h-full flex flex-col items-center justify-center text-center shadow-2xl">
                             <div className="absolute top-0 right-0 w-24 h-24 bg-blue-600/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-blue-600/10 transition-colors"></div>
                             <div className="relative z-10 flex flex-col items-center gap-4">
                                 <div className="h-16 w-16 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20 shadow-xl group-hover:scale-110 transition-transform duration-500">
                                     <Scale className="h-7 w-7 text-blue-500" />
                                 </div>
                                 <div>
-                                    <p className="text-4xl font-black text-white tracking-tighter uppercase italic leading-none mb-2">{metrics?.weight || "—"}<span className="text-base ml-1 text-neutral-600">KG</span></p>
+                                    <p className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tighter uppercase italic leading-none mb-2">{metrics?.weight || "—"}<span className="text-base ml-1 text-neutral-600">KG</span></p>
                                     <p className="text-[10px] text-neutral-500 uppercase tracking-[0.3em] font-black italic">Masa Corporal</p>
                                 </div>
                             </div>
@@ -268,14 +268,14 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                     transition={{ delay: 0.2 }}
                 >
                     <Link href="#measurements-section" className="block h-full">
-                        <div className="bg-neutral-900/20 backdrop-blur-3xl border border-white/5 rounded-4xl p-8 relative overflow-hidden group hover:border-orange-500/30 transition-all cursor-pointer h-full flex flex-col items-center justify-center text-center shadow-2xl">
+                        <div className="bg-neutral-900/20 backdrop-blur-xl border border-white/5 rounded-4xl p-8 relative overflow-hidden group hover:border-orange-500/30 transition-all cursor-pointer h-full flex flex-col items-center justify-center text-center shadow-2xl">
                             <div className="absolute top-0 right-0 w-24 h-24 bg-orange-600/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-orange-600/10 transition-colors"></div>
                             <div className="relative z-10 flex flex-col items-center gap-4">
                                 <div className="h-16 w-16 bg-orange-500/10 rounded-2xl flex items-center justify-center border border-orange-500/20 shadow-xl group-hover:scale-110 transition-transform duration-500">
                                     <Flame className="h-7 w-7 text-orange-500" />
                                 </div>
                                 <div>
-                                    <p className="text-4xl font-black text-white tracking-tighter uppercase italic leading-none mb-2">{metrics?.bodyFat ? `${metrics.bodyFat}%` : "—"}</p>
+                                    <p className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tighter uppercase italic leading-none mb-2">{metrics?.bodyFat ? `${metrics.bodyFat}%` : "—"}</p>
                                     <p className="text-[10px] text-neutral-500 uppercase tracking-[0.3em] font-black italic">Grasa Estimada</p>
                                 </div>
                             </div>
@@ -290,14 +290,14 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                     transition={{ delay: 0.3 }}
                 >
                     <Link href={isCoach ? `/progress/strength?athleteId=${targetUserId}` : "/progress/strength"} className="block h-full">
-                        <div className="bg-neutral-900/20 backdrop-blur-3xl border border-white/5 rounded-4xl p-8 relative overflow-hidden group hover:border-purple-500/30 transition-all cursor-pointer h-full flex flex-col items-center justify-center text-center shadow-2xl">
+                        <div className="bg-neutral-900/20 backdrop-blur-xl border border-white/5 rounded-4xl p-8 relative overflow-hidden group hover:border-purple-500/30 transition-all cursor-pointer h-full flex flex-col items-center justify-center text-center shadow-2xl">
                             <div className="absolute top-0 right-0 w-24 h-24 bg-purple-600/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-purple-600/10 transition-colors"></div>
                             <div className="relative z-10 flex flex-col items-center gap-4">
                                 <div className="h-16 w-16 bg-purple-500/10 rounded-2xl flex items-center justify-center border border-purple-500/20 shadow-xl group-hover:scale-110 transition-transform duration-500">
                                     <TrendingUp className="h-7 w-7 text-purple-500" />
                                 </div>
                                 <div>
-                                    <p className="text-4xl font-black text-white tracking-tighter uppercase italic leading-none mb-2">
+                                    <p className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tighter uppercase italic leading-none mb-2">
                                         {isStrengthPositive ? "+" : ""}{strengthProgress}%
                                     </p>
                                     <p className="text-[10px] text-neutral-500 uppercase tracking-[0.3em] font-black italic">Evolución Fuerza</p>
@@ -309,7 +309,7 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
             </div>
 
             {/* Body Measurements */}
-            <div id="measurements-section" className="bg-neutral-900/20 backdrop-blur-3xl border border-white/5 rounded-4xl overflow-hidden shadow-2xl scroll-mt-24 relative">
+            <div id="measurements-section" className="bg-neutral-900/20 backdrop-blur-xl border border-white/5 rounded-4xl overflow-hidden shadow-2xl scroll-mt-24 relative">
                 <div className="absolute inset-0 bg-linear-to-b from-red-600/5 to-transparent pointer-events-none" />
 
                 <div className="border-b border-white/5 p-8 flex items-center justify-between bg-black/20 relative z-10 w-full overflow-hidden">
@@ -412,7 +412,7 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
             </div>
 
             {/* récords de Ejercicios */}
-            <div id="exercises-weight-section" className="bg-neutral-900/20 backdrop-blur-3xl border border-white/5 rounded-4xl overflow-hidden shadow-2xl scroll-mt-24 relative">
+            <div id="exercises-weight-section" className="bg-neutral-900/20 backdrop-blur-xl border border-white/5 rounded-4xl overflow-hidden shadow-2xl scroll-mt-24 relative">
                 <div className="absolute inset-0 bg-linear-to-b from-blue-600/5 to-transparent pointer-events-none" />
 
                 <div className="border-b border-white/5 p-8 flex items-center justify-between bg-black/20 relative z-10">
@@ -454,7 +454,7 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                                 </div>
                                 <div className="text-right shrink-0 ml-6">
                                     <div className="flex items-baseline gap-1">
-                                        <span className="font-black text-4xl text-white tracking-tighter italic leading-none">{pr.weight}</span>
+                                        <span className="font-black text-2xl sm:text-3xl md:text-4xl text-white tracking-tighter italic leading-none">{pr.weight}</span>
                                         <span className="text-[10px] font-black text-neutral-600 uppercase italic">KG</span>
                                     </div>
                                     <p className="text-[8px] uppercase tracking-[0.3em] text-blue-500/50 font-black mt-2 italic">Peak Load</p>

@@ -75,16 +75,16 @@ export function AuthRegisterForm() {
 
     /** Clases reutilizables para inputs */
     const inputClass =
-        "h-[48px] rounded-xl border border-white/[0.06] bg-black/40 px-4 text-[14px] font-medium text-white shadow-inner transition-all placeholder:text-neutral-600 focus-visible:ring-1 focus-visible:ring-red-500/50 focus-visible:border-red-500/30";
+        "h-[48px] rounded-xl border border-white/[0.06] bg-black/40 px-4 text-base font-medium text-white shadow-inner transition-all placeholder:text-neutral-600 focus-visible:ring-1 focus-visible:ring-red-500/50 focus-visible:border-red-500/30";
     const inputPasswordClass =
-        "h-[48px] rounded-xl border border-white/[0.06] bg-black/40 pl-4 pr-12 text-[14px] font-medium text-white shadow-inner transition-all placeholder:text-neutral-600 focus-visible:ring-1 focus-visible:ring-red-500/50 focus-visible:border-red-500/30";
+        "h-[48px] rounded-xl border border-white/[0.06] bg-black/40 pl-4 pr-12 text-base font-medium text-white shadow-inner transition-all placeholder:text-neutral-600 focus-visible:ring-1 focus-visible:ring-red-500/50 focus-visible:border-red-500/30";
     const labelClass =
         "ml-1 text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400";
     const errorClass = "ml-1 text-[10px] font-semibold text-red-500";
 
     return (
-        <div className="w-full space-y-5">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+        <div className="w-full space-y-4 sm:space-y-5">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-2 sm:space-y-3">
                 {/* Nombre */}
                 <div className="space-y-1">
                     <Label htmlFor="reg-name" className={labelClass}>

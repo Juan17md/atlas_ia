@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { createRoutine, updateRoutine } from "@/actions/routine-actions";
 import { generateRoutineDescription } from "@/actions/ai-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Plus, Trash2, Save, ArrowLeft, Check, ChevronsUpDown, Dumbbell, CalendarDays, Clock, Copy, Activity, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, X, Sparkles } from "lucide-react";
+import { Loader2, Plus, Trash2, Save, ArrowLeft, Check, ChevronsUpDown, Dumbbell, CalendarDays, Clock, Copy, Activity, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, X, Sparkles, Repeat, Timer, Link } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -51,7 +51,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
 
     const DRAFT_KEY = "gymia-routine-draft";
 
-    const form = useForm({
+    const form = useForm<RoutineFormData>({
         defaultValues: initialData || {
             name: "",
             description: "",
@@ -62,15 +62,16 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
         }
     });
 
-    const { register, control, handleSubmit, setValue, watch, reset } = form;
+    const { register, control, handleSubmit, setValue, reset } = form;
     const { fields: dayFields, append: appendDay, remove: removeDay } = useFieldArray({
         control,
         name: "schedule"
     });
 
-    const formData = watch();
-    const schedule = watch("schedule");
-    const routineType = watch("type");
+    const routineName = useWatch({ control, name: "name" });
+    const routineDescription = useWatch({ control, name: "description" });
+    const schedule = useWatch({ control, name: "schedule" });
+    const routineType = useWatch({ control, name: "type" });
 
     useEffect(() => {
         if (!isEditing) {
@@ -108,11 +109,11 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
     useEffect(() => {
         if (!isEditing) {
             const timer = setTimeout(() => {
-                localStorage.setItem(DRAFT_KEY, JSON.stringify(formData));
+                localStorage.setItem(DRAFT_KEY, JSON.stringify(form.getValues()));
             }, 1000);
             return () => clearTimeout(timer);
         }
-    }, [formData, isEditing]);
+    }, [routineName, routineDescription, routineType, schedule, isEditing]);
 
     const addExerciseToDay = (dayIndex: number, insertAt?: number) => {
         const newExercise = {
@@ -161,6 +162,57 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
             updatedSchedule[dayIndex].exercises.splice(exIndex, 1);
             setValue("schedule", updatedSchedule);
         }
+    };
+
+    const comboTipos = [
+        { value: "", label: "Normal", icon: null },
+        { value: "superset", label: "Superserie", icon: Link },
+        { value: "biserie", label: "Biserie", icon: Link },
+        { value: "triserie", label: "Triserie", icon: Link },
+    ] as const;
+
+    const toggleCombo = (dayIndex: number, exIndex: number, comboTipo: string) => {
+        const updatedSchedule = [...schedule];
+        if (!updatedSchedule[dayIndex]?.exercises[exIndex]) return;
+
+        const ejercicio = updatedSchedule[dayIndex].exercises[exIndex];
+        const comboTipoActual = (ejercicio as any).comboTipo;
+
+        if (comboTipo) {
+            // Activar combo
+            const comboGrupo = `combo-${Date.now()}`;
+            (ejercicio as any).comboTipo = comboTipo;
+            (ejercicio as any).comboGrupo = comboGrupo;
+
+            // Agrupar ejercicios adyacentes según el tipo de combo
+            const numEjercicios = comboTipo === "superset" ? 2 : comboTipo === "biserie" ? 2 : 3;
+            const ejercicios = updatedSchedule[dayIndex].exercises;
+            
+            for (let i = 1; i < numEjercicios; i++) {
+                const nextIdx = exIndex + i;
+                if (nextIdx < ejercicios.length && !(ejercicios[nextIdx] as any).comboTipo) {
+                    (ejercicios[nextIdx] as any).comboTipo = comboTipo;
+                    (ejercicios[nextIdx] as any).comboGrupo = comboGrupo;
+                }
+            }
+        } else {
+            // Desactivar combo
+            const comboGrupo = (ejercicio as any).comboGrupo;
+            const ejercicios = updatedSchedule[dayIndex].exercises;
+            if (comboGrupo) {
+                (ejercicios as any[]).forEach((ex: any) => {
+                    if (ex.comboGrupo === comboGrupo) {
+                        delete ex.comboTipo;
+                        delete ex.comboGrupo;
+                    }
+                });
+            } else {
+                delete (ejercicio as any).comboTipo;
+                delete (ejercicio as any).comboGrupo;
+            }
+        }
+
+        setValue("schedule", updatedSchedule);
     };
 
     const handleGenerateDescription = async () => {
@@ -284,7 +336,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
     const totalSteps = routineType === "daily" ? 3 : 4;
     
     const nextStep = () => {
-        if (step === 1 && !formData.name) {
+        if (step === 1 && !routineName) {
             toast.error("El nombre de la rutina es obligatorio");
             return;
         }
@@ -303,7 +355,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
 
     return (
         <div className="container mx-auto max-w-7xl px-0 md:px-6 relative flex flex-col h-dvh md:h-auto md:min-h-screen bg-black overflow-hidden">
-            <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-red-600/5 rounded-full blur-[100px] -z-10 animate-pulse pointer-events-none" />
+            <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-red-600/5 rounded-full blur-[40px] -z-10 animate-pulse pointer-events-none" />
 
             <div className="px-4 md:px-0 pt-6 md:pt-10 pb-4 md:pb-8 flex flex-col gap-4 bg-black/80 backdrop-blur-xl z-20 shrink-0 border-b border-white/5">
                 <div className="flex items-center justify-between">
@@ -326,7 +378,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                     </div>
                     <div className="flex items-center gap-2">
                         {step === 1 && (
-                            <AIGenerator onGenerate={onAIResult} currentType={watch("type") as "weekly" | "daily"} />
+                            <AIGenerator onGenerate={onAIResult} currentType={routineType as "weekly" | "daily"} />
                         )}
                         <RoutineImporter routines={availableRoutines} onImport={onAIResult} />
                     </div>
@@ -352,7 +404,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                             exit={{ opacity: 0, x: -20 }}
                             className="space-y-12 pb-24"
                         >
-                            <div className="bg-neutral-900/30 backdrop-blur-3xl border border-white/5 rounded-4xl p-8 md:p-10 shadow-2xl relative overflow-hidden group">
+                            <div className="bg-neutral-900/30 backdrop-blur-xl border border-white/5 rounded-4xl p-8 md:p-10 shadow-2xl relative overflow-hidden group">
                                 <div className="absolute inset-0 bg-linear-to-b from-white/2 to-transparent pointer-events-none" />
                                 
                                 <div className="space-y-10 relative z-10">
@@ -574,7 +626,12 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: exIndex * 0.03 }}
-                                        className="bg-neutral-900/30 border border-white/5 rounded-3xl p-6 space-y-4"
+                                        className={cn(
+                                            "rounded-3xl p-6 space-y-4 border-2 transition-all",
+                                            (exercise as any).comboTipo
+                                                ? "border-amber-500/30 bg-amber-500/5"
+                                                : "bg-neutral-900/30 border border-white/5"
+                                        )}
                                     >
                                         <div className="flex items-center justify-between">
                                             <div className="flex-1">
@@ -663,6 +720,87 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                             </div>
                                         </div>
 
+                                        {/* Combo y tipo de ejercicio */}
+                                        <div className="flex flex-wrap items-center gap-2 pb-2 border-b border-white/5">
+                                            <div className="flex items-center gap-1">
+                                                <span className="text-[9px] font-black uppercase tracking-widest text-neutral-600 mr-1">Combo:</span>
+                                                {comboTipos.map((ct) => {
+                                                    const Icon = ct.icon;
+                                                    const isActive = (exercise as any).comboTipo === ct.value || (!ct.value && !(exercise as any).comboTipo);
+                                                    return (
+                                                        <button
+                                                            key={ct.value}
+                                                            type="button"
+                                                            onClick={() => toggleCombo(activeDayIndex, exIndex, ct.value)}
+                                                            className={cn(
+                                                                "px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider border transition-all",
+                                                                isActive
+                                                                    ? ct.value
+                                                                        ? "bg-amber-500/20 border-amber-500/30 text-amber-400"
+                                                                        : "bg-neutral-800 border-white/10 text-neutral-400"
+                                                                    : "bg-neutral-950 border-white/5 text-neutral-600 hover:text-white hover:border-white/20"
+                                                            )}
+                                                        >
+                                                            {Icon && <Icon className="w-2.5 h-2.5 inline mr-1" />}
+                                                            {ct.label}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                            <div className="flex items-center gap-1 ml-auto">
+                                                <span className="text-[9px] font-black uppercase tracking-widest text-neutral-600 mr-1">Tipo:</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const updated = [...schedule];
+                                                        (updated[activeDayIndex].exercises[exIndex] as any).ejercicioTipo = "reps";
+                                                        delete (updated[activeDayIndex].exercises[exIndex] as any).duracionSegundos;
+                                                        setValue("schedule", updated);
+                                                    }}
+                                                    className={cn(
+                                                        "px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider border transition-all",
+                                                        (exercise as any).ejercicioTipo !== "time"
+                                                            ? "bg-red-500/20 border-red-500/30 text-red-400"
+                                                            : "bg-neutral-950 border-white/5 text-neutral-600 hover:text-white"
+                                                    )}
+                                                >
+                                                    <Repeat className="w-2.5 h-2.5 inline mr-1" />
+                                                    Reps
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const updated = [...schedule];
+                                                        (updated[activeDayIndex].exercises[exIndex] as any).ejercicioTipo = "time";
+                                                        (updated[activeDayIndex].exercises[exIndex] as any).duracionSegundos = (updated[activeDayIndex].exercises[exIndex] as any).duracionSegundos || 60;
+                                                        setValue("schedule", updated);
+                                                    }}
+                                                    className={cn(
+                                                        "px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider border transition-all",
+                                                        (exercise as any).ejercicioTipo === "time"
+                                                            ? "bg-red-500/20 border-red-500/30 text-red-400"
+                                                            : "bg-neutral-950 border-white/5 text-neutral-600 hover:text-white"
+                                                    )}
+                                                >
+                                                    <Timer className="w-2.5 h-2.5 inline mr-1" />
+                                                    Tiempo
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* Campo de duración para ejercicios por tiempo */}
+                                        {(exercise as any).ejercicioTipo === "time" && (
+                                            <div className="flex items-center gap-2">
+                                                <Label className="text-[9px] font-black uppercase tracking-widest text-neutral-500">Duración (seg):</Label>
+                                                <Input
+                                                    type="number"
+                                                    {...register(`schedule.${activeDayIndex}.exercises.${exIndex}.duracionSegundos`, { valueAsNumber: true })}
+                                                    placeholder="60"
+                                                    className="h-9 w-24 bg-neutral-950 border border-white/10 rounded-xl px-3 text-sm font-black text-white"
+                                                />
+                                            </div>
+                                        )}
+
                                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                                             {exercise.sets?.map((set: any, setIndex: number) => (
                                                 <div key={setIndex} className="space-y-2">
@@ -678,7 +816,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                                     </div>
                                                     <Input
                                                         {...register(`schedule.${activeDayIndex}.exercises.${exIndex}.sets.${setIndex}.reps`)}
-                                                        placeholder="Reps"
+                                                        placeholder={(exercise as any).ejercicioTipo === "time" ? "Duración" : "Reps"}
                                                         className="h-10 bg-neutral-950 border border-white/10 rounded-xl px-3 text-sm font-black text-white placeholder:text-neutral-700"
                                                     />
                                                     <div className="flex items-center gap-2">
@@ -702,7 +840,12 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                                 size="sm"
                                                 onClick={() => {
                                                     const updated = [...schedule];
-                                                    updated[activeDayIndex].exercises[exIndex].sets.push({ type: "working", reps: "10", rpeTarget: 8, restSeconds: 60 });
+                                                    const esTiempo = (updated[activeDayIndex].exercises[exIndex] as any).ejercicioTipo === "time";
+                                                    updated[activeDayIndex].exercises[exIndex].sets.push(
+                                                        esTiempo
+                                                            ? { type: "working", duracionSegundos: 60, restSeconds: 30 }
+                                                            : { type: "working", reps: "10", rpeTarget: 8, restSeconds: 60 }
+                                                    );
                                                     setValue("schedule", updated);
                                                 }}
                                                 className="h-10 text-neutral-500 hover:text-white text-xs font-black uppercase"
@@ -785,11 +928,11 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                 <div className="bg-neutral-900/30 border border-white/5 rounded-3xl p-6 space-y-6">
                                     <div className="flex items-center justify-between pb-4 border-b border-white/5">
                                         <div>
-                                            <h3 className="text-xl font-black text-white uppercase italic">{formData.name}</h3>
-                                            <p className="text-sm text-neutral-500 mt-1">{formData.description || "Sin descripción"}</p>
+                                            <h3 className="text-xl font-black text-white uppercase italic">{routineName}</h3>
+                                            <p className="text-sm text-neutral-500 mt-1">{routineDescription || "Sin descripción"}</p>
                                         </div>
                                         <div className="text-right">
-                                            <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">{formData.type === "weekly" ? "Semanal" : "Diaria"}</span>
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-neutral-500">{routineType === "weekly" ? "Semanal" : "Diaria"}</span>
                                         </div>
                                     </div>
 
@@ -811,7 +954,7 @@ export function RoutineEditor({ initialData, isEditing = false, availableExercis
                                 </div>
                             </div>
 
-                            <RoutineSafetyCheck routine={formData as any} athleteId={athleteId} />
+                            <RoutineSafetyCheck routine={form.getValues() as any} athleteId={athleteId} />
 
                             <div className="flex justify-between">
                                 <Button

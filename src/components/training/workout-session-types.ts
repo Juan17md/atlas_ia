@@ -3,8 +3,10 @@ export interface RoutineSet {
     weight?: number;
     rpe?: number;
     rpeTarget?: number;
-    type?: "warmup" | "working" | "failure";
+    type?: "warmup" | "working" | "failure" | "drop";
     rest?: number;
+    restSeconds?: number;
+    duracionSegundos?: number;
 }
 
 export interface RoutineExercise {
@@ -13,12 +15,22 @@ export interface RoutineExercise {
     notes?: string;
     sets: RoutineSet[];
     variantIds?: string[];
+
+    ejercicioTipo?: "reps" | "time";
+    duracionSegundos?: number;
+
+    comboTipo?: "superset" | "biserie" | "triserie";
+    comboGrupo?: string;
 }
 
 export interface RoutineDay {
     id?: string;
     name: string;
     exercises: RoutineExercise[];
+
+    esCircuito?: boolean;
+    circuitoRondas?: number;
+    circuitoDescansoRondas?: number;
 }
 
 export interface Routine {
@@ -33,6 +45,8 @@ export interface SessionSet {
     rpe: string;
     completed: boolean;
     targetReps?: number;
+    duracionSegundos?: number;
+    tiempoCompletado?: number;
 }
 
 export interface SessionExercise {
@@ -41,6 +55,12 @@ export interface SessionExercise {
     sets: SessionSet[];
     feedback: string;
     exerciseIdUsed: string;
+
+    ejercicioTipo?: "reps" | "time";
+    tiempoCompletado?: number;
+
+    comboTipo?: "superset" | "biserie" | "triserie";
+    comboGrupo?: string;
 }
 
 export interface WorkoutSessionState {
@@ -49,4 +69,7 @@ export interface WorkoutSessionState {
     elapsedTime: number;
     isStarted: boolean;
     currentExerciseIndex: number;
+
+    circuitoRondaActual?: number;
+    circuitoEjercicioIndice?: number;
 }

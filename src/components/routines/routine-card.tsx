@@ -92,9 +92,9 @@ export function RoutineCard({ routine, athletes }: RoutineCardProps) {
                 whileHover={{ y: -5 }}
                 className="group relative h-full"
             >
-                <div className="absolute inset-0 bg-red-600/10 rounded-4xl blur-3xl opacity-0 group-hover:opacity-40 transition-opacity duration-700 pointer-events-none" />
+                <div className="absolute inset-0 bg-red-600/10 rounded-4xl blur-xl opacity-0 group-hover:opacity-40 transition-opacity duration-700 pointer-events-none" />
 
-                <Card className="relative h-full bg-neutral-900/20 backdrop-blur-3xl border border-white/5 hover:border-red-600/30 transition-all duration-500 rounded-4xl overflow-hidden shadow-2xl flex flex-col">
+                <Card className="relative h-full bg-neutral-900/20 backdrop-blur-xl border border-white/5 hover:border-red-600/30 transition-all duration-500 rounded-4xl overflow-hidden shadow-2xl flex flex-col">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-linear-to-bl from-red-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
 
                     <CardHeader className="p-4 md:p-6 pb-2 md:pb-4 relative z-10">

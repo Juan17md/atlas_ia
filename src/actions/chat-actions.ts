@@ -2,39 +2,55 @@
 
 import { getGroqClient, getAthleteContext, DEFAULT_AI_MODEL } from "@/lib/ai";
 import { auth } from "@/lib/auth";
+import {
+  clasificarIntencion,
+  generarPromptPorIntencion,
+} from "@/lib/intent-classifier";
+import { getStrengthHistory } from "@/actions/analytics-actions";
+import { getViviIntelligence } from "@/actions/vivi-intelligence-actions";
 import type { ChatCompletionMessageParam } from "groq-sdk/resources/chat/completions";
 
-export async function chatWithAI(messages: { role: string, content: string }[]) {
+export async function chatWithAI(messages: { role: string; content: string }[]) {
     try {
         const session = await auth();
         if (!session?.user?.id) return { success: false, error: "No autorizado" };
 
         const role = session.user.role || "athlete";
-        const groq = getGroqClient();
+        const ultimoMensaje = messages[messages.length - 1]?.content || "";
 
-        // Inyectar contexto del atleta para respuestas personalizadas
-        const athleteCtx = await getAthleteContext(session.user.id);
+        const { intencion } = clasificarIntencion(ultimoMensaje);
 
-        let systemPromptContent = "";
+        const [athleteCtx, viviIntel, strengthRes] = await Promise.all([
+            getAthleteContext(session.user.id, ultimoMensaje),
+            getViviIntelligence(session.user.id),
+            intencion === "progresion"
+                ? getStrengthHistory(session.user.id)
+                : Promise.resolve(null),
+        ]);
 
-        if (role === "coach") {
-            systemPromptContent = `Eres Atlas IA Copilot, un asistente experto para entrenadores de alto rendimiento.
-        Tu conocimiento abarca biomecánica avanzada, fisiología del ejercicio, periodización (lineal, ondulante, conjugada) y nutrición deportiva.
-        Ayuda al entrenador a diseñar microciclos, corregir déficits en sus atletas y optimizar el volumen/intensidad.
-        Usa terminología técnica precisa. Sé directo y profesional.`;
-        } else {
-            systemPromptContent = `Eres Atlas IA, un asistente virtual experto en fitness.
-        Tu tono es motivador pero profesional.
-        Responde dudas sobre técnica, calentamiento y nutrición básica.
-        Mantén las respuestas concisas.
-        IMPORTANTE: Considera las lesiones y condiciones del atleta en tu respuesta.
-
-        ${athleteCtx}`;
+        let datosExtra = "";
+        if (intencion === "progresion" && strengthRes?.success && strengthRes.exercises) {
+            const ejerciciosStr = strengthRes.exercises
+                .slice(0, 5)
+                .map(
+                    (ex) =>
+                        `- ${ex.exerciseName}: E1RM actual ${ex.latestE1RM}kg (cambio: ${ex.changePercent >= 0 ? "+" : ""}${ex.changePercent}%)`
+                )
+                .join("\n");
+            datosExtra = `HISTORIAL DE FUERZA (E1RM):\n${ejerciciosStr}\n\nREADINESS: ${viviIntel?.readinessScore || 75}/100`;
         }
+
+        const systemPrompt = role === "coach"
+            ? `Eres Atlas IA Copilot, un asistente experto para entrenadores de alto rendimiento.
+Tu conocimiento abarca biomecánica avanzada, fisiología del ejercicio, periodización y nutrición deportiva.
+Ayuda al entrenador con terminología técnica precisa. Sé directo y profesional.`
+            : generarPromptPorIntencion(intencion, athleteCtx, datosExtra);
+
+        const groq = getGroqClient();
 
         const systemMessage: ChatCompletionMessageParam = {
             role: "system",
-            content: systemPromptContent
+            content: systemPrompt
         };
 
         const typedMessages: ChatCompletionMessageParam[] = [
@@ -46,7 +62,7 @@ export async function chatWithAI(messages: { role: string, content: string }[]) 
             messages: typedMessages,
             model: DEFAULT_AI_MODEL,
             temperature: 0.7,
-            max_tokens: 600,
+            max_tokens: 1024,
         });
 
         const reply = completion.choices[0]?.message?.content;
@@ -55,7 +71,7 @@ export async function chatWithAI(messages: { role: string, content: string }[]) 
             return { success: false, error: "No se recibió respuesta." };
         }
 
-        return { success: true, message: reply };
+        return { success: true, message: reply, intencion };
 
     } catch (error) {
         console.error("Chat Error:", error);

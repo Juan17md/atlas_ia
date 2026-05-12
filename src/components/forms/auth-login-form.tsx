@@ -98,8 +98,8 @@ export function AuthLoginForm() {
     const isDisabled = loading || googleLoading;
 
     return (
-        <div className="w-full space-y-5">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div className="w-full space-y-4 sm:space-y-5">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
                 {/* Email */}
                 <div className="space-y-1">
                     <Label
@@ -115,7 +115,7 @@ export function AuthLoginForm() {
                         placeholder="tu@email.com"
                         autoComplete="email"
                         {...register("email")}
-                        className="h-[48px] rounded-xl border border-white/6 bg-black/40 px-4 text-[14px] font-medium text-white shadow-inner transition-all placeholder:text-neutral-600 focus-visible:ring-1 focus-visible:ring-red-500/50 focus-visible:border-red-500/30"
+                        className="h-[48px] rounded-xl border border-white/6 bg-black/40 px-4 text-base font-medium text-white shadow-inner transition-all placeholder:text-neutral-600 focus-visible:ring-1 focus-visible:ring-red-500/50 focus-visible:border-red-500/30"
                     />
                     {errors.email && (
                         <p className="ml-1 text-[10px] font-semibold text-red-500">
@@ -139,7 +139,7 @@ export function AuthLoginForm() {
                             placeholder="••••••••"
                             autoComplete="current-password"
                             {...register("password")}
-                            className="h-[48px] rounded-xl border border-white/6 bg-black/40 pl-4 pr-12 text-[14px] font-medium text-white shadow-inner transition-all placeholder:text-neutral-600 focus-visible:ring-1 focus-visible:ring-red-500/50 focus-visible:border-red-500/30"
+                            className="h-[48px] rounded-xl border border-white/6 bg-black/40 pl-4 pr-12 text-base font-medium text-white shadow-inner transition-all placeholder:text-neutral-600 focus-visible:ring-1 focus-visible:ring-red-500/50 focus-visible:border-red-500/30"
                         />
                         <button
                             type="button"

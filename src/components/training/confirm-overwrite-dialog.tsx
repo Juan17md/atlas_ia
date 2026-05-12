@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useWorkoutLogger } from "./workout-logger-context";
 
-export function ConfirmOverwriteDialog() {
+export const ConfirmOverwriteDialog = React.memo(function ConfirmOverwriteDialog() {
     const { showConfirmDialog, setShowConfirmDialog, confirmOverwrite } = useWorkoutLogger();
 
     return (
@@ -41,4 +41,4 @@ export function ConfirmOverwriteDialog() {
             </AlertDialogContent>
         </AlertDialog>
     );
-}
+});

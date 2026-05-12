@@ -9,6 +9,8 @@ import { StatCard } from "@/components/dashboard/stat-card";
 import { ScheduleCalendar } from "@/components/dashboard/schedule-calendar";
 import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
+import { MorningBriefing } from "@/components/dashboard/morning-briefing";
+import { AlertsBanner } from "@/components/dashboard/alerts-banner";
 import type { DashboardUser, RecentActivity, SerializedRoutine } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -34,8 +36,8 @@ export function AthleteDashboardUI({ user, activityData, weeklyCompleted, weekly
     return (
         <div className="space-y-8 md:space-y-12 pb-24 md:pb-10 relative">
             {/* Background Decorative Blobs */}
-            <div className="absolute top-0 left-1/4 w-96 h-96 bg-red-600/5 rounded-full blur-[120px] pointer-events-none -z-10" />
-            <div className="absolute bottom-1/4 right-0 w-64 h-64 bg-blue-600/5 rounded-full blur-[100px] pointer-events-none -z-10" />
+            <div className="absolute top-0 left-1/4 w-96 h-96 bg-red-600/5 rounded-full blur-[50px] pointer-events-none -z-10" />
+            <div className="absolute bottom-1/4 right-0 w-64 h-64 bg-blue-600/5 rounded-full blur-[40px] pointer-events-none -z-10" />
 
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
@@ -100,6 +102,12 @@ export function AthleteDashboardUI({ user, activityData, weeklyCompleted, weekly
                     icon={Plus}
                 />
             </div>
+
+            {/* Alertas proactivas */}
+            <AlertsBanner />
+
+            {/* Morning Briefing de Vivi */}
+            <MorningBriefing />
 
             {/* Schedule Section */}
             <div className="relative">
@@ -240,7 +248,7 @@ export function CoachDashboardUI({ user, stats, activities }: CoachDashboardUIPr
     return (
         <div className="space-y-8 md:space-y-12 pb-24 md:pb-10 relative">
             {/* Background Decorative Blobs */}
-            <div className="absolute top-0 right-1/4 w-96 h-96 bg-red-600/5 rounded-full blur-[120px] pointer-events-none -z-10" />
+            <div className="absolute top-0 right-1/4 w-96 h-96 bg-red-600/5 rounded-full blur-[50px] pointer-events-none -z-10" />
 
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
