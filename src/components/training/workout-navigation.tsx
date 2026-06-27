@@ -24,7 +24,7 @@ export function WorkoutNavigation({
     onFinish,
 }: WorkoutNavigationProps) {
     return (
-        <div className="fixed bottom-0 left-0 right-0 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] md:pb-6 md:p-6 bg-black/80 backdrop-blur-3xl border-t border-white/10 flex justify-between items-center gap-6 z-40 animate-in slide-in-from-bottom-full duration-700 shadow-[0_-20px_40px_rgba(0,0,0,0.5)]">
+        <div className="fixed left-0 right-0 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] md:pb-6 md:p-6 bg-black/80 backdrop-blur-3xl border-t border-white/10 flex justify-between items-center gap-6 z-40 animate-in slide-in-from-bottom-full duration-700 shadow-[0_-20px_40px_rgba(0,0,0,0.5)] bottom-[calc(6rem+env(safe-area-inset-bottom,0px))] md:bottom-0">
             <div className="max-w-3xl mx-auto w-full flex justify-between items-center gap-4 md:gap-6">
                 <Button
                     onClick={onPrev}

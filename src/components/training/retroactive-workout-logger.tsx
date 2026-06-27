@@ -117,7 +117,7 @@ function WorkoutLoggerContent({ onBack, userRole, routineDay }: { onBack?: () =>
             <WorkoutPerception />
 
             {/* Botón Guardar Fijo */}
-            <div className="fixed bottom-0 left-0 right-0 p-4 bg-black/90 backdrop-blur-xl border-t border-white/10 z-60">
+            <div className="fixed left-0 right-0 p-4 bg-black/90 backdrop-blur-xl border-t border-white/10 z-60 bottom-[calc(6rem+env(safe-area-inset-bottom,0px))] md:bottom-0">
                 <div className="max-w-2xl mx-auto">
                     <Button
                         onClick={handleSubmit}

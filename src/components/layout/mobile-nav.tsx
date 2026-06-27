@@ -28,10 +28,6 @@ export function MobileNav({ role, user }: MobileNavProps) {
     const userRoleKey = (user?.role || "athlete").toLowerCase();
     const roleInfo = ROLE_CONFIG[userRoleKey] || ROLE_CONFIG.athlete;
 
-    // Ocultar la barra de navegación durante el entrenamiento activo
-    // (WorkoutSession tiene su propio footer de navegación)
-    if (pathname.startsWith('/train')) return null;
-
     const commonItems = [
         { label: "Inicio", href: "/dashboard", icon: LayoutDashboard },
     ];
@@ -75,7 +71,7 @@ export function MobileNav({ role, user }: MobileNavProps) {
     const menuItems = items;
 
     return (
-        <div className="md:hidden fixed bottom-6 left-6 right-6 bg-black/60 backdrop-blur-2xl border border-white/10 rounded-4xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-50 h-16 flex items-center justify-around px-2 pb-[env(safe-area-inset-bottom,0px)]">
+        <div className="md:hidden fixed bottom-6 left-6 right-6 bg-black/60 backdrop-blur-2xl border border-white/10 rounded-4xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-50 flex items-center justify-around px-2 h-[calc(4rem+env(safe-area-inset-bottom,0px))] pb-[env(safe-area-inset-bottom,0px)]">
             {barItems.map((item) => {
                 const isActive = pathname === item.href;
                 const Icon = item.icon;
