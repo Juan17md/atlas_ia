@@ -1,24 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Brain, AlertCircle, Lightbulb, Loader2, AlertTriangle, CheckCircle2, Activity } from "lucide-react";
+import { Brain, Lightbulb, Loader2 } from "lucide-react";
 import { analyzeAthleteProgress } from "@/actions/analytics-actions";
-import { cn } from "@/lib/utils";
 
 interface CoachAIAnalysisProps {
     athleteId: string;
 }
 
-interface AlertItem {
-    type: string;
-    message: string;
-    severity: "high" | "medium" | "low";
-}
-
 interface AnalysisResult {
-    alerts: AlertItem[];
     suggestions: string[];
 }
 
@@ -31,10 +23,8 @@ export function CoachAIAnalysis({ athleteId }: CoachAIAnalysisProps) {
         try {
             const res = await analyzeAthleteProgress(athleteId);
             if (res.success) {
-                // Validación básica de tipos al recibir respuesta
-                const alerts = (res.alerts || []) as AlertItem[];
                 const suggestions = (res.suggestions || []) as string[];
-                setAnalysis({ alerts, suggestions });
+                setAnalysis({ suggestions });
             }
         } finally {
             setLoading(false);
@@ -61,44 +51,6 @@ export function CoachAIAnalysis({ athleteId }: CoachAIAnalysisProps) {
 
             {analysis && (
                 <CardContent className="space-y-6 pt-6 animate-in slide-in-from-top-4 fade-in duration-500">
-                    {/* Alerts Section */}
-                    <div className="space-y-3">
-                        <h4 className="flex items-center gap-2 text-sm font-bold text-neutral-400 uppercase tracking-wider">
-                            <AlertCircle className="w-4 h-4" /> Alertas
-                        </h4>
-                        {analysis.alerts.length === 0 ? (
-                            <div className="flex items-center gap-2 text-green-400 bg-green-900/10 p-4 rounded-xl border border-green-900/20">
-                                <CheckCircle2 className="w-5 h-5" />
-                                <span className="text-sm font-medium">Todo en orden. No se detectan estancamientos críticos.</span>
-                            </div>
-                        ) : (
-                            <div className="grid gap-3">
-                                {analysis.alerts.map((alert, i) => (
-                                    <div key={i} className={cn(
-                                        "p-4 rounded-xl border flex items-start gap-4 transition-all hover:scale-[1.01]",
-                                        alert.severity === 'high' ? "bg-red-950/30 border-red-500/30 text-red-200 shadow-md shadow-red-900/10" : "bg-yellow-950/30 border-yellow-500/30 text-yellow-200"
-                                    )}>
-                                        <div className={cn("mt-1 shrink-0 p-1 rounded-full",
-                                            alert.type === 'health_warning' ? "bg-red-500/20 text-red-500" :
-                                                alert.severity === 'high' ? "bg-red-500/20 text-red-500" : "bg-yellow-500/20 text-yellow-500"
-                                        )}>
-                                            {alert.type === 'health_warning' ? <Activity className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
-                                        </div>
-                                        <div className="space-y-1">
-                                            <p className="font-bold text-sm leading-none">
-                                                {alert.type === 'stagnation' ? 'Estancamiento Detectado' :
-                                                    alert.type === 'health_warning' ? 'Advertencia de Salud' : 'Alerta'}
-                                            </p>
-                                            <p className="text-xs opacity-90 leading-relaxed">{alert.message}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="h-px bg-neutral-800" />
-
                     {/* Suggestions Section */}
                     <div className="space-y-3">
                         <h4 className="flex items-center gap-2 text-sm font-bold text-neutral-400 uppercase tracking-wider">

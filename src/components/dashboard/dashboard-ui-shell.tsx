@@ -10,7 +10,6 @@ import { ScheduleCalendar } from "@/components/dashboard/schedule-calendar";
 import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MorningBriefing } from "@/components/dashboard/morning-briefing";
-import { AlertsBanner } from "@/components/dashboard/alerts-banner";
 import type { DashboardUser, RecentActivity, SerializedRoutine } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -102,9 +101,6 @@ export function AthleteDashboardUI({ user, activityData, weeklyCompleted, weekly
                     icon={Plus}
                 />
             </div>
-
-            {/* Alertas proactivas */}
-            <AlertsBanner />
 
             {/* Morning Briefing de Vivi */}
             <MorningBriefing />

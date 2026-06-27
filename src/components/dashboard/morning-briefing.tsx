@@ -11,9 +11,6 @@ import {
   ChevronUp,
   Sparkles,
   Flame,
-  Siren,
-  Utensils,
-  Ruler,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -58,17 +55,6 @@ export function MorningBriefing() {
     if (score >= 60) return "bg-yellow-500";
     if (score >= 40) return "bg-orange-500";
     return "bg-red-500";
-  };
-
-  const getSeveridadColor = (severidad: string) => {
-    switch (severidad) {
-      case "high":
-        return "border-red-500/30 bg-red-500/5";
-      case "medium":
-        return "border-yellow-500/30 bg-yellow-500/5";
-      default:
-        return "border-blue-500/30 bg-blue-500/5";
-    }
   };
 
   if (cargando) {
@@ -276,38 +262,6 @@ export function MorningBriefing() {
                         </div>
                       ))}
                     </div>
-                  </div>
-                )}
-
-                {/* Alertas */}
-                {briefing.alertas.length > 0 && (
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Siren className="w-4 h-4 text-red-500" />
-                      <p className="text-[10px] font-black text-red-500 uppercase tracking-widest">
-                        Alertas
-                      </p>
-                    </div>
-                    {briefing.alertas.map((alerta, i) => (
-                      <div
-                        key={i}
-                        className={cn(
-                          "rounded-xl p-3 border",
-                          getSeveridadColor(alerta.severidad)
-                        )}
-                      >
-                        <div className="flex items-start gap-2">
-                          {alerta.tipo === "nutricion" ? (
-                            <Utensils className="w-4 h-4 text-blue-400 mt-0.5 shrink-0" />
-                          ) : alerta.tipo === "abandono" ? (
-                            <AlertTriangle className="w-4 h-4 text-yellow-500 mt-0.5 shrink-0" />
-                          ) : (
-                            <AlertTriangle className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
-                          )}
-                          <p className="text-sm text-neutral-300">{alerta.mensaje}</p>
-                        </div>
-                      </div>
-                    ))}
                   </div>
                 )}
 

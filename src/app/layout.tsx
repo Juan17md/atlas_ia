@@ -55,10 +55,11 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
+      { url: "/icono.svg", type: "image/svg+xml" },
       { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
       { url: "/icons/icon-512x512.png", sizes: "512x512", type: "image/png" },
     ],
-    shortcut: [{ url: "/icons/icon-192x192.png", sizes: "192x192" }],
+    shortcut: [{ url: "/icono.svg", type: "image/svg+xml" }],
     apple: [
       { url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
     ],
@@ -70,7 +71,7 @@ export const metadata: Metadata = {
       },
       {
         rel: "mask-icon",
-        url: "/icons/icon-512x512.png",
+        url: "/icono.svg",
         color: "#FF0000",
       },
     ],

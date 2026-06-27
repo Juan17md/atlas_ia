@@ -18,6 +18,12 @@ export default function manifest(): MetadataRoute.Manifest {
     categories: ["fitness", "health", "productivity"],
     icons: [
       {
+        src: "/icono.svg",
+        sizes: "512x512",
+        type: "image/svg+xml",
+        purpose: "any",
+      },
+      {
         src: "/icons/icon-72x72.png",
         sizes: "72x72",
         type: "image/png",
