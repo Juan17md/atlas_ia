@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { AuthLoginForm } from "@/components/forms/auth-login-form";
 import { AuthRegisterForm } from "@/components/forms/auth-register-form";
-import { Isotipo } from "@/components/ui/isotipo";
+import { Isologo } from "@/components/ui/isologo";
 import { motion, AnimatePresence } from "framer-motion";
 
 /**
@@ -58,10 +58,10 @@ export function LoginPageClient() {
                         <motion.div
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.98 }}
-                            className="relative mb-4 rounded-full bg-linear-to-b from-white to-neutral-300 p-[18px] shadow-[0_0_50px_-12px_rgba(255,255,255,0.4)]"
+                            className="relative mb-4 rounded-2xl bg-linear-to-b from-white to-neutral-300 p-4 px-6 shadow-[0_0_50px_-12px_rgba(255,255,255,0.4)]"
                         >
-                            <Isotipo className="h-8 w-8 shrink-0 relative z-10 drop-shadow-md brightness-0" />
-                            <div className="absolute inset-0 rounded-full border border-white/40 shadow-[inset_0_2px_10px_rgba(255,255,255,0.8)] pointer-events-none" />
+                            <Isologo className="h-8 w-auto relative z-10" />
+                            <div className="absolute inset-0 rounded-2xl border border-white/40 shadow-[inset_0_2px_10px_rgba(255,255,255,0.8)] pointer-events-none" />
                         </motion.div>
 
                         <AnimatePresence mode="wait">

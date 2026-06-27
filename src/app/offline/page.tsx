@@ -77,7 +77,8 @@ export default function OfflinePage() {
             <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="50" cy="50" r="30" stroke="#FF0000" strokeWidth="6" />
               <circle cx="50" cy="50" r="40" stroke="white" strokeWidth="2" strokeDasharray="10 5" />
-              <path d="M40 50L47 57L60 43" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+              <rect x="47" y="10" width="6" height="14" rx="3" fill="white" />
+              <rect x="47" y="76" width="6" height="14" rx="3" fill="white" />
             </svg>
           </div>
           <h1>Sin conexión</h1>

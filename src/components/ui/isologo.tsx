@@ -14,8 +14,8 @@ export function Isologo({ className, ...props }: React.SVGProps<SVGSVGElement>) 
     >
       <circle cx="30" cy="40" r="18" stroke="#FF0000" strokeWidth="3" />
       <circle cx="30" cy="40" r="25" stroke="white" strokeWidth="1" strokeDasharray="4 2" />
-      <text x="65" y="52" fill="white" style={{ font: "bold italic 42px Arial, sans-serif" }}>ATLAS</text>
-      <text x="210" y="52" fill="#FF0000" style={{ font: "bold italic 42px Arial, sans-serif" }}>IA</text>
+      <text x="65" y="48" fill="white" style={{ font: "bold italic 28px Arial, sans-serif" }}>Atlas</text>
+      <text x="145" y="48" fill="#FF0000" style={{ font: "bold italic 28px Arial, sans-serif" }}>IA</text>
     </svg>
   );
 }
