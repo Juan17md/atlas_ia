@@ -9,7 +9,6 @@ import { StatCard } from "@/components/dashboard/stat-card";
 import { ScheduleCalendar } from "@/components/dashboard/schedule-calendar";
 import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MorningBriefing } from "@/components/dashboard/morning-briefing";
 import type { DashboardUser, RecentActivity, SerializedRoutine } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -101,9 +100,6 @@ export function AthleteDashboardUI({ user, activityData, weeklyCompleted, weekly
                     icon={Plus}
                 />
             </div>
-
-            {/* Morning Briefing de Vivi */}
-            <MorningBriefing />
 
             {/* Schedule Section */}
             <div className="relative">

@@ -89,12 +89,8 @@ PENDIENTE (TODO)
 - Gamification: Logros, rachas y niveles para aumentar la retención.
 - Dashboard Global Coach: Métricas agregadas de todos los atletas.
 
-
-Nuevos Cambios,Mejoras y Nuevos Requisitos:
-    - Nuevo Rol: Atleta Avanzado
-        - Este podra:
-            - Editar su rutina
-            - Anadir nuevos Ejercicios 
-    - Nueva Funcionalidad:
-        - Al crear una rutina se podra colocar el ejercicio principal y una o mas variantes.
-        - Al un atleta Iniciar su rutina podra seleccionar entre el ejercicio principal y las variantes cualquiera realizar. Ya que abra casos donde los equipos no esten disponibles.
+CAMBIOS REALIZADOS (JUNIO 2026)
+- [ELIMINADO] Sistema de alertas proactivas del dashboard (AlertsBanner, alert-actions).
+- [ELIMINADO] Morning Briefing de Vivi del dashboard atleta.
+- [UNIFICADO] Branding del sistema: sidebar, login, favicon y PWA usan el mismo isotipo (caja blanca + círculo rojo).
+- [MEJORA] Icono PWA y favicon regenerados desde el diseño unificado.
