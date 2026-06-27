@@ -43,8 +43,8 @@ const nextConfig: NextConfig = {
       "framer-motion",
     ],
     staleTimes: {
-      dynamic: 30,
-      static: 180,
+      dynamic: process.env.NODE_ENV === "development" ? 0 : 30,
+      static: process.env.NODE_ENV === "development" ? 0 : 180,
     },
   },
 
