@@ -30,7 +30,10 @@ export async function registerUser(data: z.infer<typeof RegisterInputSchemaServe
             displayName: name,
         });
 
-        // 2. Crear el documento del usuario en Firestore (Admin SDK)
+        // 2. Asignar custom claims para el role (disponible en tokens JWT y security rules)
+        await adminAuth.setCustomUserClaims(firebaseUser.uid, { role });
+
+        // 3. Crear el documento del usuario en Firestore (Admin SDK)
         const newUserData = {
             id: firebaseUser.uid,
             name,

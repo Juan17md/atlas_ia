@@ -106,10 +106,23 @@ export function useWorkoutLogger(): WorkoutLoggerStateType & WorkoutLoggerDispat
 
 // --- PROVIDER ---
 
+type ProviderRoutineDay = {
+    id?: string;
+    name?: string;
+    exercises?: Array<{
+        exerciseId?: string;
+        exerciseName: string;
+        sets: Array<{ reps?: number | string; rpeTarget?: number; restSeconds?: number }>;
+        notes?: string;
+        order?: number;
+    }>;
+    isRest?: boolean;
+};
+
 interface ProviderProps {
     children: ReactNode;
     initialRoutineName?: string;
-    routineDay?: any;
+    routineDay?: ProviderRoutineDay;
     routineId?: string;
     defaultDate?: string;
     userRole?: string;
@@ -272,7 +285,9 @@ export function WorkoutLoggerProvider({ children, initialRoutineName, routineDay
     }, [date, initialRoutineName, routineDay, createEmptyExercise]);
 
     useEffect(() => {
+        let isMounted = true;
         getExercises().then(res => {
+            if (!isMounted) return;
             if (res.success && res.exercises) {
                 setAvailableExercises(res.exercises.map((ex: any) => ({ 
                     id: ex.id, 
@@ -281,6 +296,7 @@ export function WorkoutLoggerProvider({ children, initialRoutineName, routineDay
                 })));
             }
         });
+        return () => { isMounted = false; };
     }, []);
 
     // --- DISPATCH FUNCTIONS (estables con useCallback) ---

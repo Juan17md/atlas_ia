@@ -16,7 +16,7 @@ export const getGroqClient = () => {
  * Sanitiza datos de usuario para prevenir prompt injection.
  * Elimina caracteres potencialmente problemáticos que podrían manipular el prompt.
  */
-function sanitizeForAI(input: string | undefined | null): string {
+export function sanitizeForAI(input: string | undefined | null): string {
   if (!input) return "No especificado";
   
   const sanitized = String(input)

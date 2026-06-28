@@ -5,7 +5,7 @@ import { RoutineSchema } from "@/lib/schemas";
 import { Routine } from "@/types";
 import { adminDb, serializeFirestoreData } from "@/lib/firebase-admin";
 import { auth } from "@/lib/auth";
-import { getGroqClient, DEFAULT_AI_MODEL } from "@/lib/ai";
+import { getGroqClient, DEFAULT_AI_MODEL, sanitizeForAI } from "@/lib/ai";
 import { getExercises } from "./exercise-actions";
 import { revalidatePath, revalidateTag } from "next/cache";
 
@@ -55,16 +55,9 @@ export async function getRoutines() {
             return serializeFirestoreData({ id: doc.id, ...doc.data() });
         }));
 
-        console.log(">>> [GET ROUTINES] Total routines fetched:", routinesRaw.length);
-        
-        // Filtrar rutinas: que no tengan deletedAt y que estén activas
-        // Nota: para coaches mostramos todo lo que no esté borrado suavemente
         const routines = Array.from(new Map((routinesRaw as Routine[]).map(r => [r.id, r])).values())
             .filter(r => !r.deletedAt && r.active !== false);
 
-        console.log(">>> [GET ROUTINES] Routines after filter:", routines.length);
-        console.log(">>> [GET ROUTINES] Active IDs:", routines.map(r => r.id).join(", "));
-        
         return { success: true, routines };
     } catch (error) {
         console.error("Error fetching routines:", error);
@@ -396,8 +389,11 @@ export async function updateRoutine(id: string, data: Partial<RoutineInput>) {
         return { success: false, error: "No autorizado" };
     }
 
+    const validation = RoutineSchema.partial().safeParse(data);
+    if (!validation.success) return { success: false, error: validation.error.issues[0]?.message || "Datos inválidos" };
+    const validated = validation.data;
+
     try {
-        // Verificar que el usuario es propietario de la rutina
         const docSnap = await adminDb.collection("routines").doc(id).get();
         if (!docSnap.exists) {
             return { success: false, error: "Rutina no encontrada" };
@@ -407,18 +403,12 @@ export async function updateRoutine(id: string, data: Partial<RoutineInput>) {
         const isOwner = routineData?.coachId === session.user.id;
         const isAssignedAthlete = routineData?.athleteId === session.user.id;
         
-        // Coaches pueden editar sus rutinas, atletas avanzados sus propias rutinas
-        if (!isOwner && (role === "coach" || role !== "advanced_athlete")) {
-            return { success: false, error: "No autorizado: no eres el propietario de esta rutina" };
-        }
-        
-        // Atletas pueden editar sus rutinas asignadas solo si son advanced_athlete
         if (!isOwner && !isAssignedAthlete) {
-            return { success: false, error: "No autorizado" };
+            return { success: false, error: "No autorizado: no eres el propietario de esta rutina" };
         }
 
         await adminDb.collection("routines").doc(id).update({
-            ...data,
+            ...validated,
             updatedAt: new Date(),
         });
         revalidatePath("/routines");
@@ -444,27 +434,19 @@ export async function deleteRoutine(id: string) {
         const docRef = adminDb.collection("routines").doc(id);
         const docSnap = await docRef.get();
         if (!docSnap.exists) {
-            console.log(">>> [DELETE ROUTINE] Routine not found:", id);
             return { success: false, error: "Rutina no encontrada" };
         }
         
         const routineData = docSnap.data();
         
-        // Verificar que es el propietario (coachId) o el atleta asignado (si es advanced_athlete)
         const isCoachOwner = routineData?.coachId === userId;
         const isAthleteOwner = routineData?.athleteId === userId && role === "advanced_athlete";
 
         if (!isCoachOwner && !isAthleteOwner) {
-            console.log(">>> [DELETE ROUTINE] Unauthorized access to routine:", id);
             return { success: false, error: "No tienes permisos para eliminar esta rutina" };
         }
-
-        console.log(">>> [DELETE ROUTINE] Marking routine as deleted and inactive...");
         
-        // Si es una rutina del coach (plantilla), la eliminamos físicamente para limpiar la DB
-        // y actualizamos las copias asignadas para romper la referencia
         if (isCoachOwner && !routineData?.athleteId) {
-            console.log(">>> [DELETE ROUTINE] Hard deleting coach template:", id);
             const assignedCopies = await adminDb.collection("routines")
                 .where("originalRoutineId", "==", id)
                 .get();
@@ -475,7 +457,6 @@ export async function deleteRoutine(id: string) {
             batch.delete(docRef);
             await batch.commit();
         } else {
-            // Borrado suave para rutinas de atletas (historial)
             await docRef.update({
                 deletedAt: new Date(),
                 active: false,
@@ -483,16 +464,13 @@ export async function deleteRoutine(id: string) {
             });
         }
         
-        console.log(">>> [DELETE ROUTINE] Successfully processed deletion for id:", id);
-        
         revalidatePath("/routines");
         revalidatePath("/dashboard");
         revalidateTag("routines", "default");
         
         return { success: true };
     } catch (error: any) {
-        console.error(">>> [DELETE ROUTINE] Error:", error);
-        return { success: false, error: "Error al eliminar la rutina: " + (error.message || "Unknown error") };
+        return { success: false, error: "Error al eliminar la rutina" };
     }
 }
 
@@ -559,7 +537,7 @@ export async function generateRoutineWithAI(data: z.infer<typeof GenerateRoutine
             - Tipo de Routine: ${data.routineType === "daily" ? "Sesión Diaria Única (Full Body o similar)" : "Planificación Semanal de varios días"}
             - Lesiones/Limitaciones: ${data.injuries?.join(", ") || "Ninguna"}
             ${data.focus ? `- Enfoque especial: ${data.focus}` : ""}
-            ${data.userPrompt ? `- REQUERIMIENTOS ESPECÍFICOS DEL USUARIO: "${data.userPrompt}"` : ""}
+            ${data.userPrompt ? `- REQUERIMIENTOS ESPECÍFICOS DEL USUARIO: "${sanitizeForAI(data.userPrompt)}"` : ""}
 
             Usa PREFERENTEMENTE los siguientes ejercicios disponibles en mi biblioteca, pero puedes sugerir variantes comunes si faltan básicos:
             [${simplifiedExercises}]

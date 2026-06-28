@@ -2,7 +2,7 @@
 
 import { adminDb } from "@/lib/firebase-admin";
 import { auth } from "@/lib/auth";
-import { getGroqClient, getAthleteContext, DEFAULT_AI_MODEL } from "@/lib/ai";
+import { getGroqClient, getAthleteContext, DEFAULT_AI_MODEL, sanitizeForAI } from "@/lib/ai";
 import { RoutineDaySchema } from "@/lib/schemas";
 import { z } from "zod";
 
@@ -78,7 +78,7 @@ export async function suggestSubstitute(exerciseName: string, reason: "busy" | "
         const reasonText = reason === "busy" ? "la máquina está ocupada" : reason === "pain" ? "siento dolor/molestia" : "falta equipo";
 
         const prompt = `
-            Soy un atleta en medio de mi entrenamiento. Tenía que hacer "${exerciseName}" pero no puedo porque: ${reasonText}.
+            Soy un atleta en medio de mi entrenamiento. Tenía que hacer "${sanitizeForAI(exerciseName)}" pero no puedo porque: ${reasonText}.
 
             Sugiéreme 3 alternativas biomecánicamente equivalentes (mismo patrón de movimiento y músculo objetivo).
             IMPORTANTE: Si tengo lesiones, NO sugieras ejercicios que puedan agravarlas.
@@ -195,7 +195,9 @@ export async function suggestAlternativeExercise(exerciseName: string, reason: "
     return suggestSubstitute(exerciseName, reason);
 }
 
-import { analyzeViviIntelligence, saveViviMemory } from "@/actions/vivi-intelligence-actions";
+import { analyzeViviIntelligence, saveViviMemory, type ViviIntelligenceData } from "@/actions/vivi-intelligence-actions";
+
+const CACHE_VIVI_MS = 5 * 60 * 1000; // 5 minutos
 
 // Chat con el coach AI - usado por ai-coach-chat.tsx
 export async function chatWithCoachAI(message: string, context?: { exerciseName?: string; muscleGroups?: string[] }) {
@@ -203,9 +205,14 @@ export async function chatWithCoachAI(message: string, context?: { exerciseName?
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
 
     try {
-        // 1. Ejecutar análisis rápido de inteligencia si es necesario (o proactivamente)
-        // Esto asegura que Vivi tenga los datos más frescos de los últimos entrenos
-        await analyzeViviIntelligence(session.user.id);
+        // 1. Analizar Vivi solo si pasaron >5 min desde el último análisis
+        const viviDoc = await adminDb.collection("vivi_intelligence").doc(session.user.id).get();
+        const viviData = viviDoc.data() as ViviIntelligenceData | undefined;
+        const lastAnalyzed = viviData?.lastAnalyzed;
+        const needsAnalysis = !lastAnalyzed || (Date.now() - new Date(lastAnalyzed as any).getTime()) > CACHE_VIVI_MS;
+        if (needsAnalysis) {
+            await analyzeViviIntelligence(session.user.id);
+        }
 
         // 2. Inyectar contexto enriquecido (incluye los nuevos insights y memorias)
         const athleteCtx = await getAthleteContext(session.user.id);
@@ -216,7 +223,7 @@ export async function chatWithCoachAI(message: string, context?: { exerciseName?
 
         const prompt = `
             El atleta te hace la siguiente pregunta:
-            "${message}"
+            "${sanitizeForAI(message)}"
             
             ${contextStr}
             
@@ -346,7 +353,7 @@ export async function generateExerciseDetails(exerciseName: string) {
 
     try {
         const prompt = `
-            Actúa como un experto en biomecánica y cinesiología deportiva. Tu objetivo es analizar el ejercicio "${exerciseName}" y determinar con precisión qué músculos trabaja.
+            Actúa como un experto en biomecánica y cinesiología deportiva. Tu objetivo es analizar el ejercicio "${sanitizeForAI(exerciseName)}" y determinar con precisión qué músculos trabaja.
 
             INSTRUCCIONES CLAVE:
             1. Identifica los **Músculos Agonistas** (principales ejecutores).

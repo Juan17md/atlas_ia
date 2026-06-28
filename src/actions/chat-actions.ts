@@ -1,6 +1,6 @@
 "use server";
 
-import { getGroqClient, getAthleteContext, DEFAULT_AI_MODEL } from "@/lib/ai";
+import { getGroqClient, getAthleteContext, DEFAULT_AI_MODEL, sanitizeForAI } from "@/lib/ai";
 import { auth } from "@/lib/auth";
 import {
   clasificarIntencion,
@@ -55,7 +55,7 @@ Ayuda al entrenador con terminología técnica precisa. Sé directo y profesiona
 
         const typedMessages: ChatCompletionMessageParam[] = [
             systemMessage,
-            ...messages.map(m => ({ role: m.role as "user" | "assistant" | "system", content: m.content }))
+            ...messages.map(m => ({ role: m.role as "user" | "assistant" | "system", content: m.role === "user" ? sanitizeForAI(m.content) : m.content }))
         ];
 
         const completion = await groq.chat.completions.create({
@@ -92,12 +92,12 @@ export async function analyzeWorkoutSession(workoutData: any) {
 SESIÓN ACTUAL (${workoutData.date}):
 Rutina: ${workoutData.routineName}
 RPE Global: ${workoutData.sessionRpe}/10
-Notas: ${workoutData.sessionNotes || "Ninguna"}
+Notas: ${sanitizeForAI(workoutData.sessionNotes) || "Ninguna"}
 
 EJERCICIOS:
 ${workoutData.exercises.map((ex: any, idx: number) => `
 ${idx + 1}. ${ex.exerciseName}
-   - Comentario del ejercicio: ${ex.feedback || "Sin comentarios"}
+   - Comentario del ejercicio: ${sanitizeForAI(ex.feedback) || "Sin comentarios"}
    - Series:
      ${ex.sets.map((s: any, sIdx: number) => `Set ${sIdx + 1}: ${s.weight}kg x ${s.reps} reps (RPE ${s.rpe})`).join("\n     ")}
 `).join("\n")}

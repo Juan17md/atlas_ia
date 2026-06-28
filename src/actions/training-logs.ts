@@ -30,6 +30,37 @@ export interface WorkoutSessionData {
     duracionMinutos?: number;
 }
 
+const WorkoutSessionSetSchema = z.object({
+    weight: z.number().min(0).optional(),
+    reps: z.number().min(0).optional(),
+    rpe: z.number().min(1).max(10).optional().nullable(),
+    completed: z.boolean().optional(),
+});
+
+const WorkoutSessionExerciseSchema = z.object({
+    exerciseId: z.string().optional(),
+    exerciseName: z.string().optional(),
+    exerciseIdUsed: z.string().optional(),
+    variantIds: z.array(z.string()).optional(),
+    sets: z.array(WorkoutSessionSetSchema),
+    feedback: z.string().optional(),
+    ejercicioTipo: z.enum(["reps", "time"]).optional(),
+    tiempoCompletado: z.number().optional(),
+});
+
+const WorkoutSessionSchema = z.object({
+    routineId: z.string().optional(),
+    routineName: z.string().optional(),
+    exercises: z.array(WorkoutSessionExerciseSchema).optional(),
+    totalSets: z.number().optional(),
+    notes: z.string().optional(),
+    sessionRpe: z.number().min(1).max(10).optional(),
+    sessionNotes: z.string().optional(),
+    dayId: z.string().optional(),
+    assignmentId: z.string().optional(),
+    duracionMinutos: z.number().optional(),
+});
+
 const RetroactiveSetSchema = z.object({
     weight: z.coerce.number().min(0, "El peso no puede ser negativo"),
     reps: z.coerce.number().min(0, "Las reps no pueden ser negativas"),
@@ -86,6 +117,13 @@ export async function getTrainingLogs(userId?: string) {
     const targetId = userId || session.user.id;
     if (targetId !== session.user.id && session.user.role !== "coach") return { success: false, error: "No autorizado" };
 
+    if (targetId !== session.user.id && session.user.role === "coach") {
+        const athleteDoc = await adminDb.collection("users").doc(targetId).get();
+        if (!athleteDoc.exists || athleteDoc.data()?.coachId !== session.user.id) {
+            return { success: false, error: "No autorizado" };
+        }
+    }
+
     try {
         const snapshot = await adminDb.collection("training_logs").where("athleteId", "==", targetId).orderBy("date", "desc").limit(20).get();
         const logs = snapshot.docs.map(doc => serializeFirestoreData({ id: doc.id, ...doc.data() }) as TrainingLogData);
@@ -100,6 +138,10 @@ export async function logWorkoutSession(data: WorkoutSessionData) {
     const session = await auth();
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
 
+    const validation = WorkoutSessionSchema.safeParse(data);
+    if (!validation.success) return { success: false, error: validation.error.issues[0]?.message || "Datos inválidos" };
+    const validated = validation.data;
+
     try {
         const sessionId = `session_${Date.now()}_${session.user.id.slice(0, 6)}`;
         const fechaHoyStr = obtenerFechaISOLocal();
@@ -107,10 +149,10 @@ export async function logWorkoutSession(data: WorkoutSessionData) {
         const batch = adminDb.batch();
 
         const logRef = adminDb.collection("training_logs").doc();
-        batch.set(logRef, { ...data, athleteId: session.user.id, sessionId, assignmentId: data.assignmentId || null, status: "completed", date: workoutDate, createdAt: workoutDate });
+        batch.set(logRef, { ...validated, athleteId: session.user.id, sessionId, assignmentId: validated.assignmentId || null, status: "completed", date: workoutDate, createdAt: workoutDate });
 
-        if (data.exercises) {
-            for (const exercise of data.exercises) {
+        if (validated.exercises) {
+            for (const exercise of validated.exercises) {
                 for (const set of exercise.sets) {
                     if ((set.weight || 0) > 0 || (set.reps || 0) > 0) {
                         const setRef = adminDb.collection("workout_sets").doc();

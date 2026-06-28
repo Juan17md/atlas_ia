@@ -8,6 +8,16 @@ import type { TrainingSetData, TrainingExerciseData } from "@/types";
 
 // --- HELPERS ---
 
+async function verifyCoachAccess(coachId: string, athleteId: string): Promise<boolean> {
+    if (coachId === athleteId) return true;
+    try {
+        const athleteDoc = await adminDb.collection("users").doc(athleteId).get();
+        return athleteDoc.exists && athleteDoc.data()?.coachId === coachId;
+    } catch {
+        return false;
+    }
+}
+
 function getStartOfWeek(date: Date) {
     const day = date.getDay();
     const diff = date.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
@@ -69,6 +79,9 @@ export async function getWeeklyActivity(userId?: string) {
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
 
     const targetUserId = userId || session.user.id;
+    if (targetUserId !== session.user.id && !await verifyCoachAccess(session.user.id, targetUserId)) {
+        return { success: false, error: "No autorizado" };
+    }
 
     try {
         const data = await getCachedWeeklyActivity(targetUserId);
@@ -83,6 +96,9 @@ export async function getWeeklyProgress(userId?: string) {
     const session = await auth();
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
     const targetUserId = userId || session.user.id;
+    if (targetUserId !== session.user.id && !await verifyCoachAccess(session.user.id, targetUserId)) {
+        return { success: false, error: "No autorizado" };
+    }
 
     try {
         const startOfWeek = getStartOfWeek(new Date());
@@ -122,6 +138,9 @@ export async function getPersonalRecords(userId?: string) {
     const session = await auth();
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
     const targetUserId = userId || session.user.id;
+    if (targetUserId !== session.user.id && !await verifyCoachAccess(session.user.id, targetUserId)) {
+        return { success: false, error: "No autorizado" };
+    }
 
     try {
         const logsSnapshot = await adminDb.collection("training_logs")
@@ -175,6 +194,9 @@ export async function getStrengthProgress(userId?: string) {
     const session = await auth();
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
     const targetUserId = userId || session.user.id;
+    if (targetUserId !== session.user.id && !await verifyCoachAccess(session.user.id, targetUserId)) {
+        return { success: false, error: "No autorizado" };
+    }
 
     try {
         // Obtenemos los últimos 20 logs para encontrar suficientes pares de comparación
@@ -272,6 +294,9 @@ export async function getStrengthHistory(userId?: string) {
     const session = await auth();
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
     const targetUserId = userId || session.user.id;
+    if (targetUserId !== session.user.id && !await verifyCoachAccess(session.user.id, targetUserId)) {
+        return { success: false, error: "No autorizado" };
+    }
 
     try {
         const logsSnapshot = await adminDb.collection("training_logs")
@@ -370,6 +395,7 @@ import { getGroqClient, DEFAULT_AI_MODEL } from "@/lib/ai";
 export async function analyzeAthleteProgress(userId: string) {
     const session = await auth();
     if (!session?.user?.id || session.user.role !== "coach") return { success: false, error: "No autorizado" };
+    if (!await verifyCoachAccess(session.user.id, userId)) return { success: false, error: "No autorizado" };
 
     try {
         // 1. Obtener perfil del atleta para contexto de salud
@@ -482,9 +508,8 @@ export async function analyzeAthleteProgress(userId: string) {
     } catch (error) {
         console.error("Analysis Error:", error);
         return {
-            success: true,
-            alerts: [],
-            suggestions: ["Error conectando con el motor de análisis."]
+            success: false,
+            error: "Error conectando con el motor de análisis."
         };
     }
 }

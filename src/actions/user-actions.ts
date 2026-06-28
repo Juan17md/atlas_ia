@@ -1,6 +1,6 @@
 "use server";
 
-import { adminDb } from "@/lib/firebase-admin";
+import { adminDb, adminAuth } from "@/lib/firebase-admin";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
@@ -97,6 +97,7 @@ export async function getAllUsers() {
 
     try {
         const snapshot = await adminDb.collection("users")
+            .where("coachId", "==", session.user.id)
             .orderBy("name", "asc")
             .get();
 
@@ -121,15 +122,18 @@ export async function updateUserRole(userId: string, newRole: string) {
         return { success: false, error: "No autorizado" };
     }
 
-    // Validar el rol
-    const validRoles = ["athlete", "coach", "advanced_athlete"];
+    const validRoles = ["athlete", "advanced_athlete"];
     if (!validRoles.includes(newRole)) {
-        return { success: false, error: "Rol inválido" };
+        return { success: false, error: "Solo puedes asignar roles de atleta" };
     }
 
-    // Impedir que un usuario se cambie el rol a sí mismo
     if (userId === session.user.id) {
         return { success: false, error: "No puedes cambiar tu propio rol" };
+    }
+
+    const athleteDoc = await adminDb.collection("users").doc(userId).get();
+    if (!athleteDoc.exists || athleteDoc.data()?.coachId !== session.user.id) {
+        return { success: false, error: "No autorizado" };
     }
 
     try {
@@ -137,6 +141,8 @@ export async function updateUserRole(userId: string, newRole: string) {
             role: newRole,
             updatedAt: new Date()
         });
+
+        await adminAuth.setCustomUserClaims(userId, { role: newRole });
 
         revalidatePath("/users");
         revalidatePath("/dashboard");
@@ -157,8 +163,12 @@ export async function deleteUser(userId: string) {
         return { success: false, error: "No puedes eliminarte a ti mismo" };
     }
 
+    const athleteDoc = await adminDb.collection("users").doc(userId).get();
+    if (!athleteDoc.exists || athleteDoc.data()?.coachId !== session.user.id) {
+        return { success: false, error: "No autorizado" };
+    }
+
     try {
-        const { adminAuth } = await import("@/lib/firebase-admin");
         const batch = adminDb.batch();
 
         // 1. Eliminar rutinas del atleta
