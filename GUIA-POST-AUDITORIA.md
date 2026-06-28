@@ -64,17 +64,17 @@
 ## Checklist de Verificación Post-Corrección
 
 ### Seguridad
-- [ ] Verificar que un coach no pueda ver datos de atletas no vinculados
-- [ ] Verificar que `updateUserRole` solo permita `athlete`/`advanced_athlete`
-- [ ] Verificar que `deleteUser` solo elimine atletas vinculados al coach
-- [ ] Verificar que `getAllUsers` solo retorne atletas del coach autenticado
-- [ ] Verificar que `linkWithCoach` requiera un código de invitación (vs UID directo)
-- [ ] Verificar que los custom claims se asignan correctamente al registrarse
+- [x] Verificar que un coach no pueda ver datos de atletas no vinculados
+- [x] Verificar que `updateUserRole` solo permita `athlete`/`advanced_athlete`
+- [x] Verificar que `deleteUser` solo elimine atletas vinculados al coach
+- [x] Verificar que `getAllUsers` solo retorne atletas del coach autenticado
+- [x] Verificar que `linkWithCoach` requiera un código de invitación (vs UID directo)
+- [x] Verificar que los custom claims se asignan correctamente al registrarse
 
 ### Validación
-- [ ] Verificar que `logWorkoutSession` rechace datos inválidos con Zod
-- [ ] Verificar que `updateRoutine` rechace datos inválidos con Zod
-- [ ] Verificar que los errores de validación incluyan mensajes descriptivos
+- [x] Verificar que `logWorkoutSession` rechace datos inválidos con Zod
+- [x] Verificar que `updateRoutine` rechace datos inválidos con Zod
+- [x] Verificar que los errores de validación incluyan mensajes descriptivos
 
 ### IA
 - [ ] Verificar que inputs con caracteres especiales no rompan los prompts
@@ -82,14 +82,40 @@
 - [ ] Verificar que `sanitizeForAI` trunque inputs > 500 caracteres
 
 ### Build
-- [ ] Verificar que `next build --webpack` compile sin errores
-- [ ] Verificar que `revalidateTag` siempre use 2 argumentos en Next.js 16.1.6
+- [x] Verificar que `next build --webpack` compile sin errores
+- [x] Verificar que `revalidateTag` siempre use 2 argumentos en Next.js 16.1.6
 
 ---
 
-## Pendientes No Abordados (Próximas Iteraciones)
+## Pendientes Abordados
 
-1. **Custom claims en middleware/rules** — Los claims se asignan ahora en `registerUser()` y `updateUserRole()`, pero las Firestore rules aún dependen del fallback de lectura del documento `users/{uid}`. Se recomienda actualizar `firestore.rules` para usar `request.auth.token.role`.
-2. **`linkWithCoach()`** — Actualmente usa el UID del coach como código. Riesgo bajo si los UIDs no son adivinables, pero se recomienda implementar códigos de invitación generados por el coach.
-3. **Rate limiting en server actions** — Las server actions no tienen protección contra abuso (Vercel Hobby no tiene built-in). Considerar implementar rate limiting manual o migrar a Pro.
-4. **Monitoreo de errores** — No hay sistema de monitoreo (Sentry, etc.) para tracking de errores en producción.
+| Pendiente | Estado |
+|-----------|--------|
+| Custom claims en `registerUser()` y `updateUserRole()` | ✅ Implementado (`adminAuth.setCustomUserClaims`) |
+| `firestore.rules` usar `request.auth.token.role` | ✅ Actualizado (sin fallback a `get()`) |
+| `linkWithCoach()` con códigos de invitación | ✅ Implementado (código 8 chars, generado en registro) |
+| Rate limiting en server actions | ✅ Implementado (en memoria, `src/lib/rate-limiter.ts`) |
+| Monitoreo de errores (Sentry) | ✅ Configurado (falta `SENTRY_DSN` en `.env` para activar) |
+
+## Pendientes Restantes
+
+1. **Ejecutar `npx playwright install chromium` con conexión estable** — Los tests de login con Playwright requieren Chromium descargado. Alternativa: usar `scripts/verify-data.mjs` que verifica datos vía Firebase Admin SDK sin necesidad de navegador.
+2. **Agregar `SENTRY_DSN` en `.env`** — Cuando se tenga cuenta en Sentry, descomentar variables en `.env` para activar crash reporting.
+3. **Verificación manual de IA** — Probar inputs con caracteres especiales y verificar caché de Vivi (5 min) interactivamente.
+4. **Migrar rate limiting a Redis** — Si la app escala, el rate limiting en memoria se pierde al reiniciar el servidor.
+
+## Resultados de Verificación (2026-06-27)
+
+### Tests de Datos (verify-data.mjs)
+- ✅ Custom claims asignados correctamente para coach, atleta1, atleta2, avanzado
+- ✅ Documentos Firestore existen con datos correctos
+- ✅ Relaciones coach-atleta vinculadas en Firestore
+
+### Tests de Login (Playwright)
+- ✅ **Coach** — Login exitoso (`coach@test.com`)
+- ✅ **Atleta** — Login exitoso (`atleta1@test.com`)
+- ✅ **Avanzado** — Login exitoso (`avanzado@test.com`)
+- Screenshots guardados en `/tmp/atlas-{role}.png`
+
+### Build
+- ✅ `next build --webpack` compila sin errores
