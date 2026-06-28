@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { getGroqClient, getAthleteContext, DEFAULT_AI_MODEL, sanitizeForAI } from "@/lib/ai";
 import { RoutineDaySchema } from "@/lib/schemas";
 import { z } from "zod";
+import { rateLimit } from "@/lib/rate-limiter";
 
 type RoutineSchedule = z.infer<typeof RoutineDaySchema>[];
 
@@ -13,7 +14,9 @@ export async function generateWarmup(muscleGroups: string[]) {
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
 
     try {
-        // Inyectar contexto del atleta para personalizar el calentamiento
+        const rl = rateLimit(`warmup:${session.user.id}`, 5, 60_000);
+        if (!rl.allowed) return { success: false, error: `Demasiadas solicitudes. Espera ${rl.retryAfter}s` };
+
         const athleteCtx = await getAthleteContext(session.user.id);
 
         const prompt = `
@@ -72,7 +75,9 @@ export async function suggestSubstitute(exerciseName: string, reason: "busy" | "
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
 
     try {
-        // Inyectar contexto del atleta para considerar lesiones al sugerir alternativas
+        const rl = rateLimit(`substitute:${session.user.id}`, 10, 60_000);
+        if (!rl.allowed) return { success: false, error: `Demasiadas solicitudes. Espera ${rl.retryAfter}s` };
+
         const athleteCtx = await getAthleteContext(session.user.id);
 
         const reasonText = reason === "busy" ? "la máquina está ocupada" : reason === "pain" ? "siento dolor/molestia" : "falta equipo";
@@ -205,6 +210,10 @@ export async function chatWithCoachAI(message: string, context?: { exerciseName?
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
 
     try {
+        // Rate limit: 10 llamadas por minuto por usuario
+        const rl = rateLimit(`chat:${session.user.id}`, 10, 60_000);
+        if (!rl.allowed) return { success: false, error: `Demasiadas solicitudes. Espera ${rl.retryAfter}s` };
+
         // 1. Analizar Vivi solo si pasaron >5 min desde el último análisis
         const viviDoc = await adminDb.collection("vivi_intelligence").doc(session.user.id).get();
         const viviData = viviDoc.data() as ViviIntelligenceData | undefined;
@@ -352,6 +361,9 @@ export async function generateExerciseDetails(exerciseName: string) {
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
 
     try {
+        const rl = rateLimit(`exc-details:${session.user.id}`, 20, 60_000);
+        if (!rl.allowed) return { success: false, error: `Demasiadas solicitudes. Espera ${rl.retryAfter}s` };
+
         const prompt = `
             Actúa como un experto en biomecánica y cinesiología deportiva. Tu objetivo es analizar el ejercicio "${sanitizeForAI(exerciseName)}" y determinar con precisión qué músculos trabaja.
 

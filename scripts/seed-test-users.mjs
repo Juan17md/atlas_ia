@@ -121,6 +121,10 @@ async function main() {
                 goal: u.goal || null,
                 experienceLevel: u.experienceLevel || null,
                 injuries: u.injuries || [],
+                inviteCode: u.role === "coach" ? (
+                    Math.random().toString(36).substring(2, 6).toUpperCase() +
+                    Math.random().toString(36).substring(2, 6).toUpperCase()
+                ) : undefined,
             };
 
             await db.collection("users").doc(user.uid).set(userData);

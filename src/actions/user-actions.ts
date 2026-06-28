@@ -15,28 +15,26 @@ export async function linkWithCoach(coachCode: string) {
     }
 
     try {
-        // Buscar al coach por su ID (usaremos el ID como código por simplicidad inicial)
-        // Opcionalmente podríamos tener un campo "inviteCode" en el documento del coach.
-        const coachDoc = await adminDb.collection("users").doc(coachCode).get();
+        // Buscar al coach por su código de invitación (no por UID)
+        const snapshot = await adminDb.collection("users")
+            .where("inviteCode", "==", coachCode)
+            .where("role", "==", "coach")
+            .limit(1)
+            .get();
 
-        if (!coachDoc.exists) {
-            return { success: false, error: "Coach no encontrado con ese código" };
+        if (snapshot.empty) {
+            return { success: false, error: "Código de invitación inválido" };
         }
 
+        const coachDoc = snapshot.docs[0];
         const coachData = coachDoc.data();
-        if (coachData?.role !== "coach") {
-            return { success: false, error: "El usuario no es un coach" };
-        }
 
         // Actualizar al atleta
         await adminDb.collection("users").doc(session.user.id).update({
-            coachId: coachCode,
+            coachId: coachDoc.id,
             coachName: coachData?.name || "Coach",
             linkedAt: new Date()
         });
-
-        // Opcional: Añadir el atleta a la lista del coach (si desnormalizamos)
-        // Pero es mejor query on-demand: users where coachId == myId
 
         revalidatePath("/profile");
         return { success: true, coachName: coachData?.name };
@@ -53,7 +51,7 @@ export async function unlinkCoach() {
 
     try {
         await adminDb.collection("users").doc(session.user.id).update({
-            coachId: null, // o admin.firestore.FieldValue.delete()
+            coachId: null,
             coachName: null,
             linkedAt: null
         });
@@ -62,6 +60,46 @@ export async function unlinkCoach() {
         return { success: true };
     } catch (error) {
         return { success: false, error: "Error al desvincular" };
+    }
+}
+
+export async function getMyInviteCode() {
+    const session = await auth();
+    if (!session?.user?.id || session.user.role !== "coach") {
+        return { success: false, error: "No autorizado" };
+    }
+
+    try {
+        const doc = await adminDb.collection("users").doc(session.user.id).get();
+        const inviteCode = doc.data()?.inviteCode;
+        if (!inviteCode) return { success: false, error: "No tienes código de invitación" };
+        return { success: true, inviteCode };
+    } catch (error) {
+        return { success: false, error: "Error al obtener código" };
+    }
+}
+
+export async function regenerateInviteCode() {
+    const session = await auth();
+    if (!session?.user?.id || session.user.role !== "coach") {
+        return { success: false, error: "No autorizado" };
+    }
+
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let code = "";
+    for (let i = 0; i < 8; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+
+    try {
+        await adminDb.collection("users").doc(session.user.id).update({
+            inviteCode: code,
+            updatedAt: new Date()
+        });
+        revalidatePath("/profile");
+        return { success: true, inviteCode: code };
+    } catch (error) {
+        return { success: false, error: "Error al regenerar código" };
     }
 }
 

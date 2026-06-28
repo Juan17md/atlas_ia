@@ -8,6 +8,7 @@ import {
   similitudJaccard,
   similitudSemantica,
 } from "@/lib/embeddings";
+import { rateLimit } from "@/lib/rate-limiter";
 
 export interface ViviInsight {
     type: "fatigue" | "pr" | "nutrition" | "memory" | "injury" | "motivation" | "technique";
@@ -173,6 +174,9 @@ export async function buildContextFromMemories(memories: ViviMemory[]): Promise<
 export async function analyzeViviIntelligence(userId?: string) {
     const session = await auth();
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
+
+    const rl = rateLimit(`vivi-analyze:${session.user.id}`, 3, 60_000);
+    if (!rl.allowed) return { success: false, error: `Demasiadas solicitudes. Espera ${rl.retryAfter}s` };
 
     const targetUserId = userId || session.user.id;
 

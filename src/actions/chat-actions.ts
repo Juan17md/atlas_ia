@@ -9,11 +9,15 @@ import {
 import { getStrengthHistory } from "@/actions/analytics-actions";
 import { getViviIntelligence } from "@/actions/vivi-intelligence-actions";
 import type { ChatCompletionMessageParam } from "groq-sdk/resources/chat/completions";
+import { rateLimit } from "@/lib/rate-limiter";
 
 export async function chatWithAI(messages: { role: string; content: string }[]) {
     try {
         const session = await auth();
         if (!session?.user?.id) return { success: false, error: "No autorizado" };
+
+        const rl = rateLimit(`chat-ai:${session.user.id}`, 15, 60_000);
+        if (!rl.allowed) return { success: false, error: `Demasiadas solicitudes. Espera ${rl.retryAfter}s` };
 
         const role = session.user.role || "athlete";
         const ultimoMensaje = messages[messages.length - 1]?.content || "";

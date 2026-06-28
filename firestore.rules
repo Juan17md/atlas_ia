@@ -18,28 +18,18 @@ service cloud.firestore {
     }
     
     // Verifica si el usuario tiene rol de coach (usando Custom Claims)
-    // Fallback: lee el documento del usuario si no hay custom claims
     function isCoach() {
-      return isAuthenticated() && (
-        request.auth.token.role == 'coach' ||
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'coach'
-      );
+      return isAuthenticated() && request.auth.token.role == 'coach';
     }
     
     // Verifica si el usuario tiene rol de atleta
     function isAthlete() {
-      return isAuthenticated() && (
-        request.auth.token.role == 'athlete' ||
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'athlete'
-      );
+      return isAuthenticated() && request.auth.token.role == 'athlete';
     }
     
     // Verifica si el usuario tiene rol de atleta avanzado
     function isAdvancedAthlete() {
-      return isAuthenticated() && (
-        request.auth.token.role == 'advanced_athlete' ||
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'advanced_athlete'
-      );
+      return isAuthenticated() && request.auth.token.role == 'advanced_athlete';
     }
     
     // Verifica si el usuario es coach o atleta avanzado
