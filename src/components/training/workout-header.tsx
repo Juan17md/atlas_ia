@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { AIAssistantDialog } from "@/components/training/ai-assistant-dialog";
-import { WorkoutTimer } from "./workout-timer";
 import { RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -10,8 +9,6 @@ interface WorkoutHeaderProps {
     currentExerciseIndex: number;
     totalExercises: number;
     exerciseName: string;
-    elapsedTime: number;
-    isStarted: boolean;
     isAdvanced: boolean;
     onSwapExercise: () => void;
     onCancel: () => void;
@@ -24,8 +21,6 @@ export function WorkoutHeader({
     currentExerciseIndex,
     totalExercises,
     exerciseName,
-    elapsedTime,
-    isStarted,
     isAdvanced,
     onSwapExercise,
     onCancel,
@@ -49,7 +44,7 @@ export function WorkoutHeader({
                         <h2 className="text-sm md:text-base font-bold text-white tracking-tight truncate uppercase italic">
                             {exerciseName}
                         </h2>
-                        {(isAdvanced || isStarted && totalExercises === 1 && exerciseName === "Rutina Libre") && (
+                        {(isAdvanced) && (
                             <Button
                                 variant="ghost"
                                 size="icon"
@@ -64,8 +59,6 @@ export function WorkoutHeader({
                 </div>
 
                 <div className="flex gap-1 md:gap-2 items-center shrink-0">
-                    <WorkoutTimer elapsedTime={elapsedTime} isStarted={isStarted} />
-
                     <AIAssistantDialog
                         muscleGroups={[exerciseName || "General"]}
                         availableExercises={[exerciseName]}

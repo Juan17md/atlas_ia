@@ -520,8 +520,6 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                                     currentExerciseIndex={currentExerciseIndex}
                                     totalExercises={mutableExercises.length}
                                     exerciseName={currentLogExercise?.exerciseName || ""}
-                                    elapsedTime={elapsedTime}
-                                    isStarted={isStarted}
                                     isAdvanced={isAdvanced}
                                     onSwapExercise={() => openSwapSelector(currentExerciseIndex)}
                                     onCancel={() => setShowCancelDialog(true)}
