@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -45,7 +45,12 @@ export function AuthLoginForm() {
                 toast.error("Credenciales incorrectas");
             } else {
                 toast.success("Bienvenido de nuevo");
-                router.push("/dashboard");
+                const session = await getSession();
+                if (session?.user?.onboardingCompleted) {
+                    router.push("/dashboard");
+                } else {
+                    router.push("/onboarding");
+                }
                 router.refresh();
             }
         } catch (error) {

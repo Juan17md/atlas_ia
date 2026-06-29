@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
 import dynamic from "next/dynamic";
 
@@ -18,6 +19,8 @@ export default async function DashboardLayout({
     children: React.ReactNode;
 }) {
     const session = await auth();
+    if (!session?.user) redirect("/");
+
     const role = session?.user?.role;
     const user = session?.user ? {
         name: session.user.name,

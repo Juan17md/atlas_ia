@@ -11,7 +11,11 @@ export default async function LoginPage() {
 
     // Redirección en servidor (más rápida que useEffect)
     if (session?.user) {
-        redirect("/dashboard");
+        if (session.user.onboardingCompleted) {
+            redirect("/dashboard");
+        } else {
+            redirect("/onboarding");
+        }
     }
 
     return <LoginPageClient />;
