@@ -18,8 +18,7 @@ import { ProgressionTip } from "@/components/training/progression-tip";
 import { useOfflineSync } from "@/hooks/use-offline-sync";
 import { SessionFeedbackDialog } from "@/components/training/session-feedback-dialog";
 import { CancelWorkoutDialog } from "@/components/training/cancel-workout-dialog";
-import { ClientMotionDiv } from "@/components/ui/client-motion";
-import { motion, AnimatePresence } from "framer-motion";
+
 import { ExerciseSelector } from "@/components/routines/exercise-selector";
 import { RestTimer } from "./rest-timer";
 import { ExerciseTimer } from "./exercise-timer";
@@ -493,7 +492,7 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
     return (
         <>
             <div className={cn(
-                "max-w-3xl mx-auto pb-32 space-y-6 transition-all duration-500",
+                "max-w-3xl mx-auto pb-32 space-y-6",
                 showExerciseSelector && "opacity-10 saturate-0 scale-[0.98] pointer-events-none blur-sm"
             )}>
                 {isFreeRunningEmpty ? (
@@ -528,14 +527,7 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                                 />
 
                                 <div className="space-y-6 min-h-[50vh] relative px-2">
-                                    <AnimatePresence mode="wait">
-                                        <motion.div
-                                            key={currentExerciseIndex}
-                                            initial={{ opacity: 0, x: 20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            exit={{ opacity: 0, x: -20 }}
-                                            transition={{ duration: 0.4, ease: "circOut" }}
-                                            className="bg-neutral-900/40 backdrop-blur-xl rounded-4xl border border-white/5 overflow-hidden shadow-2xl relative"
+                                    <div className="bg-neutral-900/40 backdrop-blur-xl rounded-4xl border border-white/5 overflow-hidden shadow-2xl relative"
                                         >
                                             <div className="absolute top-0 right-0 w-64 h-64 bg-red-600/5 rounded-full blur-[40px] pointer-events-none -z-10" />
 
@@ -578,7 +570,7 @@ export function WorkoutSession({ routine, userRole }: WorkoutSessionProps) {
                                                                         <RefreshCw className="w-4 h-4" />
                                                                     </Button>
                                                                     {showDeleteConfirm === currentExerciseIndex ? (
-                                                                        <div className="flex items-center gap-1 animate-in fade-in duration-200">
+                                                                        <div className="flex items-center gap-1">
                                                                             <Button
                                                                                 variant="ghost"
                                                                                 size="sm"
@@ -746,7 +738,7 @@ className="h-10 w-10 rounded-lg text-neutral-600 hover:text-red-500 hover:bg-red
                                                             <div
                                                                 key={setIndex}
                                                                 className={cn(
-                                                                    "flex flex-col md:grid md:grid-cols-12 gap-2 md:gap-3 p-3 md:p-3 rounded-2xl md:items-center transition-all duration-500 relative group/set border",
+                                                                    "flex flex-col md:grid md:grid-cols-12 gap-2 md:gap-3 p-3 md:p-3 rounded-2xl md:items-center relative group/set border",
                                                                     isCompleted
                                                                         ? "bg-emerald-500/10 border-emerald-500/30 shadow-[0_0_30px_-10px_rgba(16,185,129,0.2)]"
                                                                         : "bg-neutral-900 border-white/5 hover:border-white/10"
@@ -755,7 +747,7 @@ className="h-10 w-10 rounded-lg text-neutral-600 hover:text-red-500 hover:bg-red
                                                                 <div className="flex justify-between items-center md:contents">
                                                                     <div className="flex items-center gap-3 md:col-span-4 z-10 md:justify-start">
                                                                         <span className={cn(
-                                                                            "text-[9px] md:text-[10px] font-black w-7 h-7 md:w-8 md:h-8 rounded-xl flex items-center justify-center border transition-all duration-300 md:ml-auto md:mr-4 shrink-0",
+                                                                            "text-[9px] md:text-[10px] font-black w-7 h-7 md:w-8 md:h-8 rounded-xl flex items-center justify-center border md:ml-auto md:mr-4 shrink-0",
                                                                             isCompleted ? "bg-emerald-500 text-black border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.4)]" :
                                                                                 set.type === 'warmup' ? "text-amber-500 bg-amber-500/10 border-amber-500/20" :
                                                                                     set.type === 'failure' ? "text-red-500 bg-red-500/10 border-red-500/20" :
@@ -777,13 +769,13 @@ className="h-10 w-10 rounded-lg text-neutral-600 hover:text-red-500 hover:bg-red
                                                                             size="icon"
                                                                             onClick={() => toggleSetComplete(currentExerciseIndex, setIndex)}
                                                                             className={cn(
-                                                                                "h-9 w-9 rounded-xl transition-all duration-500 border",
+                                                                                "h-9 w-9 rounded-xl border",
                                                                                 isCompleted
                                                                                     ? "bg-emerald-500 text-black border-emerald-400 hover:bg-emerald-400 shadow-[0_0_25px_rgba(16,185,129,0.5)] scale-110"
                                                                                     : "bg-neutral-950 text-neutral-700 border-white/5 hover:border-red-600/30"
                                                                             )}
                                                                         >
-                                                                            <Check className={cn("w-4 h-4 transition-transform", isCompleted ? "scale-110" : "scale-100", isCompleted ? "text-black" : "text-neutral-600 hover:text-white")} />
+                                                                            <Check className={cn("w-4 h-4", isCompleted ? "scale-110" : "scale-100", isCompleted ? "text-black" : "text-neutral-600 hover:text-white")} />
                                                                         </Button>
                                                                     </div>
                                                                 </div>
@@ -855,13 +847,13 @@ className="h-10 w-10 rounded-lg text-neutral-600 hover:text-red-500 hover:bg-red
                                                                         size="icon"
                                                                         onClick={() => toggleSetComplete(currentExerciseIndex, setIndex)}
                                                                         className={cn(
-                                                                            "h-14 w-14 rounded-xl transition-all duration-500 border",
+                                                                            "h-14 w-14 rounded-xl border",
                                                                             isCompleted
                                                                                 ? "bg-emerald-500 text-black border-emerald-400 hover:bg-emerald-400 shadow-[0_0_25px_rgba(16,185,129,0.5)] scale-110"
                                                                                 : "bg-neutral-950 text-neutral-700 border-white/5 hover:border-red-600/30 hover:text-white"
                                                                         )}
                                                                     >
-                                                                        <Check className={cn("w-6 h-6 transition-transform", isCompleted ? "scale-110" : "scale-100")} />
+                                                                        <Check className={cn("w-6 h-6", isCompleted ? "scale-110" : "scale-100")} />
                                                                     </Button>
                                                                 </div>
                                                             </div>
@@ -885,8 +877,7 @@ className="h-10 w-10 rounded-lg text-neutral-600 hover:text-red-500 hover:bg-red
                                         )}
                                     </>
                                 )}
-                                        </motion.div>
-                                    </AnimatePresence>
+                                        </div>
                                 </div>
 
                                 {canAddExercises && (
@@ -896,7 +887,7 @@ className="h-10 w-10 rounded-lg text-neutral-600 hover:text-red-500 hover:bg-red
                                             onClick={openAddSelector}
                                             className="w-full h-14 border border-dashed border-white/10 bg-neutral-900/20 text-neutral-500 hover:text-white hover:bg-white/5 hover:border-white/20 rounded-2xl transition-all group"
                                         >
-                                            <Plus className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
+                                            <Plus className="w-5 h-5 mr-2 " />
                                             <span className="text-xs font-black uppercase tracking-[0.2em] italic">Agregar Ejercicio</span>
                                         </Button>
                                     </div>

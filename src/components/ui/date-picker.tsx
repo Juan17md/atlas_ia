@@ -13,7 +13,7 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
-import { motion, AnimatePresence } from "framer-motion";
+
 
 interface DatePickerProps {
     date: Date | undefined;
@@ -58,30 +58,22 @@ export function DatePicker({
                 align="start"
                 sideOffset={8}
             >
-                <AnimatePresence>
-                    {open && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                            transition={{ duration: 0.2, ease: "easeOut" }}
-                            className="bg-neutral-950 border border-neutral-800 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden"
-                        >
-                            <Calendar
-                                mode="single"
-                                selected={date}
-                                onSelect={(newDate) => {
-                                    setDate(newDate);
-                                    setOpen(false);
-                                }}
-                                disabled={(date) =>
-                                    maxDate ? date > maxDate : false
-                                }
-                                initialFocus
-                            />
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                {open && (
+                    <div className="bg-neutral-950 border border-neutral-800 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden">
+                        <Calendar
+                            mode="single"
+                            selected={date}
+                            onSelect={(newDate) => {
+                                setDate(newDate);
+                                setOpen(false);
+                            }}
+                            disabled={(date) =>
+                                maxDate ? date > maxDate : false
+                            }
+                            initialFocus
+                        />
+                    </div>
+                )}
             </PopoverContent>
         </Popover>
     );

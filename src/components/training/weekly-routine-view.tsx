@@ -104,7 +104,7 @@ export function WeeklyRoutineView({ schedule, routineId, routineName, routineTyp
 
     // --- Vista Semanal ---
     return (
-        <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in duration-500">
+        <div className="max-w-2xl mx-auto space-y-6">
             {/* Header */}
             <div className="space-y-1">
                 <div className="flex items-center gap-2 text-neutral-400 text-xs font-bold uppercase tracking-wider">

@@ -53,7 +53,7 @@ function WorkoutLoggerContent({ onBack, userRole, routineDay }: { onBack?: () =>
     const canEdit = true;
 
     return (
-        <div className="max-w-2xl mx-auto pb-32 space-y-6 animate-in fade-in duration-500">
+        <div className="max-w-2xl mx-auto pb-32 space-y-6">
             <SessionHeader onBack={onBack} disableRoutineName={!!routineDay} />
 
             {/* Lista de Ejercicios */}
@@ -92,7 +92,7 @@ function WorkoutLoggerContent({ onBack, userRole, routineDay }: { onBack?: () =>
                                 <button
                                     type="button"
                                     onClick={() => openInsertSelector(exIndex + 1)}
-                                    className="relative w-9 h-9 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all hover:scale-110 active:scale-95 text-red-500 shadow-xl p-1"
+                                    className="relative w-9 h-9 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all active:scale-95 text-red-500 shadow-xl p-1"
                                 >
                                     <Plus className="w-4 h-4" />
                                 </button>
@@ -108,7 +108,7 @@ function WorkoutLoggerContent({ onBack, userRole, routineDay }: { onBack?: () =>
                         onClick={canUseSelector !== false ? openAddSelector : addExercise}
                         className="w-full h-12 border border-dashed border-neutral-800 bg-neutral-900/30 text-neutral-500 hover:text-white hover:bg-neutral-800 hover:border-neutral-700 rounded-xl transition-all group"
                     >
-                        <Plus className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
+                        <Plus className="w-4 h-4 mr-2" />
                         <span className="text-xs font-bold uppercase tracking-widest">Añadir Ejercicio</span>
                     </Button>
                 )}
@@ -122,7 +122,7 @@ function WorkoutLoggerContent({ onBack, userRole, routineDay }: { onBack?: () =>
                     <Button
                         onClick={handleSubmit}
                         disabled={isSubmitting || exercises.length === 0 || isLoadingLog}
-                        className="w-full h-14 text-lg font-black bg-white text-black hover:bg-neutral-200 rounded-2xl shadow-[0_0_30px_rgba(255,255,255,0.15)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:hover:scale-100"
+                        className="w-full h-14 text-lg font-black bg-white text-black hover:bg-neutral-200 rounded-2xl shadow-[0_0_30px_rgba(255,255,255,0.15)] active:scale-[0.98] transition-all disabled:opacity-50"
                     >
                         {isSubmitting || isLoadingLog ? (
                             <>

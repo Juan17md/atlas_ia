@@ -10,7 +10,6 @@ import { LogMeasurementDialog } from "@/components/profile/log-measurement-dialo
 import { getBodyMeasurementsHistory } from "@/actions/measurement-actions";
 import { EditHealthDialog } from "@/components/dashboard/edit-health-dialog";
 import dynamic from "next/dynamic";
-import { ClientMotionDiv } from "@/components/ui/client-motion";
 import { cn } from "@/lib/utils";
 
 const MeasurementChart = dynamic(
@@ -65,9 +64,7 @@ export default async function ProfilePage() {
             <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-blue-600/5 rounded-full blur-[50px] pointer-events-none -z-10" />
 
             {/* Header */}
-            <ClientMotionDiv
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
+            <div
                 className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2"
             >
                 <div className="flex items-center gap-6">
@@ -86,7 +83,7 @@ export default async function ProfilePage() {
                         </h1>
                     </div>
                 </div>
-            </ClientMotionDiv>
+            </div>
 
             <Tabs defaultValue="details" className="w-full">
                 <TabsList className={cn(
@@ -114,22 +111,18 @@ export default async function ProfilePage() {
                 </TabsList>
 
                 <TabsContent value="details">
-                    <ClientMotionDiv
-                        initial={{ opacity: 0, scale: 0.98 }}
-                        animate={{ opacity: 1, scale: 1 }}
+                    <div
                         className="bg-neutral-900/20 backdrop-blur-xl border border-white/5 rounded-4xl p-10 shadow-2xl relative overflow-hidden"
                     >
                         <div className="absolute inset-0 bg-linear-to-b from-white/5 to-transparent pointer-events-none" />
                         <div className="relative z-10">
                             <ProfileForm user={userData} />
                         </div>
-                    </ClientMotionDiv>
+                    </div>
                 </TabsContent>
 
                 <TabsContent value="measurements" className="space-y-10">
-                        <ClientMotionDiv
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
+                        <div
                             className="flex flex-col md:flex-row md:justify-between md:items-center bg-neutral-900/20 backdrop-blur-xl border border-white/5 rounded-4xl p-10 shadow-2xl relative overflow-hidden gap-6"
                         >
                             <div className="absolute inset-0 bg-linear-to-r from-red-600/5 to-transparent pointer-events-none" />
@@ -143,7 +136,7 @@ export default async function ProfilePage() {
                                     initialData={userData.measurements}
                                 />
                             </div>
-                        </ClientMotionDiv>
+                        </div>
 
                         <div className="grid grid-cols-1 gap-12">
                             <MeasurementChart
@@ -187,9 +180,7 @@ export default async function ProfilePage() {
                     </TabsContent>
 
                 <TabsContent value="health" className="space-y-10">
-                    <ClientMotionDiv
-                        initial={{ opacity: 0, scale: 0.98 }}
-                        animate={{ opacity: 1, scale: 1 }}
+                    <div
                         className="bg-neutral-900/20 backdrop-blur-xl border border-white/5 rounded-4xl p-10 md:p-12 shadow-2xl relative overflow-hidden"
                     >
                         <div className="absolute inset-0 bg-linear-to-b from-blue-600/5 to-transparent pointer-events-none" />
@@ -260,7 +251,7 @@ export default async function ProfilePage() {
                                     )}
                                 </div>
                             </div>
-                        </ClientMotionDiv>
+                        </div>
                     </TabsContent>
             </Tabs>
         </div>

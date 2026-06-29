@@ -4,7 +4,7 @@ import { ChevronDown, ChevronUp, Clock, Dumbbell, Flame, MessageSquare, Zap, Act
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { motion, AnimatePresence } from "framer-motion";
+
 
 // --- INTERFACES ---
 
@@ -30,7 +30,7 @@ function WorkoutLogItem({ log }: { log: TrainingLogData }) {
     const dateObj = new Date(log.date);
 
     return (
-        <div className="bg-neutral-900/20 backdrop-blur-3xl border border-white/5 rounded-4xl overflow-hidden hover:border-red-600/30 transition-all duration-500 group shadow-2xl relative">
+        <div className="bg-neutral-900/20 backdrop-blur-3xl border border-white/5 rounded-4xl overflow-hidden hover:border-red-600/30 transition-colors group shadow-2xl relative">
             <div className="absolute inset-0 bg-linear-to-br from-white/2 to-transparent pointer-events-none" />
 
             {/* Header - Clickable */}
@@ -40,7 +40,7 @@ function WorkoutLogItem({ log }: { log: TrainingLogData }) {
             >
                 <div className="flex items-center gap-6 md:gap-8">
                     {/* Date Block */}
-                    <div className="h-14 w-14 md:h-20 md:w-20 rounded-xl md:rounded-3xl bg-neutral-950 border border-white/5 flex flex-col items-center justify-center shadow-2xl group-hover:border-red-600/50 transition-all duration-500 shrink-0 relative overflow-hidden group/date">
+                    <div className="h-14 w-14 md:h-20 md:w-20 rounded-xl md:rounded-3xl bg-neutral-950 border border-white/5 flex flex-col items-center justify-center shadow-2xl group-hover:border-red-600/50 transition-colors shrink-0 relative overflow-hidden group/date">
                         <div className="absolute inset-0 bg-red-600/10 opacity-0 group-hover/date:opacity-100 transition-opacity duration-500" />
                         <span className="text-xl md:text-3xl font-black text-white leading-none tracking-tighter italic relative z-10">
                             {dateObj.getDate()}
@@ -92,25 +92,17 @@ function WorkoutLogItem({ log }: { log: TrainingLogData }) {
                         <span className="text-[9px] text-neutral-600 uppercase tracking-[0.2em] font-black mt-1">Status</span>
                     </div>
 
-                    <div className="h-12 w-12 rounded-2xl bg-neutral-950 border border-white/5 flex items-center justify-center text-neutral-500 group-hover:text-white group-hover:border-red-600/30 transition-all duration-500">
-                        <motion.div
-                            animate={{ rotate: expanded ? 180 : 0 }}
-                            transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                        >
+                    <div className="h-12 w-12 rounded-2xl bg-neutral-950 border border-white/5 flex items-center justify-center text-neutral-500 group-hover:text-white group-hover:border-red-600/30 transition-colors">
+                        <div>
                             <ChevronDown className="w-6 h-6" />
-                        </motion.div>
+                        </div>
                     </div>
                 </div>
             </div >
 
             {/* Expanded Content */}
-            <AnimatePresence>
-                {expanded && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.3 }}
+            {expanded && (
+                    <div
                         className="overflow-hidden"
                     >
                         <div className="border-t border-white/5 bg-white/2 p-4 md:p-10 space-y-6 md:space-y-10 relative">
@@ -187,9 +179,8 @@ function WorkoutLogItem({ log }: { log: TrainingLogData }) {
                                 ))}
                             </div>
                         </div>
-                    </motion.div>
+                    </div>
                 )}
-            </AnimatePresence>
         </div >
     );
 }
@@ -211,7 +202,7 @@ export function TrainingHistoryList({ logs }: TrainingHistoryListProps) {
     }
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-700 mb-10">
+        <div className="space-y-8 mb-10">
             {logs.map((log) => (
                 <WorkoutLogItem key={log.id} log={log} />
             ))}

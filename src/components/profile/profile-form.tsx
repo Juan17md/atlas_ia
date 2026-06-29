@@ -134,7 +134,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
                 {bmi && (
                     <div className={cn(
-                        "md:ml-auto p-6 rounded-3xl border bg-neutral-900/40 backdrop-blur-3xl flex flex-col items-center justify-center min-w-[160px] shadow-2xl transition-all hover:scale-105",
+                        "md:ml-auto p-6 rounded-3xl border bg-neutral-900/40 backdrop-blur-3xl flex flex-col items-center justify-center min-w-[160px] shadow-2xl",
                         bmi.color.split(' ')[0],
                         "hover:border-opacity-50"
                     )}>
@@ -267,7 +267,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                             {isSubmitting ? <LoaderPremium size="sm" /> : (
                                 <>
                                     <span>Sincronizar Datos</span>
-                                    <Target className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                                    <Target className="w-4 h-4" />
                                 </>
                             )}
                         </Button>

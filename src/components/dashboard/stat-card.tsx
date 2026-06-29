@@ -2,7 +2,6 @@
 
 import { LucideIcon, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
 
 interface StatCardProps {
     title: string;
@@ -38,11 +37,7 @@ export function StatCard({
     const TrendIcon = trend === "up" ? ArrowUpRight : trend === "down" ? ArrowDownRight : null;
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className={cn(
+        <div className={cn(
                 "p-4 md:p-6 rounded-4xl bg-neutral-900/40 backdrop-blur-xl border border-white/5 flex flex-col justify-between h-32 md:h-44 group relative overflow-hidden shadow-2xl",
                 "hover:border-white/20 hover:bg-neutral-900/60 transition-colors",
                 className
@@ -79,6 +74,6 @@ export function StatCard({
                     <span className="text-[11px] text-neutral-500 font-bold uppercase tracking-wider">{label}</span>
                 )}
             </div>
-        </motion.div>
+        </div>
     );
 }

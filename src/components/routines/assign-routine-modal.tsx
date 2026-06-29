@@ -122,7 +122,7 @@ export function AssignRoutineModal({ athleteId, athleteName, routines = [], clas
         <Dialog open={open} onOpenChange={reset}>
             <DialogTrigger asChild>
                 {trigger || (
-                    <Button className={cn("bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl h-10 px-6 shadow-lg shadow-red-900/20 transition-all hover:scale-105", className)}>
+                    <Button className={cn("bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl h-10 px-6 shadow-lg shadow-red-900/20 transition-all ", className)}>
                         <Plus className="w-4 h-4 mr-2" />
                         Asignar Rutina
                     </Button>
@@ -276,7 +276,7 @@ export function AssignRoutineModal({ athleteId, athleteName, routines = [], clas
                                 </div>
 
                                 {selectedWeekday !== null && (
-                                    <div className="flex items-center gap-3 p-3 bg-neutral-950/50 border border-neutral-800 rounded-xl animate-in fade-in duration-300">
+                                    <div className="flex items-center gap-3 p-3 bg-neutral-950/50 border border-neutral-800 rounded-xl ">
                                         <div className="w-9 h-9 rounded-lg bg-red-600 flex items-center justify-center shrink-0">
                                             <span className="text-[10px] font-black text-white uppercase">
                                                 {WEEKDAYS[selectedWeekday].slice(0, 3)}

@@ -38,7 +38,7 @@ export function ExerciseSetRow({
     return (
         <div
             className={cn(
-                "flex flex-col md:grid md:grid-cols-12 gap-2 md:gap-3 p-3 md:p-3 rounded-2xl md:items-center transition-all duration-500 relative overflow-hidden group/set border",
+                "flex flex-col md:grid md:grid-cols-12 gap-2 md:gap-3 p-3 md:p-3 rounded-2xl md:items-center transition-colors relative overflow-hidden group/set border",
                 isCompleted
                     ? "bg-emerald-500/10 border-emerald-500/30 shadow-[0_0_30px_-10px_rgba(16,185,129,0.2)]"
                     : "bg-neutral-900 border-white/5 hover:border-white/10"
@@ -69,13 +69,13 @@ export function ExerciseSetRow({
                         size="icon"
                         onClick={onToggleComplete}
                         className={cn(
-                            "h-9 w-9 rounded-xl transition-all duration-500 border",
+                            "h-9 w-9 rounded-xl transition-colors border",
                             isCompleted
                                 ? "bg-emerald-500 text-black border-emerald-400 hover:bg-emerald-400 shadow-[0_0_25px_rgba(16,185,129,0.5)] scale-110"
                                 : "bg-neutral-950 text-neutral-700 border-white/5 hover:border-red-600/30"
                         )}
                     >
-                        <Check className={cn("w-4 h-4 transition-transform", isCompleted ? "scale-110" : "scale-100", isCompleted ? "text-black" : "text-neutral-600 hover:text-white")} />
+                        <Check className={cn("w-4 h-4", isCompleted ? "scale-110" : "scale-100", isCompleted ? "text-black" : "text-neutral-600 hover:text-white")} />
                     </Button>
                 </div>
             </div>
@@ -146,13 +146,13 @@ export function ExerciseSetRow({
                     size="icon"
                     onClick={onToggleComplete}
                     className={cn(
-                        "h-14 w-14 rounded-xl transition-all duration-500 border",
+                        "h-14 w-14 rounded-xl transition-colors border",
                         isCompleted
                             ? "bg-emerald-500 text-black border-emerald-400 hover:bg-emerald-400 shadow-[0_0_25px_rgba(16,185,129,0.5)] scale-110"
                             : "bg-neutral-950 text-neutral-700 border-white/5 hover:border-red-600/30 hover:text-white"
                     )}
                 >
-                    <Check className={cn("w-6 h-6 transition-transform", isCompleted ? "scale-110" : "scale-100")} />
+                    <Check className={cn("w-6 h-6", isCompleted ? "scale-110" : "scale-100")} />
                 </Button>
             </div>
         </div>

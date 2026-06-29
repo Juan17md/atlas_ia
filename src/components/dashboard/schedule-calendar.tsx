@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 
 import { cn } from "@/lib/utils";
 import { fechaLocalAString } from "@/lib/fecha-utils";
-import { motion, AnimatePresence } from "framer-motion";
+
 
 /**
  * Capitaliza la primera letra de cada palabra o de la cadena
@@ -135,11 +135,7 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="md:col-span-2 p-6 bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-4xl shadow-2xl"
-            >
+            <div className="md:col-span-2 p-6 bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-4xl shadow-2xl">
                 <div className="flex items-center justify-between mb-8 px-2">
                     <div className="space-y-1">
                         <h3 className="text-lg md:text-xl font-black text-white uppercase tracking-tight flex items-center gap-3">
@@ -190,13 +186,9 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
                         }}
                     />
                 </div>
-            </motion.div>
+            </div>
 
-            <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-4xl p-6 flex flex-col h-full shadow-2xl"
-            >
+            <div className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-4xl p-6 flex flex-col h-full shadow-2xl">
                 <div className="space-y-4 mb-8">
                     <div className="flex justify-between items-start">
                         <h3 className="text-2xl font-black text-white tracking-tighter leading-none first-letter:uppercase">
@@ -214,15 +206,8 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
                 </div>
 
                 <div className="space-y-4 flex-1 overflow-y-auto pr-1 custom-scrollbar">
-                    <AnimatePresence mode="wait">
-                        {isRestDay && !isRecordedDay ? (
-                            <motion.div
-                                key="rest"
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                                className="p-8 text-center bg-neutral-950/30 border border-white/5 border-dashed rounded-4xl flex flex-col items-center gap-4 mt-4"
-                            >
+                    {isRestDay && !isRecordedDay ? (
+                            <div className="p-8 text-center bg-neutral-950/30 border border-white/5 border-dashed rounded-4xl flex flex-col items-center gap-4 mt-4">
                                 <div className="h-16 w-16 bg-neutral-900 rounded-2xl flex items-center justify-center shadow-lg border border-white/5">
                                     <Moon className="h-8 w-8 text-neutral-600" />
                                 </div>
@@ -236,7 +221,7 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
                                     className="w-full border-white/10 text-white/70 hover:text-white"
                                 />
 
-                            </motion.div>
+                            </div>
                         ) : isRecordedDay ? (
                             <div className="space-y-3">
                                 {loadingLogs ? (
@@ -245,13 +230,7 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
                                     </div>
                                 ) : logsDelDia.length > 0 ? (
                                     logsDelDia.map((log, logIdx) => (
-                                        <motion.div
-                                            key={log.id}
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: logIdx * 0.1 }}
-                                            className="p-6 rounded-4xl border bg-emerald-500/10 border-emerald-500/20 shadow-[0_20px_40px_-15px_rgba(16,185,129,0.1)] relative overflow-hidden backdrop-blur-md"
-                                        >
+                                        <div className="p-6 rounded-4xl border bg-emerald-500/10 border-emerald-500/20 shadow-[0_20px_40px_-15px_rgba(16,185,129,0.1)] relative overflow-hidden backdrop-blur-md">
                                             <div className="absolute top-0 right-0 p-4 opacity-10">
                                                 <Dumbbell className="w-12 h-12 text-emerald-400" />
                                             </div>
@@ -297,15 +276,10 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
                                                     ))}
                                                 </div>
                                             )}
-                                        </motion.div>
+                                        </div>
                                     ))
                                 ) : (
-                                    <motion.div
-                                        key="extra-fallback"
-                                        initial={{ opacity: 0, scale: 0.95 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        className="p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-4xl flex flex-col items-center gap-4 text-center mt-4"
-                                    >
+                                    <div className="p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-4xl flex flex-col items-center gap-4 text-center mt-4">
                                         <div className="h-16 w-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20">
                                             <CheckCircle2 className="h-8 w-8 text-emerald-500" />
                                         </div>
@@ -313,19 +287,13 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
                                             <h4 className="font-black text-white uppercase tracking-tight">Sesión Completada</h4>
                                             <p className="text-xs text-neutral-500 font-medium italic">Sin detalles disponibles.</p>
                                         </div>
-                                    </motion.div>
+                                    </div>
                                 )}
                             </div>
                         ) : selectedDayAssignments.length > 0 ? (
                             <div className="space-y-3">
                                 {selectedDayAssignments.map((assignment, idx) => (
-                                    <motion.div
-                                        key={assignment.id}
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: idx * 0.1 }}
-                                        className="p-6 rounded-4xl border transition-all group relative overflow-hidden backdrop-blur-md bg-neutral-900/60 border-white/5 hover:border-red-500/40 hover:bg-neutral-900/80 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]"
-                                    >
+                                    <div className="p-6 rounded-4xl border transition-all group relative overflow-hidden backdrop-blur-md bg-neutral-900/60 border-white/5 hover:border-red-500/40 hover:bg-neutral-900/80 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]">
                                         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                                             <Dumbbell className="w-12 h-12 text-white" />
                                         </div>
@@ -341,15 +309,12 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
                                         <p className="text-xs text-neutral-500 font-bold mt-1 uppercase tracking-widest relative z-10">
                                             {assignment.dayName}
                                         </p>
-                                    </motion.div>
+                                    </div>
                                 ))}
                             </div>
                         ) : selectedDayInfo && !selectedDayInfo.isRest ? (
                             <div className="space-y-3">
-                                <motion.div
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    className={cn(
+                                <div className={cn(
                                         "p-6 rounded-4xl border transition-all group relative overflow-hidden backdrop-blur-md",
                                         isRecordedDay
                                             ? "bg-emerald-500/10 border-emerald-500/20 shadow-[0_20px_40px_-15px_rgba(16,185,129,0.1)]"
@@ -383,7 +348,7 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
                                             ))}
                                         </div>
                                     )}
-                                </motion.div>
+                                </div>
                                 <MarkRestButton 
                                     dateStr={date ? fechaLocalAString(date) : undefined}
                                     variant="ghost"
@@ -392,7 +357,7 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
 
                             </div>
                         ) : (
-                            <div className="h-full flex flex-col items-center justify-center py-20 opacity-30 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-500">
+                            <div className="h-full flex flex-col items-center justify-center py-20 opacity-30 grayscale">
                                 <Dumbbell className="h-12 w-12 mb-4" />
                                 <p className="text-xs font-black uppercase tracking-widest mb-6">Sin Actividad</p>
                                 <MarkRestButton 
@@ -403,9 +368,9 @@ export function ScheduleCalendar({ athleteId, activeRoutine }: { athleteId: stri
                             </div>
 
                         )}
-                    </AnimatePresence>
+
                 </div>
-            </motion.div>
+            </div>
         </div>
     );
 }

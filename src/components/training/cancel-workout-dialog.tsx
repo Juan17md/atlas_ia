@@ -21,7 +21,7 @@ export function CancelWorkoutDialog({ open, onOpenChange, onConfirm }: CancelWor
                         <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center border border-red-500/20">
                             <AlertTriangle className="w-8 h-8 text-red-500" />
                         </div>
-                        <div className="absolute -inset-4 bg-red-500/5 blur-2xl rounded-full -z-10 animate-pulse" />
+                        <div className="absolute -inset-4 bg-red-500/5 blur-2xl rounded-full -z-10 " />
                     </div>
 
                     <div className="space-y-2">

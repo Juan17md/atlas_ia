@@ -117,7 +117,7 @@ export function EditHealthDialog({ athlete, trigger }: EditHealthDialogProps) {
                                         onClick={() => handleToggleInjury(injury)}
                                         className={cn(
                                             "py-3.5 px-2 rounded-xl border text-sm font-bold transition-all text-center",
-                                            "hover:scale-[1.02] active:scale-[0.98]",
+                                            "active:scale-[0.98]",
                                             isSelected
                                                 ? "bg-red-600 border-red-500 text-white shadow-lg shadow-red-900/20"
                                                 : "bg-neutral-900 border-neutral-800 text-neutral-400 hover:border-neutral-700 hover:text-white"

@@ -156,7 +156,7 @@ export function AIGenerator({ onGenerate, currentType }: AIGeneratorProps) {
                         <Button
                             onClick={handleGenerate}
                             disabled={loading}
-                            className="w-full h-16 bg-white text-black hover:bg-neutral-200 font-black uppercase italic tracking-widest text-[10px] rounded-2xl shadow-2xl transition-all shadow-white/5 hover:-translate-y-1"
+                            className="w-full h-16 bg-white text-black hover:bg-neutral-200 font-black uppercase italic tracking-widest text-[10px] rounded-2xl shadow-2xl transition-all shadow-white/5 "
                         >
                             {loading ? <Loader2 className="w-5 h-5 animate-spin mr-3" /> : <Sparkles className="w-5 h-5 mr-3" />}
                             Iniciar Generación de Datos

@@ -132,7 +132,7 @@ export function Chatbot() {
   return (
     <div className="fixed bottom-28 md:bottom-6 right-6 z-50 flex flex-col items-end gap-3 font-sans">
       {isOpen ? (
-        <div className="w-[calc(100vw-2rem)] md:w-[400px] h-[550px] md:h-[600px] flex flex-col bg-neutral-950 border border-neutral-800 rounded-3xl shadow-[0_0_50px_-10px_rgba(220,38,38,0.2)] overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-300">
+        <div className="w-[calc(100vw-2rem)] md:w-[400px] h-[550px] md:h-[600px] flex flex-col bg-neutral-950 border border-neutral-800 rounded-3xl shadow-[0_0_50px_-10px_rgba(220,38,38,0.2)] overflow-hidden ">
           {/* Header */}
           <div className="flex flex-row items-center justify-between p-4 bg-gradient-to-r from-red-900/50 to-neutral-900 border-b border-neutral-800 backdrop-blur-md">
             <div className="flex items-center gap-3">

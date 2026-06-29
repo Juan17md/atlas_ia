@@ -272,7 +272,7 @@ export function LogMeasurementDialog({
                     </div>
 
                     <div className="flex justify-center pt-4 pb-2">
-                        <Button type="submit" disabled={isSubmitting} className="bg-white text-black hover:bg-neutral-300 w-full md:w-auto font-black rounded-2xl px-12 h-14 text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-white/10 hover:scale-105 transition-all">
+                        <Button type="submit" disabled={isSubmitting} className="bg-white text-black hover:bg-neutral-300 w-full md:w-auto font-black rounded-2xl px-12 h-14 text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-white/10 transition-all">
                             {isSubmitting ? <LoaderPremium size="sm" /> : (isEdit ? "Actualizar Registro" : "Guardar Registro")}
                         </Button>
                     </div>

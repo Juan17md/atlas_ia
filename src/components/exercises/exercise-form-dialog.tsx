@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 import { Loader2, Dumbbell, Tag, ImagePlay, Search, Eraser, Activity, ChevronRight, ChevronLeft, Sparkles, Youtube, Check, ExternalLink as ExternalLinkIcon, Timer, Repeat } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -237,15 +237,7 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
 
                 <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 overflow-hidden">
                     <div className="flex-1 overflow-y-auto p-5 md:p-10 scrollbar-hide">
-                        <AnimatePresence mode="wait">
-                            <motion.div
-                                key={step}
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -20 }}
-                                transition={{ duration: 0.3, ease: "easeOut" }}
-                                className="space-y-8"
-                            >
+                        <div className="space-y-8">
                                 {step === 1 && (
                                     <div className="space-y-6">
                                         <div className="space-y-4">
@@ -263,16 +255,13 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
                                                         disabled={isSearching || isSubmitting}
                                                         className={cn(
                                                             "h-10 w-10 md:h-14 md:w-14 rounded-lg md:rounded-2xl transition-all shadow-xl group border relative overflow-hidden",
-                                                            isSearching ? "bg-neutral-800 border-white/5" : "bg-red-600 border-red-500 hover:bg-red-700 hover:scale-105 active:scale-95"
+                                                            isSearching ? "bg-neutral-800 border-white/5" : "bg-red-600 border-red-500 hover:bg-red-700 active:scale-95"
                                                         )}
                                                     >
                                                         {isSearching ? (
                                                             <Loader2 className="w-5 h-5 animate-spin text-red-500" />
                                                         ) : (
-                                                            <>
-                                                                <div className="absolute inset-0 bg-linear-to-tr from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                                                                <Sparkles className="w-5 h-5 text-white animate-pulse" />
-                                                            </>
+                                                            <Sparkles className="w-5 h-5 text-white" />
                                                         )}
                                                     </Button>
                                                 </div>
@@ -322,12 +311,7 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
                                         </div>
 
                                         {tipoEjercicio === "time" && (
-                                            <motion.div
-                                                initial={{ opacity: 0, height: 0 }}
-                                                animate={{ opacity: 1, height: "auto" }}
-                                                exit={{ opacity: 0, height: 0 }}
-                                                className="space-y-3"
-                                            >
+                                            <div className="space-y-3">
                                                 <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-500 ml-1">
                                                     Duración por Serie (segundos)
                                                 </Label>
@@ -339,7 +323,7 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
                                                     max={600}
                                                     className="bg-neutral-900/40 backdrop-blur-md border border-white/5 text-white h-14 md:h-16 rounded-xl md:rounded-2xl px-6 text-lg font-black italic focus-visible:ring-red-600/30 focus-visible:border-red-600/50 transition-all placeholder:text-neutral-800 shadow-2xl"
                                                 />
-                                            </motion.div>
+                                            </div>
                                         )}
                                         <input type="hidden" {...register("tipoEjercicio")} />
 
@@ -465,8 +449,7 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
                                         </div>
                                     </div>
                                 )}
-                            </motion.div>
-                        </AnimatePresence>
+                        </div>
                     </div>
 
                     <DialogFooter className={cn(
@@ -493,7 +476,7 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
                             <Button
                                 type="button"
                                 onClick={() => setStep(step + 1)}
-                                className="h-14 md:h-16 rounded-xl md:rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest text-[10px] px-8 shadow-xl shadow-red-900/40 hover:-translate-y-1 transition-all duration-300 flex-2 md:flex-none"
+                                className="h-14 md:h-16 rounded-xl md:rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest text-[10px] px-8 shadow-xl shadow-red-900/40 transition-all duration-300 flex-2 md:flex-none"
                             >
                                 <span className="flex items-center gap-2">
                                     Siguiente <ChevronRight className="w-4 h-4" />
@@ -503,7 +486,7 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
                             <Button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="h-14 md:h-16 rounded-xl md:rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest text-[10px] px-8 shadow-2xl shadow-red-900/60 hover:-translate-y-1 transition-all duration-500 flex-2 md:flex-none animate-pulse"
+                                className="h-14 md:h-16 rounded-xl md:rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest text-[10px] px-8 shadow-2xl shadow-red-900/60 transition-all duration-500 flex-2 md:flex-none"
                             >
                                 {isSubmitting ? (
                                     <Loader2 className="w-5 h-5 animate-spin" />

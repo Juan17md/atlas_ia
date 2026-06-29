@@ -5,7 +5,7 @@ import { Plus, ClipboardList, ChevronRight, Zap } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { RoutineCard } from "@/components/routines/routine-card";
-import { ClientMotionDiv } from "@/components/ui/client-motion";
+
 
 export default async function RoutinesPage() {
     const session = await auth();
@@ -26,9 +26,7 @@ export default async function RoutinesPage() {
             <div className="absolute top-0 right-1/4 w-96 h-96 bg-red-600/5 rounded-full blur-[120px] pointer-events-none -z-10" />
             <div className="absolute bottom-1/4 -left-20 w-80 h-80 bg-red-600/5 rounded-full blur-[100px] pointer-events-none -z-10" />
 
-            <ClientMotionDiv
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
+            <div
                 className="flex flex-col gap-6 md:flex-row md:justify-between md:items-end mb-4 md:mb-6"
             >
                 <div className="space-y-1">
@@ -42,22 +40,20 @@ export default async function RoutinesPage() {
                     <Link href="/routines/new" className="w-full md:w-auto">
                         <Button className="group relative w-full md:w-auto overflow-hidden rounded-2xl bg-red-600 px-8 h-14 text-xs font-black text-white shadow-2xl shadow-red-900/40 transition-all duration-300 active:scale-95 group hover:bg-red-700">
                             <span className="relative z-10 flex items-center gap-3 uppercase tracking-[0.2em]">
-                                <Plus className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
+                                <Plus className="w-5 h-5" />
                                 Nueva Rutina
-                                <ChevronRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
+                                <ChevronRight className="w-5 h-5" />
                             </span>
                         </Button>
                     </Link>
                 </div>
-            </ClientMotionDiv>
+            </div>
 
             {routines.length === 0 ? (
-                <ClientMotionDiv
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
+                <div
                     className="relative p-12 md:p-24 bg-neutral-900/20 backdrop-blur-3xl rounded-4xl border border-white/5 overflow-hidden group shadow-2xl"
                 >
-                    <div className="absolute inset-0 bg-linear-to-br from-red-600/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                    <div className="absolute inset-0 bg-linear-to-br from-red-600/5 via-transparent to-transparent" />
                     <div className="relative z-10 flex flex-col items-center text-center max-w-lg mx-auto">
                         <div className="w-24 h-24 rounded-3xl bg-neutral-900/50 border border-white/10 flex items-center justify-center mb-8 shadow-2xl">
                             <ClipboardList className="w-10 h-10 text-red-500" />
@@ -73,13 +69,13 @@ export default async function RoutinesPage() {
                             </Button>
                         </Link>
                     </div>
-                </ClientMotionDiv>
+                    </div>
             ) : (
                 <div className="space-y-16">
                     {/* Weekly Routines Section */}
                     <div className="space-y-8">
                         <div className="flex items-center gap-4 group">
-                            <div className="h-8 w-1 bg-red-600 rounded-full group-hover:h-10 transition-all duration-500" />
+                            <div className="h-8 w-1 bg-red-600 rounded-full" />
                             <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">Planificación Semanal</h2>
                             <div className="px-3 py-1 rounded-full bg-red-600/10 border border-red-600/20 text-red-500 text-[10px] font-black tabular-nums">
                                 {routines.filter((r: any) => r.type !== 'daily').length}
@@ -103,7 +99,7 @@ export default async function RoutinesPage() {
                     {/* Daily Routines Section */}
                     <div className="space-y-8">
                         <div className="flex items-center gap-4 group">
-                            <div className="h-8 w-1 bg-amber-500 rounded-full group-hover:h-10 transition-all duration-500" />
+                            <div className="h-8 w-1 bg-amber-500 rounded-full" />
                             <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">Sesiones Diarias</h2>
                             <div className="px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[10px] font-black tabular-nums">
                                 {routines.filter((r: any) => r.type === 'daily').length}

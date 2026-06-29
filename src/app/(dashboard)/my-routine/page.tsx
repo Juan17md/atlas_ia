@@ -7,7 +7,6 @@ import { getActiveRoutine } from "@/actions/athlete-actions";
 import { differenceInCalendarWeeks } from "date-fns";
 import { redirect } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { ClientMotionDiv } from "@/components/ui/client-motion";
 
 // Interfaces para la rutina
 interface ScheduleExercise {
@@ -47,10 +46,7 @@ export default async function MyRoutinePage() {
                 {/* Background decorative elements */}
                 <div className="absolute top-1/4 right-1/4 w-[400px] h-[400px] bg-red-600/5 rounded-full blur-[120px] pointer-events-none -z-10" />
 
-                <ClientMotionDiv
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, ease: "circOut" }}
+                <div
                     className="relative space-y-12 max-w-md w-full"
                 >
                     <div className="relative mx-auto w-32 h-32 flex items-center justify-center group">
@@ -79,7 +75,7 @@ export default async function MyRoutinePage() {
                             </Button>
                         </Link>
                     </div>
-                </ClientMotionDiv>
+                </div>
             </div>
         );
     }
@@ -99,9 +95,7 @@ export default async function MyRoutinePage() {
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-red-600/5 rounded-full blur-[150px] pointer-events-none -z-10" />
 
             {/* Header */}
-            <ClientMotionDiv
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
+            <div
                 className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2"
             >
                 <div className="space-y-3">
@@ -121,12 +115,12 @@ export default async function MyRoutinePage() {
                     </Link>
                     <Link href="/train">
                         <Button className="h-14 rounded-2xl bg-white text-black font-black text-[10px] uppercase tracking-widest hover:bg-neutral-200 transition-all px-10 shadow-xl shadow-white/5 flex items-center gap-3 group">
-                            <Play className="h-4 w-4 fill-black group-hover:scale-110 transition-transform" />
+                            <Play className="h-4 w-4 fill-black" />
                             Ejecutar Sesión
                         </Button>
                     </Link>
                 </div>
-            </ClientMotionDiv>
+            </div>
 
             {/* Info Metrics Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -135,16 +129,13 @@ export default async function MyRoutinePage() {
                     { label: "Volumen", val: `${totalExercises} MODS`, icon: Dumbbell, color: "text-blue-500", bg: "bg-blue-500/10", border: "border-blue-500/20" },
                     { label: "Ciclo", val: `Semana ${weeksActive}`, icon: Sparkles, color: "text-emerald-500", bg: "bg-emerald-500/10", border: "border-emerald-500/20" }
                 ].map((stat, i) => (
-                    <ClientMotionDiv
+                    <div
                         key={i}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.1 }}
                         className="bg-neutral-900/20 backdrop-blur-3xl border border-white/5 rounded-4xl p-8 flex items-center gap-6 relative overflow-hidden group shadow-2xl hover:border-white/10 transition-colors"
                     >
-                        <div className={cn("absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 bg-linear-to-br from-white/5 via-transparent to-transparent")} />
+                        <div className="absolute inset-0 bg-linear-to-br from-white/5 via-transparent to-transparent" />
 
-                        <div className={cn("h-16 w-16 rounded-2xl flex items-center justify-center border shadow-xl group-hover:scale-110 transition-transform duration-500", stat.bg, stat.border)}>
+                        <div className={cn("h-16 w-16 rounded-2xl flex items-center justify-center border shadow-xl", stat.bg, stat.border)}>
                             <stat.icon className={cn("h-7 w-7", stat.color)} />
                         </div>
 
@@ -152,22 +143,20 @@ export default async function MyRoutinePage() {
                             <p className="text-neutral-500 text-[10px] uppercase font-black tracking-[0.3em] mb-1 italic">{stat.label}</p>
                             <p className="text-white font-black text-2xl tracking-tighter uppercase italic">{stat.val}</p>
                         </div>
-                    </ClientMotionDiv>
+                    </div>
                 ))}
             </div>
 
             {/* Banner si comienza en el futuro */}
             {isFuture && (
-                <ClientMotionDiv
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
+                <div
                     className="bg-blue-500/10 border border-blue-500/20 p-6 rounded-3xl flex items-center gap-4 text-blue-400 backdrop-blur-3xl"
                 >
                     <Info className="h-6 w-6 shrink-0" />
                     <p className="text-sm font-black uppercase tracking-tight italic">
                         Rutina programada para iniciar el <span className="underline">{startDateRaw.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}</span>
                     </p>
-                </ClientMotionDiv>
+                </div>
             )}
 
             {/* Rutina Activa */}
@@ -190,26 +179,23 @@ export default async function MyRoutinePage() {
 
                 <div className="grid gap-6">
                     {schedule.map((day: ScheduleDay, index: number) => (
-                        <ClientMotionDiv
+                        <div
                             key={index}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.1 }}
                             className={cn(
-                                "border rounded-4xl p-8 flex flex-col md:flex-row items-start md:items-center justify-between transition-all group relative overflow-hidden shadow-2xl backdrop-blur-3xl",
+                                "border rounded-4xl p-8 flex flex-col md:flex-row items-start md:items-center justify-between transition-colors group relative overflow-hidden shadow-2xl backdrop-blur-3xl",
                                 day.isRest
                                     ? "bg-neutral-900/10 border-white/5 opacity-50 grayscale"
                                     : "bg-neutral-900/40 border-white/5 hover:border-white/10"
                             )}
                         >
-                            <div className="absolute inset-0 bg-linear-to-r from-white/0 to-white/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                            <div className="absolute inset-0 bg-linear-to-r from-white/0 to-white/5 pointer-events-none" />
 
                             <div className="flex items-center gap-8 relative z-10 w-full md:w-auto">
                                 <div className={cn(
-                                    "h-20 w-20 border rounded-3xl flex items-center justify-center font-black text-3xl transition-all shadow-xl",
+                                    "h-20 w-20 border rounded-3xl flex items-center justify-center font-black text-3xl shadow-xl",
                                     day.isRest
                                         ? "bg-neutral-950/50 border-white/5 text-neutral-800"
-                                        : "bg-black/50 border-white/5 text-neutral-500 group-hover:text-white group-hover:border-red-500/30 group-hover:bg-red-950/20"
+                                        : "bg-black/50 border-white/5 text-neutral-500 group-hover:text-white group-hover:bg-red-950/20 transition-colors"
                                 )}>
                                     {day.isRest ? <Moon className="h-8 w-8" /> : String(index + 1).padStart(2, '0')}
                                 </div>
@@ -252,7 +238,7 @@ export default async function MyRoutinePage() {
                                     </Button>
                                 </Link>
                             </div>
-                        </ClientMotionDiv>
+                        </div>
                     ))}
 
                     {schedule.length === 0 && (

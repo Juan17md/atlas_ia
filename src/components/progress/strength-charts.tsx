@@ -230,7 +230,7 @@ export function StrengthCharts({ exercises, overallProgress }: StrengthChartsPro
                             className="bg-neutral-900/20 backdrop-blur-xl border border-white/5 rounded-3xl p-6 hover:border-white/10 transition-all group shadow-xl relative overflow-hidden"
                         >
                             <div
-                                className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl -mr-12 -mt-12 pointer-events-none opacity-10 group-hover:opacity-20 transition-opacity"
+                                className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl -mr-12 -mt-12 pointer-events-none opacity-10"
                                 style={{ backgroundColor: color }}
                             />
 

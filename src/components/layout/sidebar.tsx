@@ -49,7 +49,7 @@ export function Sidebar({ user }: SidebarProps) {
             <div className="p-8 relative z-10 shrink-0">
                 <Link href="/dashboard" className="flex items-center gap-4 group transition-all">
                     <div className="relative">
-                        <div className="h-12 w-12 bg-white rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.1)] group-hover:scale-110 transition-transform duration-500">
+                        <div className="h-12 w-12 bg-white rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.1)] transition-transform duration-500">
                             <Isotipo />
                         </div>
                         <div className="absolute -inset-1 bg-white/20 rounded-2xl blur-md opacity-0 group-hover:opacity-100 transition-opacity" />

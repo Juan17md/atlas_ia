@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ClientMotionDiv } from "@/components/ui/client-motion";
 import { Play, Dumbbell } from "lucide-react";
 
 interface SessionStartViewProps {
@@ -24,12 +23,8 @@ export function SessionStartView({
     const cleanRoutineName = routineName.replace(/\(assigned\)/i, '').trim();
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-[85vh] px-4 space-y-8 pb-32 animate-in fade-in duration-500">
-            <ClientMotionDiv
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-center space-y-3"
-            >
+        <div className="flex flex-col items-center justify-center min-h-[85vh] px-4 space-y-8 pb-32">
+            <div className="text-center space-y-3">
                 <h1 className="text-4xl md:text-6xl font-black text-white tracking-tighter uppercase italic leading-none">
                     {cleanRoutineName}
                 </h1>
@@ -40,15 +35,9 @@ export function SessionStartView({
                     </p>
                     <div className="h-px w-8 bg-red-600/30" />
                 </div>
-            </ClientMotionDiv>
+            </div>
 
-            <ClientMotionDiv
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.2 }}
-                className="w-full max-w-md bg-neutral-900/20 backdrop-blur-3xl border border-white/5 rounded-4xl p-8 space-y-8 relative overflow-hidden group shadow-2xl"
-            >
-                <div className="absolute inset-0 bg-linear-to-br from-red-600/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+            <div className="w-full max-w-md bg-neutral-900/20 backdrop-blur-3xl border border-white/5 rounded-4xl p-8 space-y-8 relative overflow-hidden shadow-2xl">
 
                 <div className="flex items-center justify-between relative z-10">
                     <div className="flex items-center gap-3 text-neutral-400">
@@ -80,12 +69,12 @@ export function SessionStartView({
                         ))
                     )}
                 </div>
-            </ClientMotionDiv>
+            </div>
 
             <div className="w-full max-w-md pt-4">
                 <Button
                     onClick={onStart}
-                    className="w-full h-16 text-xl font-black italic bg-white text-black hover:bg-neutral-200 rounded-2xl shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+                    className="w-full h-16 text-xl font-black italic bg-white text-black hover:bg-neutral-200 rounded-2xl shadow-[0_0_30px_rgba(255,255,255,0.2)] active:scale-[0.98] transition-all cursor-pointer"
                 >
                     <Play className="w-6 h-6 mr-2 fill-black" />
                     INICIAR

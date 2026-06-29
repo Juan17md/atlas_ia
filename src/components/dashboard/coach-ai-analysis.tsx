@@ -50,7 +50,7 @@ export function CoachAIAnalysis({ athleteId }: CoachAIAnalysisProps) {
             </CardHeader>
 
             {analysis && (
-                <CardContent className="space-y-6 pt-6 animate-in slide-in-from-top-4 fade-in duration-500">
+                <CardContent className="space-y-6 pt-6 ">
                     {/* Suggestions Section */}
                     <div className="space-y-3">
                         <h4 className="flex items-center gap-2 text-sm font-bold text-neutral-400 uppercase tracking-wider">

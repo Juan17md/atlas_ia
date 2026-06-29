@@ -60,7 +60,7 @@ export function NotificationBell() {
                     )}
                 </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[360px] bg-neutral-950/95 backdrop-blur-xl border-neutral-800 text-white rounded-3xl shadow-[0_0_40px_-10px_rgba(0,0,0,0.7)] p-0 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200">
+            <DropdownMenuContent align="end" className="w-[360px] bg-neutral-950/95 backdrop-blur-xl border-neutral-800 text-white rounded-3xl shadow-[0_0_40px_-10px_rgba(0,0,0,0.7)] p-0 overflow-hidden z-50 ">
                 <div className="p-5 bg-neutral-950/50 border-b border-neutral-800 flex items-center justify-between">
                     <DropdownMenuLabel className="font-black text-lg p-0 flex items-center gap-2.5 tracking-tight">
                         <div className="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center border border-red-500/20">

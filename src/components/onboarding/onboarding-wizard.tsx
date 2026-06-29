@@ -314,7 +314,7 @@ export function OnboardingWizard() {
                         >
                             {isSubmitting ? (
                                 <span className="flex items-center gap-2">
-                                    <Sparkles className="w-4 h-4 animate-spin" /> Configurando...
+                                    <Sparkles className="w-4 h-4" /> Configurando...
                                 </span>
                             ) : (
                                 <span className="flex items-center gap-2">

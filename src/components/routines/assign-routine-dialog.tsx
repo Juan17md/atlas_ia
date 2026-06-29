@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { motion, AnimatePresence } from "framer-motion";
+
 
 interface Athlete {
     id: string;
@@ -78,7 +78,7 @@ export function AssignRoutineDialog({ routineId, athletes }: { routineId: string
             }
         }}>
             <DialogTrigger asChild>
-                <Button className="w-full bg-neutral-800 text-white hover:bg-neutral-700/80 rounded-xl font-bold h-11 sm:h-10 shadow-sm transition-all hover:scale-[1.02]">
+                <Button className="w-full bg-neutral-800 text-white hover:bg-neutral-700/80 rounded-xl font-bold h-11 sm:h-10 shadow-sm transition-all ">
                     <Users className="w-4 h-4 mr-2" /> ASIGNAR
                 </Button>
             </DialogTrigger>
@@ -111,14 +111,8 @@ export function AssignRoutineDialog({ routineId, athletes }: { routineId: string
                     </DialogHeader>
                 </div>
 
-                <AnimatePresence mode="wait">
-                    {step === 'athlete' ? (
-                        <motion.div
-                            key="athlete-step"
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
-                        >
+                {step === 'athlete' ? (
+                        <div>
                             <div className="px-8 py-6 bg-black/40 backdrop-blur-md border-b border-white/5">
                                 <div className="relative group">
                                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-600 group-focus-within:text-red-500 transition-colors" />
@@ -171,15 +165,9 @@ export function AssignRoutineDialog({ routineId, athletes }: { routineId: string
                                     )}
                                 </div>
                             </ScrollArea>
-                        </motion.div>
+                        </div>
                     ) : (
-                        <motion.div
-                            key="confirm-step"
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: 20 }}
-                            className="flex flex-col"
-                        >
+                        <div className="flex flex-col">
                             <div className="flex-1 p-8 space-y-8">
                                 <div className="bg-red-600/5 border border-red-600/10 p-6 rounded-3xl flex items-start gap-4 text-red-500 shadow-inner">
                                     <div className="h-10 w-10 rounded-2xl bg-red-600/10 flex items-center justify-center shrink-0 border border-red-600/20">
@@ -217,7 +205,7 @@ export function AssignRoutineDialog({ routineId, athletes }: { routineId: string
 
                             <DialogFooter className="p-8 border-t border-white/5 bg-black/60 backdrop-blur-2xl">
                                 <Button
-                                    className="w-full h-16 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-[0.2em] text-xs shadow-2xl shadow-red-900/40 hover:-translate-y-1 transition-all active:scale-95 duration-500"
+                                    className="w-full h-16 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-[0.2em] text-xs shadow-2xl shadow-red-900/40 transition-all active:scale-95 duration-500"
                                     onClick={handleConfirmAssign}
                                     disabled={isSubmitting}
                                 >
@@ -231,9 +219,8 @@ export function AssignRoutineDialog({ routineId, athletes }: { routineId: string
                                     )}
                                 </Button>
                             </DialogFooter>
-                        </motion.div>
+                        </div>
                     )}
-                </AnimatePresence>
             </DialogContent>
         </Dialog>
     );

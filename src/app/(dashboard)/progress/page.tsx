@@ -8,7 +8,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { LogMeasurementDialog } from "@/components/profile/log-measurement-dialog";
-import { ClientMotionDiv } from "@/components/ui/client-motion";
+
 
 interface PersonalRecord {
     exercise: string;
@@ -95,9 +95,7 @@ export default async function ProgressPage() {
 
             {/* Header & Athlete Selector */}
             <div className="space-y-8">
-                <ClientMotionDiv
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
+                <div
                     className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 px-2"
                 >
                     <div className="flex items-center gap-6">
@@ -116,7 +114,7 @@ export default async function ProgressPage() {
                             </h1>
                         </div>
                     </div>
-                </ClientMotionDiv>
+                </div>
 
 
             </div>
@@ -124,20 +122,16 @@ export default async function ProgressPage() {
             {/* Metrics Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Peso Card */}
-                <ClientMotionDiv
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.1 }}
-                >
+                <div>
                     <LogMeasurementDialog
                         initialWeight={metrics?.weight}
                         initialData={metrics?.measurements}
                         targetUserId={targetUserId}
                     >
-                        <div className="bg-neutral-900/20 backdrop-blur-xl border border-white/5 rounded-4xl p-8 relative overflow-hidden group hover:border-blue-500/30 transition-all cursor-pointer h-full flex flex-col items-center justify-center text-center shadow-2xl">
-                            <div className="absolute top-0 right-0 w-24 h-24 bg-blue-600/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-blue-600/10 transition-colors"></div>
+                        <div className="bg-neutral-900/20 backdrop-blur-xl border border-white/5 rounded-4xl p-8 relative overflow-hidden group hover:border-blue-500/30 cursor-pointer h-full flex flex-col items-center justify-center text-center shadow-2xl transition-colors">
+                            <div className="absolute top-0 right-0 w-24 h-24 bg-blue-600/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
                             <div className="relative z-10 flex flex-col items-center gap-4">
-                                <div className="h-16 w-16 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20 shadow-xl group-hover:scale-110 transition-transform duration-500">
+                                <div className="h-16 w-16 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20 shadow-xl">
                                     <Scale className="h-7 w-7 text-blue-500" />
                                 </div>
                                 <div>
@@ -147,19 +141,15 @@ export default async function ProgressPage() {
                             </div>
                         </div>
                     </LogMeasurementDialog>
-                </ClientMotionDiv>
+                </div>
 
                 {/* Body Fat Card */}
-                <ClientMotionDiv
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.2 }}
-                >
+                <div>
                     <Link href="#measurements-section" className="block h-full">
-                        <div className="bg-neutral-900/20 backdrop-blur-xl border border-white/5 rounded-4xl p-8 relative overflow-hidden group hover:border-orange-500/30 transition-all cursor-pointer h-full flex flex-col items-center justify-center text-center shadow-2xl">
-                            <div className="absolute top-0 right-0 w-24 h-24 bg-orange-600/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-orange-600/10 transition-colors"></div>
+                        <div className="bg-neutral-900/20 backdrop-blur-xl border border-white/5 rounded-4xl p-8 relative overflow-hidden group hover:border-orange-500/30 cursor-pointer h-full flex flex-col items-center justify-center text-center shadow-2xl transition-colors">
+                            <div className="absolute top-0 right-0 w-24 h-24 bg-orange-600/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
                             <div className="relative z-10 flex flex-col items-center gap-4">
-                                <div className="h-16 w-16 bg-orange-500/10 rounded-2xl flex items-center justify-center border border-orange-500/20 shadow-xl group-hover:scale-110 transition-transform duration-500">
+                                <div className="h-16 w-16 bg-orange-500/10 rounded-2xl flex items-center justify-center border border-orange-500/20 shadow-xl">
                                     <Flame className="h-7 w-7 text-orange-500" />
                                 </div>
                                 <div>
@@ -169,19 +159,15 @@ export default async function ProgressPage() {
                             </div>
                         </div>
                     </Link>
-                </ClientMotionDiv>
+                </div>
 
                 {/* Strength Progress Card */}
-                <ClientMotionDiv
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.3 }}
-                >
+                <div>
                     <Link href="/progress/strength" className="block h-full">
-                        <div className="bg-neutral-900/20 backdrop-blur-xl border border-white/5 rounded-4xl p-8 relative overflow-hidden group hover:border-purple-500/30 transition-all cursor-pointer h-full flex flex-col items-center justify-center text-center shadow-2xl">
-                            <div className="absolute top-0 right-0 w-24 h-24 bg-purple-600/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-purple-600/10 transition-colors"></div>
+                        <div className="bg-neutral-900/20 backdrop-blur-xl border border-white/5 rounded-4xl p-8 relative overflow-hidden group hover:border-purple-500/30 cursor-pointer h-full flex flex-col items-center justify-center text-center shadow-2xl transition-colors">
+                            <div className="absolute top-0 right-0 w-24 h-24 bg-purple-600/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
                             <div className="relative z-10 flex flex-col items-center gap-4">
-                                <div className="h-16 w-16 bg-purple-500/10 rounded-2xl flex items-center justify-center border border-purple-500/20 shadow-xl group-hover:scale-110 transition-transform duration-500">
+                                <div className="h-16 w-16 bg-purple-500/10 rounded-2xl flex items-center justify-center border border-purple-500/20 shadow-xl">
                                     <TrendingUp className="h-7 w-7 text-purple-500" />
                                 </div>
                                 <div>
@@ -193,7 +179,7 @@ export default async function ProgressPage() {
                             </div>
                         </div>
                     </Link>
-                </ClientMotionDiv>
+                </div>
             </div>
 
             {/* Body Measurements */}
@@ -213,7 +199,7 @@ export default async function ProgressPage() {
                     
                     <Link href="/progress/history">
                         <Button variant="ghost" className="h-10 px-4 rounded-xl bg-neutral-900/40 border border-white/5 text-neutral-400 hover:text-white hover:bg-white/10 transition-all font-black text-[10px] uppercase tracking-widest italic group shrink-0">
-                            <History className="w-4 h-4 mr-2 text-red-500 group-hover:-rotate-12 transition-transform" />
+                            <History className="w-4 h-4 mr-2 text-red-500" />
                             Historial Completo
                         </Button>
                     </Link>
@@ -266,24 +252,21 @@ export default async function ProgressPage() {
                                         const isHeight = key.toLowerCase() === "height";
 
                                         return (
-                                            <ClientMotionDiv
+                                            <div
                                                 key={key}
-                                                initial={{ opacity: 0, scale: 0.9 }}
-                                                animate={{ opacity: 1, scale: 1 }}
-                                                transition={{ delay: i * 0.05 }}
                                                 className={cn(
-                                                    "text-center p-6 bg-black/40 border border-white/5 rounded-3xl hover:border-red-500/30 transition-all hover:bg-neutral-900/60 group shadow-xl",
+                                                    "text-center p-6 bg-black/40 border border-white/5 rounded-3xl hover:border-red-500/30 hover:bg-neutral-900/60 group shadow-xl transition-colors",
                                                     isHeight && "col-span-2 md:col-span-2 border-red-500/10"
                                                 )}
                                             >
-                                                <p className="text-3xl font-black text-white mb-1 group-hover:scale-110 transition-transform origin-bottom italic">
+                                                <p className="text-3xl font-black text-white mb-1 italic">
                                                     {value as number}
                                                     <span className="text-[10px] text-neutral-600 ml-1 font-black">CM</span>
                                                 </p>
                                                 <p className="text-[9px] text-neutral-500 uppercase tracking-widest font-black group-hover:text-red-500 transition-colors italic">
                                                     {labels[key.toLowerCase()] || key}
                                                 </p>
-                                            </ClientMotionDiv>
+                                            </div>
                                         );
                                     });
                             })()}
@@ -318,15 +301,12 @@ export default async function ProgressPage() {
                 {prs && prs.length > 0 ? (
                     <div className="divide-y divide-white/5 relative z-10">
                         {prs.map((pr: PersonalRecord, i: number) => (
-                            <ClientMotionDiv
+                            <div
                                 key={i}
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: i * 0.1 }}
-                                className="p-6 md:p-8 flex items-center justify-between hover:bg-white/5 transition-all group"
+                                className="p-6 md:p-8 flex items-center justify-between hover:bg-white/5 group transition-colors"
                             >
                                 <div className="flex items-center gap-6 flex-1 min-w-0">
-                                    <div className="h-14 w-14 bg-neutral-950/50 rounded-2xl shrink-0 flex items-center justify-center border border-white/5 group-hover:border-blue-500/30 transition-all shadow-lg">
+                                    <div className="h-14 w-14 bg-neutral-950/50 rounded-2xl shrink-0 flex items-center justify-center border border-white/5 group-hover:border-blue-500/30 shadow-lg transition-colors">
                                         <Dumbbell className="h-6 w-6 text-neutral-700 group-hover:text-blue-500 transition-colors" />
                                     </div>
                                     <div className="min-w-0 space-y-1">
@@ -347,7 +327,7 @@ export default async function ProgressPage() {
                                     </div>
                                     <p className="text-[8px] uppercase tracking-[0.3em] text-blue-500/50 font-black mt-2 italic">Peak Load</p>
                                 </div>
-                            </ClientMotionDiv>
+                            </div>
                         ))}
                     </div>
                 ) : (

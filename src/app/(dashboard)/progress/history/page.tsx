@@ -4,7 +4,7 @@ import { adminDb } from "@/lib/firebase-admin";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, History, Calendar, Scale, AlignLeft, Info } from "lucide-react";
-import { ClientMotionDiv } from "@/components/ui/client-motion";
+
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { MeasurementHistoryActions } from "@/components/profile/measurement-history-actions";
@@ -46,9 +46,7 @@ export default async function MeasurementHistoryPage({ searchParams }: HistoryPa
             <div className="fixed bottom-0 left-0 w-[400px] h-[400px] bg-blue-600/5 rounded-full blur-[120px] pointer-events-none -z-10" />
 
             {/* Header */}
-            <ClientMotionDiv
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
+            <div
                 className="flex items-center gap-6 px-2"
             >
                 <Link href="/progress">
@@ -65,7 +63,7 @@ export default async function MeasurementHistoryPage({ searchParams }: HistoryPa
                         {session.user.name || "Mi Historial"}
                     </h1>
                 </div>
-            </ClientMotionDiv>
+            </div>
 
             <div className="max-w-screen-2xl mx-auto w-full px-4 mt-8">
                 {sortedHistory.length > 0 ? (
@@ -75,11 +73,8 @@ export default async function MeasurementHistoryPage({ searchParams }: HistoryPa
                             const loggedMeasurements = measurementKeys.filter(key => item[key as keyof typeof item] !== undefined && item[key as keyof typeof item] !== null);
 
                             return (
-                                <ClientMotionDiv
+                                <div
                                     key={item.id}
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: index * 0.1 }}
                                     className="relative pl-8 md:pl-12"
                                 >
                                     {/* Timeline Dot */}
@@ -105,10 +100,10 @@ export default async function MeasurementHistoryPage({ searchParams }: HistoryPa
                                             )}
                                         </div>
 
-                                        <div className="bg-neutral-900/40 backdrop-blur-xl border border-white/10 rounded-4xl overflow-hidden shadow-2xl relative group hover:border-red-500/30 hover:shadow-[0_0_40px_rgba(239,68,68,0.1)] transition-all duration-500">
+                                        <div className="bg-neutral-900/40 backdrop-blur-xl border border-white/10 rounded-4xl overflow-hidden shadow-2xl relative group hover:border-red-500/30 hover:shadow-[0_0_40px_rgba(239,68,68,0.1)] transition-colors">
                                             {/* Glow decorativo interno */}
-                                            <div className="absolute top-0 right-0 w-64 h-64 bg-red-600/10 rounded-full blur-[80px] -z-10 group-hover:bg-red-500/20 transition-colors duration-700" />
-                                            <div className="absolute bottom-0 left-0 w-48 h-48 bg-orange-600/5 rounded-full blur-[60px] -z-10 group-hover:bg-orange-500/10 transition-colors duration-700" />
+                                            <div className="absolute top-0 right-0 w-64 h-64 bg-red-600/10 rounded-full blur-[80px] -z-10" />
+                                            <div className="absolute bottom-0 left-0 w-48 h-48 bg-orange-600/5 rounded-full blur-[60px] -z-10" />
 
                                             {/* Upper row: Weight & Meta */}
                                             {item.weight && (
@@ -177,7 +172,7 @@ export default async function MeasurementHistoryPage({ searchParams }: HistoryPa
                                             )}
                                         </div>
                                     </div>
-                                </ClientMotionDiv>
+                                </div>
                             );
                         })}
                     </div>

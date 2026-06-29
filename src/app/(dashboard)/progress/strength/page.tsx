@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StrengthCharts } from "@/components/progress/strength-charts";
-import { ClientMotionDiv } from "@/components/ui/client-motion";
+
 
 export default async function StrengthPage() {
     const session = await auth();
@@ -28,9 +28,7 @@ export default async function StrengthPage() {
             <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-red-600/5 rounded-full blur-[120px] pointer-events-none -z-10" />
 
             {/* Header */}
-            <ClientMotionDiv
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
+            <div
                 className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 px-2"
             >
                 <div className="flex items-center gap-6">
@@ -61,16 +59,12 @@ export default async function StrengthPage() {
                         <p className="text-[9px] text-neutral-500 font-black uppercase tracking-[0.2em]">Promedio General</p>
                     </div>
                 </div>
-            </ClientMotionDiv>
+            </div>
 
             {/* Charts */}
-            <ClientMotionDiv
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-            >
+            <div>
                 <StrengthCharts exercises={exercises} overallProgress={overallProgress} />
-            </ClientMotionDiv>
+            </div>
         </div>
     );
 }

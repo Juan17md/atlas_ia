@@ -39,7 +39,7 @@ export function FreeWorkoutView({
                     </div>
                     <div className="flex gap-2 items-center shrink-0">
                         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-900/50 rounded-xl border border-white/5">
-                            <Clock className="w-3.5 h-3.5 text-red-500 animate-pulse" />
+                            <Clock className="w-3.5 h-3.5 text-red-500 " />
                             <span className="text-xs font-black text-white italic tracking-widest">{formatTime(elapsedTime)}</span>
                         </div>
                         <Button
@@ -72,7 +72,7 @@ export function FreeWorkoutView({
                     onClick={onAddExercise}
                     className="h-14 px-8 bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 border border-amber-500/20 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] transition-all shadow-xl group"
                 >
-                    <Plus className="w-4 h-4 mr-3 group-hover:scale-110 transition-transform" />
+                    <Plus className="w-4 h-4 mr-3 " />
                     Agregar Ejercicio
                 </Button>
             </div>
