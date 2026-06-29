@@ -110,7 +110,11 @@ export async function checkWeekConflicts(athleteId: string, dates: string[]) {
 
 export async function assignRoutineDay(data: AssignmentInput, confirmReplace: boolean = false) {
     const session = await auth();
-    if (!session?.user?.id || session.user.role !== "coach") {
+    if (!session?.user?.id) {
+        return { success: false, error: "No autorizado" };
+    }
+
+    if (data.athleteId !== session.user.id) {
         return { success: false, error: "No autorizado" };
     }
 
@@ -129,21 +133,12 @@ export async function assignRoutineDay(data: AssignmentInput, confirmReplace: bo
         // 2. Get or Create Routine Copy
         const routineCopyId = await getRoutineCopyId(data.athleteId, data.routineId, session.user.id);
 
-        // 3. Create/Overwrite Assignment
-        // Use date as doc ID to ensure uniqueness per day? 
-        // Or generic ID? Using generic ID allows multiple workouts per day technically, 
-        // but prompt implies checking constraints. Let's assume 1 per day for now for simplicity, 
-        // or just use add() and let conflict check handle it.
-        // If we want to replace, we should delete existing ones.
-
         const assignmentsRef = adminDb.collection("users").doc(data.athleteId).collection("assignments");
 
         if (conflictCheck.conflict && confirmReplace) {
-            // Delete existing
             await assignmentsRef.doc(conflictCheck.existingAssignment!.id).delete();
         }
 
-        // Fetch routine details for denormalization (optional, but good for calendar display)
         const routineSnap = await adminDb.collection("routines").doc(routineCopyId).get();
         const routineDoc = routineSnap.data();
         const routineData = routineDoc as { name?: string; schedule?: RoutineDay[] } | undefined;
@@ -160,7 +155,6 @@ export async function assignRoutineDay(data: AssignmentInput, confirmReplace: bo
             createdAt: new Date(),
         });
 
-        revalidatePath(`/athletes/${data.athleteId}`);
         return { success: true };
 
     } catch (error) {
@@ -171,7 +165,11 @@ export async function assignRoutineDay(data: AssignmentInput, confirmReplace: bo
 
 export async function assignRoutineWeek(data: BatchAssignmentInput, confirmReplace: boolean = false) {
     const session = await auth();
-    if (!session?.user?.id || session.user.role !== "coach") {
+    if (!session?.user?.id) {
+        return { success: false, error: "No autorizado" };
+    }
+
+    if (data.athleteId !== session.user.id) {
         return { success: false, error: "No autorizado" };
     }
 

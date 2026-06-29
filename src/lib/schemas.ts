@@ -2,7 +2,7 @@ import { z } from "zod";
 
 // --- Enums y Constantes ---
 
-export const RoleEnum = z.enum(["athlete", "coach", "advanced_athlete"]);
+export const RoleEnum = z.enum(["advanced_athlete"]);
 export const GenderEnum = z.enum(["male", "female", "other"]);
 export const GoalEnum = z.enum(["hypertrophy", "weight_loss", "endurance", "flexibility", "strength"]);
 
@@ -13,7 +13,7 @@ export const RegisterInputSchema = z.object({
     email: z.string().email("Email inválido"),
     password: z.string().min(6, "Mínimo 6 caracteres"),
     confirmPassword: z.string().min(6),
-    role: z.enum(["athlete", "coach", "advanced_athlete"]),
+    role: z.enum(["advanced_athlete"]),
 }).refine((data) => data.password === data.confirmPassword, {
     message: "Las contraseñas no coinciden",
     path: ["confirmPassword"],
@@ -24,7 +24,7 @@ export const RegisterInputSchemaServer = z.object({
     name: z.string().min(2, "Mínimo 2 caracteres"),
     email: z.string().email("Email inválido"),
     password: z.string().min(6, "Mínimo 6 caracteres"),
-    role: z.enum(["athlete", "coach", "advanced_athlete"]),
+    role: z.enum(["advanced_athlete"]),
 });
 
 // Schema para medidas corporales (Solo Atletas)

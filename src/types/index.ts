@@ -33,7 +33,7 @@ export type ComboTipo = z.infer<typeof ComboTipoEnum>;
 export type CircuitTipo = z.infer<typeof CircuitTipoEnum>;
 
 // Tipos de Rol y Género para uso directo
-export type UserRole = "athlete" | "coach" | "advanced_athlete";
+export type UserRole = "advanced_athlete";
 export type Gender = "male" | "female" | "other";
 
 // Re-exportar tipos de API para uso centralizado

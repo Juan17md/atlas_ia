@@ -2,7 +2,7 @@
 
 import { adminDb } from "@/lib/firebase-admin";
 import { auth } from "@/lib/auth";
-import { unstable_cache } from "next/cache";
+import { unstable_cache, revalidateTag } from "next/cache";
 
 interface TrainingSet {
     reps?: number;
@@ -118,7 +118,7 @@ const getCachedCoachNotifications = unstable_cache(
 
 export async function getCoachNotifications() {
     const session = await auth();
-    if (session?.user?.role !== "coach") {
+    if (!session?.user?.id) {
         return { success: false, error: "No autorizado" };
     }
 
@@ -237,6 +237,7 @@ export async function markAllNotificationsAsRead() {
         await adminDb.collection("users").doc(session.user.id).update({
             lastReadNotificationsAt: new Date()
         });
+        revalidateTag("athlete-notifications", "default");
         return { success: true };
     } catch (error) {
         console.error("Error marking notifications as read:", error);

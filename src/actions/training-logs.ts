@@ -115,14 +115,7 @@ export async function getTrainingLogs(userId?: string) {
     const session = await auth();
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
     const targetId = userId || session.user.id;
-    if (targetId !== session.user.id && session.user.role !== "coach") return { success: false, error: "No autorizado" };
-
-    if (targetId !== session.user.id && session.user.role === "coach") {
-        const athleteDoc = await adminDb.collection("users").doc(targetId).get();
-        if (!athleteDoc.exists || athleteDoc.data()?.coachId !== session.user.id) {
-            return { success: false, error: "No autorizado" };
-        }
-    }
+    if (targetId !== session.user.id) return { success: false, error: "No autorizado" };
 
     try {
         const snapshot = await adminDb.collection("training_logs").where("athleteId", "==", targetId).orderBy("date", "desc").limit(20).get();

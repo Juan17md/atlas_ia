@@ -98,8 +98,6 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href="https://ik.imagekit.io" />
-        <link rel="dns-prefetch" href="https://ik.imagekit.io" />
         <link rel="preconnect" href="https://firestore.googleapis.com" />
       </head>
       <body

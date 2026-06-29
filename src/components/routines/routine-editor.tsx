@@ -38,7 +38,7 @@ interface RoutineEditorProps {
 
 export function RoutineEditor({ initialData, isEditing = false, availableExercises = [], athleteId, availableRoutines = [], initialDayIndex = 0 }: RoutineEditorProps) {
     const { data: session } = useSession();
-    const canCreateExercises = session?.user?.role === "coach" || session?.user?.role === "advanced_athlete";
+    const canCreateExercises = true;
     const sortedExercises = useMemo(() => {
         return [...availableExercises].sort((a, b) => (a.name || "").localeCompare(b.name || ""));
     }, [availableExercises]);

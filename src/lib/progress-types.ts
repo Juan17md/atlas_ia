@@ -94,7 +94,6 @@ export async function getLatestBodyMetrics(userId: string): Promise<BodyMetrics 
 export async function getProgressData(userId: string) {
     const { getPersonalRecords, getStrengthProgress } = await import("@/actions/analytics-actions");
     const { getBodyMeasurementsHistory } = await import("@/actions/measurement-actions");
-    const { getAllAthletes } = await import("@/actions/coach-actions");
 
     const [prsResult, metrics, strengthResult, historyResult] = await Promise.all([
         getPersonalRecords(userId),

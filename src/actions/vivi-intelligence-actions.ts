@@ -181,18 +181,7 @@ export async function analyzeViviIntelligence(userId?: string) {
     const targetUserId = userId || session.user.id;
 
     if (targetUserId !== session.user.id) {
-        const coachDoc = await adminDb.collection("users").doc(session.user.id).get();
-        const isCoach = coachDoc.exists && coachDoc.data()?.role === "coach";
-        
-        if (isCoach) {
-            const athleteDoc = await adminDb.collection("users").doc(targetUserId).get();
-            const athleteData = athleteDoc.data();
-            if (!athleteData || athleteData.coachId !== session.user.id) {
-                return { success: false, error: "No autorizado: no eres el coach de este atleta" };
-            }
-        } else {
-            return { success: false, error: "No autorizado para analizar este atleta" };
-        }
+        return { success: false, error: "No autorizado" };
     }
 
     try {
@@ -387,18 +376,7 @@ export async function getViviIntelligence(userId?: string) {
     const targetUserId = userId || session.user.id;
 
     if (targetUserId !== session.user.id) {
-        const coachDoc = await adminDb.collection("users").doc(session.user.id).get();
-        const isCoach = coachDoc.exists && coachDoc.data()?.role === "coach";
-        
-        if (isCoach) {
-            const athleteDoc = await adminDb.collection("users").doc(targetUserId).get();
-            const athleteData = athleteDoc.data();
-            if (!athleteData || athleteData.coachId !== session.user.id) {
-                return null;
-            }
-        } else {
-            return null;
-        }
+        return null;
     }
 
     try {

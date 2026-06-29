@@ -1,11 +1,10 @@
 import { auth } from "@/lib/auth";
-import { Activity, Flame, Scale, TrendingUp, Trophy, Ruler, Users, ArrowLeft, Dumbbell, Sparkles, History } from "lucide-react";
+import { Activity, Flame, Scale, TrendingUp, Trophy, Ruler, ArrowLeft, Dumbbell, History } from "lucide-react";
 import { getPersonalRecords, getStrengthProgress } from "@/actions/analytics-actions";
 import { getBodyMeasurementsHistory } from "@/actions/measurement-actions";
 import { adminDb } from "@/lib/firebase-admin";
-import { getAllAthletes } from "@/actions/coach-actions";
+import { calcularGrasaCorporal } from "@/lib/body-fat";
 import Link from "next/link";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { LogMeasurementDialog } from "@/components/profile/log-measurement-dialog";
@@ -34,7 +33,6 @@ async function getLatestBodyMetrics(userId: string) {
 
         const userData = userDoc.data();
 
-        // Limpiar measurements para asegurar que solo pasamos números al cliente
         const rawMeasurements = userData?.measurements || {};
         const cleanMeasurements: Record<string, number> = {};
 
@@ -44,35 +42,17 @@ async function getLatestBodyMetrics(userId: string) {
             }
         });
 
-        // TRAYECTORIA DE CÁLCULO: Priorizar campo directo, si no, intentar calcular
         let bodyFat = userData?.bodyFat;
 
         if (!bodyFat && userData?.height && cleanMeasurements.waist && cleanMeasurements.neck) {
-            const h = userData.height;
-            const w = cleanMeasurements.waist;
-            const n = cleanMeasurements.neck;
-            const gender = userData?.gender || "male";
-            const log10 = Math.log10;
-
-            if (gender === "male" || gender !== "female") {
-                const diff = w - n;
-                if (diff > 0) {
-                    const denom = 1.0324 - 0.19077 * log10(diff) + 0.15456 * log10(h);
-                    bodyFat = (495 / denom) - 450;
-                }
-            } else if (gender === "female" && cleanMeasurements.hips) {
-                const hip = cleanMeasurements.hips;
-                const diff = (w + hip) - n;
-                if (diff > 0) {
-                    const denom = 1.29579 - 0.35004 * log10(diff) + 0.22100 * log10(h);
-                    bodyFat = (495 / denom) - 450;
-                }
-            }
-
-            if (bodyFat !== undefined && !isNaN(bodyFat)) {
-                bodyFat = Math.max(2, Math.min(60, bodyFat));
-                bodyFat = parseFloat(bodyFat.toFixed(1));
-            }
+            const { bodyFat: calculated } = calcularGrasaCorporal({
+                height: userData.height,
+                waist: cleanMeasurements.waist,
+                neck: cleanMeasurements.neck,
+                hips: cleanMeasurements.hips,
+                gender: userData?.gender || "male",
+            });
+            bodyFat = calculated;
         }
 
         return {
@@ -89,70 +69,11 @@ async function getLatestBodyMetrics(userId: string) {
     }
 }
 
-interface ProgressPageProps {
-    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}
-
-export default async function ProgressPage({ searchParams }: ProgressPageProps) {
-    // ... logic (session, coach, metrics, etc)
+export default async function ProgressPage() {
     const session = await auth();
     if (!session?.user?.id) return null;
 
-    const isCoach = session.user.role === "coach";
-    let targetUserId = session.user.id;
-    let athletes: Athlete[] = [];
-
-    // Coach Logic: Determine target user
-    if (isCoach) {
-        const result = await getAllAthletes();
-        athletes = (result.athletes as unknown as Athlete[]) || [];
-
-        const params = await searchParams;
-        const requestedId = params?.athleteId as string;
-
-        if (requestedId) {
-            targetUserId = requestedId;
-        } else if (athletes.length > 0) {
-            targetUserId = athletes[0].id;
-        } else {
-            targetUserId = "";
-        }
-    }
-
-    // Handle Empty State for Coach
-    if (isCoach && !targetUserId) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-[70vh] px-6 text-center relative overflow-hidden">
-                <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-red-600/5 rounded-full blur-[50px] pointer-events-none -z-10" />
-
-                <ClientMotionDiv
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="relative space-y-12 max-w-md w-full"
-                >
-                    <div className="relative mx-auto w-32 h-32 flex items-center justify-center group">
-                        <div className="absolute inset-0 bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-4xl rotate-6 group-hover:rotate-0 transition-transform duration-500" />
-                        <Users className="w-12 h-12 text-neutral-600 relative z-10" />
-                    </div>
-
-                    <div className="space-y-4">
-                        <h1 className="text-3xl font-black text-white uppercase italic tracking-tighter">
-                            Escuadrón No Detectado
-                        </h1>
-                        <p className="text-neutral-500 font-bold text-sm leading-relaxed">
-                            No se han identificado perfiles operativos bajo tu mando. Inicia el reclutamiento para comenzar el seguimiento telemétrico.
-                        </p>
-                    </div>
-
-                    <Link href="/athletes/new" className="block">
-                        <Button className="w-full h-14 bg-white text-black font-black uppercase italic tracking-widest rounded-2xl hover:bg-neutral-200 transition-all shadow-xl shadow-white/5 active:scale-95">
-                            Reclutar Atleta
-                        </Button>
-                    </Link>
-                </ClientMotionDiv>
-            </div>
-        );
-    }
+    const targetUserId = session.user.id;
 
     const [prsResult, metrics, strengthResult, historyResult] = await Promise.all([
         getPersonalRecords(targetUserId),
@@ -191,46 +112,13 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                                 <span className="text-[10px] font-black text-red-500 uppercase tracking-[0.4em] italic">Análisis Biométrico</span>
                             </div>
                             <h1 className="text-4xl md:text-5xl font-black text-white uppercase italic tracking-tighter leading-none">
-                                {isCoach ? (
-                                    <>Telemetría: <span className="text-red-600 font-black">{metrics?.name}</span></>
-                                ) : "Mi Progreso"}
+                                Mi Progreso
                             </h1>
                         </div>
                     </div>
                 </ClientMotionDiv>
 
-                {isCoach && athletes.length > 0 && (
-                    <ClientMotionDiv
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.2 }}
-                        className="flex items-center gap-4 overflow-x-auto pb-4 scrollbar-hide px-2"
-                    >
-                        {athletes.map((athlete, i) => {
-                            const isActive = athlete.id === targetUserId;
-                            return (
-                                <Link
-                                    key={athlete.id}
-                                    href={`/progress?athleteId=${athlete.id}`}
-                                    className={cn(
-                                        "flex items-center gap-3 px-2 pr-5 py-2 rounded-2xl transition-all shrink-0 border backdrop-blur-xl shadow-xl",
-                                        isActive
-                                            ? "bg-red-600 border-red-500 text-white translate-y-[-2px]"
-                                            : "bg-neutral-900/40 border-white/5 text-neutral-500 hover:bg-white/5 hover:text-white hover:border-white/10"
-                                    )}
-                                >
-                                    <Avatar className="h-9 w-9 border border-white/10 shadow-lg">
-                                        <AvatarImage src={athlete.image} />
-                                        <AvatarFallback className="bg-black text-[10px] font-black italic">
-                                            {athlete.name?.[0]?.toUpperCase()}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                    <span className="text-xs font-black uppercase tracking-widest italic truncate max-w-[120px]">{athlete.name}</span>
-                                </Link>
-                            );
-                        })}
-                    </ClientMotionDiv>
-                )}
+
             </div>
 
             {/* Metrics Grid */}
@@ -289,7 +177,7 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.3 }}
                 >
-                    <Link href={isCoach ? `/progress/strength?athleteId=${targetUserId}` : "/progress/strength"} className="block h-full">
+                    <Link href="/progress/strength" className="block h-full">
                         <div className="bg-neutral-900/20 backdrop-blur-xl border border-white/5 rounded-4xl p-8 relative overflow-hidden group hover:border-purple-500/30 transition-all cursor-pointer h-full flex flex-col items-center justify-center text-center shadow-2xl">
                             <div className="absolute top-0 right-0 w-24 h-24 bg-purple-600/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-purple-600/10 transition-colors"></div>
                             <div className="relative z-10 flex flex-col items-center gap-4">
@@ -323,7 +211,7 @@ export default async function ProgressPage({ searchParams }: ProgressPageProps) 
                         </div>
                     </div>
                     
-                    <Link href={`/progress/history${isCoach && targetUserId ? `?athleteId=${targetUserId}` : ''}`}>
+                    <Link href="/progress/history">
                         <Button variant="ghost" className="h-10 px-4 rounded-xl bg-neutral-900/40 border border-white/5 text-neutral-400 hover:text-white hover:bg-white/10 transition-all font-black text-[10px] uppercase tracking-widest italic group shrink-0">
                             <History className="w-4 h-4 mr-2 text-red-500 group-hover:-rotate-12 transition-transform" />
                             Historial Completo

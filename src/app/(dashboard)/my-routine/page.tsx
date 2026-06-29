@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { CalendarDays, Clock, Dumbbell, Play, Moon, Info, Sparkles, Activity, Pencil } from "lucide-react";
 import Link from "next/link";
-import { getRoutines } from "@/actions/routine-actions";
+import { getActiveRoutine } from "@/actions/athlete-actions";
 import { differenceInCalendarWeeks } from "date-fns";
 import { redirect } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -38,10 +38,8 @@ export default async function MyRoutinePage() {
         redirect("/login");
     }
 
-    const { success, routines } = await getRoutines();
-
-    // Asumimos que la lógica de backend devuelve solo activas para atletas
-    const activeRoutine: ActiveRoutine | null = routines && routines.length > 0 ? (routines[0] as unknown as ActiveRoutine) : null;
+    const { success, routine: activeRoutineData } = await getActiveRoutine();
+    const activeRoutine: ActiveRoutine | null = success && activeRoutineData ? (activeRoutineData as unknown as ActiveRoutine) : null;
 
     if (!activeRoutine) {
         return (
@@ -70,16 +68,14 @@ export default async function MyRoutinePage() {
                     </div>
 
                     <div className="flex flex-col gap-3">
-                        {session.user.role === "coach" && (
-                            <Link href="/routines" className="w-full">
-                                <Button className="w-full h-14 bg-white text-black font-black uppercase italic tracking-widest rounded-2xl hover:bg-neutral-200 transition-all shadow-xl shadow-white/5 active:scale-95">
-                                    Gestionar Archivos
-                                </Button>
-                            </Link>
-                        )}
+                        <Link href="/routines" className="w-full">
+                            <Button className="w-full h-14 bg-white text-black font-black uppercase italic tracking-widest rounded-2xl hover:bg-neutral-200 transition-all shadow-xl shadow-white/5 active:scale-95">
+                                Explorar Rutinas
+                            </Button>
+                        </Link>
                         <Link href="/train" className="w-full">
                             <Button variant="outline" className="w-full h-14 border-neutral-800 text-neutral-400 font-black uppercase italic tracking-widest rounded-2xl hover:bg-white/5 hover:text-white transition-all active:scale-95">
-                                Reintentar Enlace
+                                Entrenamiento Libre
                             </Button>
                         </Link>
                     </div>
@@ -250,13 +246,11 @@ export default async function MyRoutinePage() {
                                         </Button>
                                     </Link>
                                 )}
-                                {(session.user.role === "advanced_athlete" || session.user.role === "coach") && (
-                                    <Link href={`/routines/${activeRoutine.id}?day=${index}`} className="block">
-                                        <Button variant="outline" className="w-12 h-12 p-0 rounded-2xl bg-white/5 border border-white/10 text-neutral-300 hover:bg-white hover:text-black transition-all shadow-lg active:scale-95 flex items-center justify-center">
-                                            <Pencil className="w-4 h-4" />
-                                        </Button>
-                                    </Link>
-                                )}
+                                <Link href={`/routines/${activeRoutine.id}?day=${index}`} className="block">
+                                    <Button variant="outline" className="w-12 h-12 p-0 rounded-2xl bg-white/5 border border-white/10 text-neutral-300 hover:bg-white hover:text-black transition-all shadow-lg active:scale-95 flex items-center justify-center">
+                                        <Pencil className="w-4 h-4" />
+                                    </Button>
+                                </Link>
                             </div>
                         </ClientMotionDiv>
                     ))}

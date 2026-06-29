@@ -69,17 +69,8 @@ export async function getExercises() {
     try {
         let exercisesQuery: FirebaseFirestore.Query = adminDb.collection("exercises");
 
-        // Coach ve solo sus propios ejercicios; atleta avanzado ve los suyos y los de su coach
-        if (session.user.role === "coach") {
-            exercisesQuery = exercisesQuery.where("coachId", "==", session.user.id);
-        } else {
-            // Atleta avanzado: ver ejercicios propios y de su coach
-            const userDoc = await adminDb.collection("users").doc(session.user.id).get();
-            const coachId = userDoc.data()?.coachId;
-            const ownerIds = [session.user.id];
-            if (coachId) ownerIds.push(coachId);
-            exercisesQuery = exercisesQuery.where("coachId", "in", ownerIds);
-        }
+        // Ver ejercicios propios
+        exercisesQuery = exercisesQuery.where("coachId", "==", session.user.id);
 
         const snapshot = await exercisesQuery.get();
 

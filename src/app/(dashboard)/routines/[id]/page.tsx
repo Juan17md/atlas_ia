@@ -19,12 +19,14 @@ export default async function EditRoutinePage({ params, searchParams }: PageProp
     const session = await auth();
 
     if (!session?.user?.id) redirect("/login");
-    const role = session.user.role as string;
-    if (role !== "coach" && role !== "advanced_athlete") redirect("/dashboard");
 
-    const { routine, error } = await getRoutine(id) as { routine?: { name: string; description?: string; type?: string; schedule: any[] }; error?: string };
-    const { exercises } = await getExercises();
-    const { routines: availableRoutines } = await getRoutines();
+    const [routineRes, { exercises }, { routines: availableRoutines }] = await Promise.all([
+        getRoutine(id) as Promise<{ routine?: { name: string; description?: string; type?: string; schedule: any[] }; error?: string }>,
+        getExercises(),
+        getRoutines(),
+    ]);
+
+    const { routine, error } = routineRes;
 
     if (error || !routine) {
         return <div>Error: {error || "Rutina no encontrada"}</div>;

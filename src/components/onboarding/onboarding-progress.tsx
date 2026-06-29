@@ -1,13 +1,12 @@
 "use client";
 
-import { ChevronRight, ChevronLeft, Check, User, Target, HeartPulse, Ruler, Lock, LucideIcon } from "lucide-react";
+import { Check, User, Target, HeartPulse, Ruler, LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type Step = "bio" | "goals" | "health" | "measurements" | "security";
+type Step = "bio" | "goals" | "health" | "measurements";
 
 interface OnboardingProgressProps {
     currentStep: Step;
-    isGoogleUser: boolean;
 }
 
 const steps: { id: Step; label: string; icon: LucideIcon }[] = [
@@ -15,30 +14,23 @@ const steps: { id: Step; label: string; icon: LucideIcon }[] = [
     { id: "goals", label: "Objetivos", icon: Target },
     { id: "health", label: "Salud", icon: HeartPulse },
     { id: "measurements", label: "Medidas", icon: Ruler },
-    { id: "security", label: "Seguridad", icon: Lock },
 ];
 
-export function OnboardingProgress({ currentStep, isGoogleUser }: OnboardingProgressProps) {
-    const activeSteps = isGoogleUser
-        ? steps
-        : steps.filter((s) => s.id !== "security");
-
-    const stepIndex = activeSteps.findIndex(s => s.id === currentStep);
+export function OnboardingProgress({ currentStep }: OnboardingProgressProps) {
+    const stepIndex = steps.findIndex(s => s.id === currentStep);
 
     return (
         <div className="mb-8">
             <div className="flex justify-between mb-2">
                 {steps.map((step) => {
-                    const thisIndex = activeSteps.findIndex(s => s.id === step.id);
-                    if (thisIndex === -1) return null;
-                    
+                    const thisIndex = steps.findIndex(s => s.id === step.id);
                     const isCompleted = thisIndex < stepIndex;
                     const isActive = step.id === currentStep;
 
                     return (
                         <div key={step.id} className={cn(
                             "flex flex-col items-center gap-2 relative z-10 w-full",
-                            thisIndex === 0 ? "items-start" : thisIndex === activeSteps.length - 1 ? "items-end" : "items-center"
+                            thisIndex === 0 ? "items-start" : thisIndex === steps.length - 1 ? "items-end" : "items-center"
                         )}>
                             <div className={cn(
                                 "w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300",

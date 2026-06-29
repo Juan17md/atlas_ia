@@ -13,12 +13,8 @@ export default async function OnboardingPage() {
         redirect("/dashboard");
     }
 
-    // Obtener el proveedor de autenticación de la sesión para decidir si la contraseña es obligatoria
-    const authProvider = session.user.authProvider || "password";
-
     return (
         <div className="min-h-screen bg-black relative overflow-hidden flex flex-col items-center justify-center p-4 md:p-6">
-            {/* Background Mood */}
             <div className="absolute top-0 right-0 -z-10 h-[300px] md:h-[500px] w-[300px] md:w-[500px] bg-red-600/10 blur-[80px] md:blur-[120px] rounded-full pointer-events-none" />
             <div className="absolute bottom-0 left-0 -z-10 h-[300px] md:h-[500px] w-[300px] md:w-[500px] bg-blue-600/5 blur-[80px] md:blur-[120px] rounded-full pointer-events-none" />
 
@@ -32,7 +28,7 @@ export default async function OnboardingPage() {
                     </p>
                 </div>
 
-                <OnboardingWrapper authProvider={authProvider} />
+                <OnboardingWrapper />
             </div>
         </div>
     );

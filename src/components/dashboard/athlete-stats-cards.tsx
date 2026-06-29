@@ -1,5 +1,3 @@
-"use client";
-
 import { StatCard } from "@/components/dashboard/stat-card";
 import { Dumbbell, TrendingUp, Trophy, Flame } from "lucide-react";
 

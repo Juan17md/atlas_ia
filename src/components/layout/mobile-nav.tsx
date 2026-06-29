@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Users, ClipboardList, Dumbbell, BarChart2, History, UserCircle, Menu } from "lucide-react";
+import { LayoutDashboard, ClipboardList, Dumbbell, BarChart2, History, UserCircle, Menu } from "lucide-react";
 import * as React from "react";
 import {
     Sheet,
@@ -28,42 +28,16 @@ export function MobileNav({ role, user }: MobileNavProps) {
     const userRoleKey = (user?.role || "athlete").toLowerCase();
     const roleInfo = ROLE_CONFIG[userRoleKey] || ROLE_CONFIG.athlete;
 
-    const commonItems = [
+    const items = [
         { label: "Inicio", href: "/dashboard", icon: LayoutDashboard },
-    ];
-
-    const coachItems = [
-        ...commonItems,
-        { label: "Atletas", href: "/athletes", icon: Users },
-        { label: "Rutinas", href: "/routines", icon: ClipboardList },
-        { label: "Ejercicios", href: "/exercises", icon: Dumbbell },
-        { label: "Progreso", href: "/progress", icon: BarChart2 },
-    ];
-
-    // For coach, limit to 4 items in main bar, maybe put Analytics in "More"?
-    // Let's stick to 4 main + More for Coach if needed, or 5.
-    // Coach: Home, Athletes, Routines, Exercises, Stats. That's 5. Fits.
-
-    const athleteItems = [
-        ...commonItems,
         { label: "Rutina", href: "/my-routine", icon: ClipboardList },
         { label: "Entrenar", href: "/train", icon: Dumbbell },
+        { label: "Rutinas", href: "/routines", icon: ClipboardList },
+        { label: "Ejercicios", href: "/exercises", icon: Dumbbell },
         { label: "Actividad", href: "/history", icon: History },
         { label: "Avance", href: "/progress", icon: BarChart2 },
         { label: "Perfil", href: "/profile", icon: UserCircle },
     ];
-
-    const advancedAthleteItems = [
-        ...athleteItems,
-        { label: "Rutinas", href: "/routines", icon: ClipboardList },
-        { label: "Ejercicios", href: "/exercises", icon: Dumbbell },
-    ];
-
-    const items = role === "coach"
-        ? coachItems
-        : role === "advanced_athlete"
-            ? advancedAthleteItems
-            : athleteItems;
 
     // Solo mostrar los primeros 4 en la barra inferior, el resto irá al "Menú"
     const barItems = items.slice(0, 4);

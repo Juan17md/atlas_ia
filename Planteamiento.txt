@@ -1,28 +1,26 @@
 ASISTENTE DE ENTRENAMIENTO INTELIGENTE - PLANTEAMIENTO DEL PROYECTO
 
 1. PLANTEAMIENTO (CONCEPTO)
-Sistema integral de gestión y optimización del entrenamiento físico mediante la integración de Inteligencia Artificial. No es una landing page comercial, sino una herramienta de software diseñada como un ecosistema premium enfocado en movilidad (Mobile-First). El sistema facilita la colaboración entre entrenadores (Coaches) y deportistas (Atletas), utilizando la IA como un motor de asistencia técnica y pedagógica con permisos diferenciados según el rol.
+Sistema integral de gestión y optimización del entrenamiento físico mediante la integración de Inteligencia Artificial. No es una landing page comercial, sino una herramienta de software diseñada como un ecosistema premium enfocado en movilidad (Mobile-First). El sistema funciona como un asistente personal de entrenamiento con un único rol de usuario (advanced_athlete), eliminando la distinción tradicional entre coach y atleta. La IA actúa como motor de asistencia técnica y pedagógica, reemplazando la figura del entrenador humano con recomendaciones automatizadas.
 
 2. WORKFLOW (FLUJO DE TRABAJO)
 
-1. [COMPLETADO] Registro y Perfilado (Onboarding): El atleta completa su perfil con:
+1. [COMPLETADO] Registro y Perfilado (Onboarding): El usuario completa su perfil con:
    - Datos Personales: Sexo (Hombre/Mujer), Edad.
    - Perfil de Salud: Registro de lesiones (antiguas/nuevas) y dificultades médicas.
    - Datos Corporales Iniciales: Peso y Altura.
    - Medidas Antropométricas (Circunferencias): Pecho/Espalda, Cintura, Cadera, Hombros, Bíceps, Tríceps, Antebrazos, Cuádriceps, Pantorrillas.
    - Definición de Objetivo: Hipertrofia, Déficit Calórico, Resistencia y Agilidad.
-2. [COMPLETADO] Asignación de Programa:
-   - El Coach diseña la rutina personalizada.
-   - El Coach utiliza el Asistente de IA para generar o validar la rutina del atleta basándose en su perfil.
-3. [COMPLETADO] Ejecución del Entrenamiento: El atleta usa la Consola de Entrenamiento en tiempo real.
-4. [COMPLETADO] Soporte Local (IA Atleta): Durante la sesión, el atleta consulta a la IA para ideas de calentamiento específicas o explicaciones técnicas de los ejercicios asignados.
+2. [COMPLETADO] Generación de Rutina: La IA genera la rutina personalizada basándose en el perfil del usuario.
+3. [COMPLETADO] Ejecución del Entrenamiento: El usuario usa la Consola de Entrenamiento en tiempo real.
+4. [COMPLETADO] Soporte Local (IA): Durante la sesión, el usuario consulta a la IA para ideas de calentamiento específicas o explicaciones técnicas de los ejercicios asignados.
 5. [COMPLETADO] Logging y Feedback: Registro de series, reps, pesos y RPE.
-6. [EN PROCESO] Análisis y Ajuste: El Coach evalúa el progreso (asistido por IA) y ajusta la carga para la siguiente fase.
+6. [EN PROCESO] Análisis y Ajuste: La IA evalúa el progreso y ajusta la carga para la siguiente fase.
 
 3. SECCIONES DEL SISTEMA
 
 AREAS COMUNES
-- [COMPLETADO] Portal de Acceso: Interfaz de autenticación y seguridad.
+- [COMPLETADO] Portal de Acceso: Interfaz de autenticación con email/contraseña.
 - [COMPLETADO] Modo Offline: Sincronización automática de entrenamientos realizados sin conexión.
 - [COMPLETADO] Onboarding: Flujo paso a paso para la captura de datos iniciales (Salud, Biometría, Objetivos).
 - [COMPLETADO] Centro de Perfil y Progreso: Gestión de evolución corporal mediante el log de:
@@ -30,22 +28,18 @@ AREAS COMUNES
     - Registro histórico de medidas (Circunferencias).
     - Seguimiento de lesiones y estado de salud.
 
-AREA DEL ATLETA
-- [COMPLETADO] Dashboard Atleta: Visualización de la rutina activa y récords.
+AREA DEL USUARIO
+- [COMPLETADO] Dashboard: Visualización de la rutina activa y récords.
 - [COMPLETADO] Consola de Entrenamiento: Interfaz de ejecución con cronómetro y registro de datos.
 - [COMPLETADO] Asistente de Sesión (IA): Micro-servicio de IA limitado a:
     - Generación de rutinas de calentamiento dinámico.
     - Explicación y técnica de ejercicios asignados en su rutina.
 - [COMPLETADO] Historial y Progreso: Análisis visual de la evolución.
-
-AREA DEL COACH
-- [COMPLETADO] Dashboard Coach: Supervisión de atletas y alertas de cumplimiento.
-- [COMPLETADO] Gestión de Atletas: Ficha técnica y seguimiento individual.
-- [COMPLETADO] Diseñador de Rutinas Pro: Constructor con Asistente de IA Completo para:
-    - Generación automática de planes de entrenamiento utilizando la biblioteca propia del coach.
-    - Evaluación de carga y volumen de rutinas creadas por el coach.
-    - Ajustes inteligentes según el feedback del atleta.
-- [COMPLETADO] Gestión de Biblioteca de Ejercicios (CRUD): Repositorio centralizado de ejercicios gestionado por el coach:
+- [COMPLETADO] Diseñador de Rutinas: Constructor con Asistente de IA para:
+    - Generación automática de planes de entrenamiento.
+    - Evaluación de carga y volumen.
+    - Ajustes inteligentes según el feedback.
+- [COMPLETADO] Gestión de Biblioteca de Ejercicios (CRUD): Repositorio centralizado gestionado por el usuario:
     - Registro de nombre del ejercicio.
     - Clasificación por Grupos Musculares (uno o más).
     - Músculos Específicos detallados (uno o más).
@@ -58,39 +52,51 @@ FUNCIONES DE DATOS
 - [COMPLETADO] CRUD de Rutinas: Sistema de plantillas y snapshots que consumen la biblioteca de ejercicios.
 - [COMPLETADO] Persistencia de Logs: Registro validado de cada serie.
 - [COMPLETADO] Análisis de Volumen: Procesamiento automático de carga de trabajo por grupo muscular.
-- [COMPLETADO] Control de Acceso (RBAC): Seguridad estricta para asegurar que el atleta solo vea lo asignado.
+- [COMPLETADO] Control de Acceso: Seguridad por propietario de datos.
 
 FUNCIONES DE INTELIGENCIA ARTIFICIAL
-- [COMPLETADO] Contextualización por Atleta (Core): El motor de IA integra automáticamente el perfil del atleta (sexo, edad, peso, altura, lesiones, historial médico y objetivos) en cada interacción.
-- [COMPLETADO] IA para Atletas (Restringida): Motor pedagógico enfocado en:
-    - Prevención de lesiones (calentamiento adaptado).
-    - Comprensión técnica de ejercicios asignados.
-    - Sustitución por "Máquina Ocupada": Sugerencia instantánea de ejercicios equivalentes (mismo patrón de movimiento) si el equipo no está disponible, respetando lesiones y perfil.
-- [EN PROCESO] IA para Coaches (Full): Motor de ingeniería deportiva para:
+- [COMPLETADO] Contextualización por Usuario (Core): El motor de IA integra automáticamente el perfil del usuario (sexo, edad, peso, altura, lesiones, historial médico y objetivos) en cada interacción.
+- [COMPLETADO] IA (Full): Motor de ingeniería deportiva para:
     - Generación de rutinas "Perfil-Aware" y análisis de seguridad.
-    - [COMPLETADO] Sugerencia de Sobrecarga Progresiva: Propuesta automática de aumento de carga (2-5%) o reps para la siguiente sesión basada en el RPE y rendimiento previo.
-    - [COMPLETADO] Alertas de Estancamiento: Notificaciones automáticas al coach si un atleta no mejora marcas en 3 sesiones o si el volumen decae (detección de sobreentrenamiento).
-    - Ajustes inteligentes según el feedback del atleta.
+    - Sugerencia de Sobrecarga Progresiva: Propuesta automática de aumento de carga (2-5%) o reps para la siguiente sesión basada en el RPE y rendimiento previo.
+    - Alertas de Estancamiento: Notificaciones automáticas si no se mejoran marcas en 3 sesiones o si el volumen decae (detección de sobreentrenamiento).
+    - Ajustes inteligentes según el feedback del usuario.
 
 FUNCIONES DE UI/UX
 - [COMPLETADO] Mobile-First: Interfaz optimizada para uso en el gimnasio.
 - [COMPLETADO] Sincronización en Tiempo Real: Actualización constante de datos y estados.
-- [COMPLETADO] Visualización Avanzada: Gráficos dinámicos de rendimiento.
+- [COMPLETADO] Visualización Avanzada: Gráficos SVG nativos de rendimiento.
 
-5. ESTADO ACTUAL DEL PROYECTO (UPDATE 2026-02-08)
+5. ESTADO ACTUAL DEL PROYECTO (UPDATE 2026-06)
 
-REFACTORIZACIÓN DE CÓDIGO (FEBRERO 2026)
-- [COMPLETADO] Eliminación de 'any' Types: Se han definido interfaces TypeScript estrictas para todo el flujo de datos principal (Routine, WorkoutLog, WarmupPlan, PersonalRecord).
-- [COMPLETADO] Componentes Modulares: Refactorización de `workout-session`, `train-console`, `warmup-generator` y `exercise-selector` para mayor mantenibilidad.
-- [COMPLETADO] Lints y Estilos: Estandarización de clases CSS (ej. `rounded-4xl` en lugar de valores arbitrarios) y gradientes modernos.
+REFACTORIZACIÓN DE ROLES (JUNIO 2026)
+- [ELIMINADO] Roles de coach y athlete: El sistema ahora tiene un único rol (advanced_athlete).
+- [ELIMINADO] Páginas de gestión de atletas (/athletes, /users) y todo el flujo coach.
+- [ELIMINADO] Lógica de vinculación coach-atleta (linkWithCoach, unlinkCoach).
+- [ELIMINADO] Sistema de códigos de invitación para coaches.
+- [SIMPLIFICADO] Server actions: eliminados ~40 checks de rol coach/athlete en todas las acciones.
+- [SIMPLIFICADO] Sidebar y navegación: menú único sin distinción por rol.
+- [SIMPLIFICADO] Dashboard unificado: solo AthleteDashboardUI.
+
+OPTIMIZACIÓN DE RENDIMIENTO (JUNIO 2026)
+- [ELIMINADO] Dependencia react-markdown: -25KB de bundle.
+- [ELIMINADO] Dependencia @imagekit/javascript: integración de hosting de imágenes eliminada.
+- [ELIMINADO] Dependencia recharts: reemplazado por gráficos SVG nativos (~-80KB).
+- [ELIMINADO] Login con Google: autenticación solo con email/contraseña.
+- [AÑADIDO] Caché con unstable_cache en 4 server actions clave (TTL 60-300s).
+- [AÑADIDO] loading.tsx en 19/19 páginas del dashboard.
+- [AÑADIDO] Fetching paralelo con Promise.all en /profile y /routines/[id].
+- [CENTRALIZADO] Cálculo de grasa corporal (fórmula Navy) en src/lib/body-fat.ts.
+- [CORREGIDO] revalidatePath con query params (no soportado por Next.js).
+- [CORREGIDO] markAllNotificationsAsRead sin revalidación de caché.
+- [ELIMINADO] verifyCoachAccess y lógica legacy de coach en analytics.
+- [ELIMINADO] "use client" innecesario en personal-records-card y athlete-stats-cards.
 
 PENDIENTE (TODO)
-- Notificaciones: Sistema de avisos in-app y correo para atletas (ej. rutina actualizada).
 - Gamification: Logros, rachas y niveles para aumentar la retención.
-- Dashboard Global Coach: Métricas agregadas de todos los atletas.
 
-CAMBIOS REALIZADOS (JUNIO 2026)
+CAMBIOS REALIZADOS (FEBRERO 2026)
 - [ELIMINADO] Sistema de alertas proactivas del dashboard (AlertsBanner, alert-actions).
 - [ELIMINADO] Morning Briefing de Vivi del dashboard atleta.
-- [UNIFICADO] Branding del sistema: sidebar, login, favicon y PWA usan el mismo isotipo (caja blanca + círculo rojo).
+- [UNIFICADO] Branding del sistema: sidebar, login, favicon y PWA usan el mismo isotipo.
 - [MEJORA] Icono PWA y favicon regenerados desde el diseño unificado.

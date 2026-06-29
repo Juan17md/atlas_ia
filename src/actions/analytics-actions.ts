@@ -8,16 +8,6 @@ import type { TrainingSetData, TrainingExerciseData } from "@/types";
 
 // --- HELPERS ---
 
-async function verifyCoachAccess(coachId: string, athleteId: string): Promise<boolean> {
-    if (coachId === athleteId) return true;
-    try {
-        const athleteDoc = await adminDb.collection("users").doc(athleteId).get();
-        return athleteDoc.exists && athleteDoc.data()?.coachId === coachId;
-    } catch {
-        return false;
-    }
-}
-
 function getStartOfWeek(date: Date) {
     const day = date.getDay();
     const diff = date.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
@@ -79,10 +69,6 @@ export async function getWeeklyActivity(userId?: string) {
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
 
     const targetUserId = userId || session.user.id;
-    if (targetUserId !== session.user.id && !await verifyCoachAccess(session.user.id, targetUserId)) {
-        return { success: false, error: "No autorizado" };
-    }
-
     try {
         const data = await getCachedWeeklyActivity(targetUserId);
         return { success: true, data };
@@ -96,9 +82,6 @@ export async function getWeeklyProgress(userId?: string) {
     const session = await auth();
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
     const targetUserId = userId || session.user.id;
-    if (targetUserId !== session.user.id && !await verifyCoachAccess(session.user.id, targetUserId)) {
-        return { success: false, error: "No autorizado" };
-    }
 
     try {
         const startOfWeek = getStartOfWeek(new Date());
@@ -134,22 +117,15 @@ export async function getWeeklyProgress(userId?: string) {
     }
 }
 
-export async function getPersonalRecords(userId?: string) {
-    const session = await auth();
-    if (!session?.user?.id) return { success: false, error: "No autorizado" };
-    const targetUserId = userId || session.user.id;
-    if (targetUserId !== session.user.id && !await verifyCoachAccess(session.user.id, targetUserId)) {
-        return { success: false, error: "No autorizado" };
-    }
-
-    try {
+const getCachedPersonalRecords = unstable_cache(
+    async (targetUserId: string) => {
         const logsSnapshot = await adminDb.collection("training_logs")
             .where("athleteId", "==", targetUserId)
             .orderBy("date", "desc")
             .limit(20)
             .get();
 
-        const prsMap = new Map(); // Exercise -> { weight, reps, rpe, date }
+        const prsMap = new Map<string, { weight: number; reps: number; rpe: number; date: string }>();
 
         logsSnapshot.docs.forEach(doc => {
             const data = doc.data();
@@ -175,14 +151,25 @@ export async function getPersonalRecords(userId?: string) {
             }
         });
 
-        const prs = Array.from(prsMap.entries()).map(([name, val]) => ({
+        return Array.from(prsMap.entries()).map(([name, val]) => ({
             exercise: name,
             weight: val.weight,
             reps: val.reps,
             rpe: val.rpe,
             date: val.date
         })).sort((a, b) => b.weight - a.weight).slice(0, 20);
+    },
+    ["personal-records"],
+    { revalidate: 60, tags: ["personal-records", "training-logs"] }
+);
 
+export async function getPersonalRecords(userId?: string) {
+    const session = await auth();
+    if (!session?.user?.id) return { success: false, error: "No autorizado" };
+    const targetUserId = userId || session.user.id;
+
+    try {
+        const prs = await getCachedPersonalRecords(targetUserId);
         return { success: true, prs };
     } catch (error) {
         console.error("Error fetching PRs:", error);
@@ -190,16 +177,8 @@ export async function getPersonalRecords(userId?: string) {
     }
 }
 
-export async function getStrengthProgress(userId?: string) {
-    const session = await auth();
-    if (!session?.user?.id) return { success: false, error: "No autorizado" };
-    const targetUserId = userId || session.user.id;
-    if (targetUserId !== session.user.id && !await verifyCoachAccess(session.user.id, targetUserId)) {
-        return { success: false, error: "No autorizado" };
-    }
-
-    try {
-        // Obtenemos los últimos 20 logs para encontrar suficientes pares de comparación
+const getCachedStrengthProgress = unstable_cache(
+    async (targetUserId: string) => {
         const logsSnapshot = await adminDb.collection("training_logs")
             .where("athleteId", "==", targetUserId)
             .orderBy("date", "desc")
@@ -207,10 +186,9 @@ export async function getStrengthProgress(userId?: string) {
             .get();
 
         if (logsSnapshot.empty || logsSnapshot.size < 2) {
-            return { success: true, progress: 0 };
+            return 0;
         }
 
-        // Estructura: Ejercicio -> [E1RM_sesión_más_reciente, E1RM_sesión_anterior, ...]
         const exerciseHistory = new Map<string, number[]>();
 
         const calculateMaxE1RM = (exercise: TrainingExerciseData) => {
@@ -218,7 +196,6 @@ export async function getStrengthProgress(userId?: string) {
             exercise.sets.forEach((s: TrainingSetData) => {
                 if (s.completed && s.weight && s.reps) {
                     const rpe = s.rpe || 8;
-                    // Fórmula E1RM: Weight * (1 + (Reps + (10 - RPE)) / 30)
                     const e1rm = s.weight * (1 + (s.reps + (10 - rpe)) / 30);
                     if (e1rm > maxE1RM) maxE1RM = e1rm;
                 }
@@ -226,7 +203,6 @@ export async function getStrengthProgress(userId?: string) {
             return maxE1RM;
         };
 
-        // Procesar logs desde el más nuevo al más viejo
         logsSnapshot.docs.forEach(doc => {
             const data = doc.data();
             if (data.exercises) {
@@ -238,7 +214,6 @@ export async function getStrengthProgress(userId?: string) {
                         if (!exerciseHistory.has(name)) {
                             exerciseHistory.set(name, []);
                         }
-                        // Solo añadimos si es una sesión distinta (un log por sesión)
                         exerciseHistory.get(name)?.push(maxE1RM);
                     }
                 });
@@ -248,11 +223,10 @@ export async function getStrengthProgress(userId?: string) {
         let totalProgress = 0;
         let comparableExercisesCount = 0;
 
-        // Comparar cada ejercicio consigo mismo de la sesión anterior
-        exerciseHistory.forEach((history, exerciseName) => {
+        exerciseHistory.forEach((history) => {
             if (history.length >= 2) {
-                const latest = history[0];   // El más reciente (primero en el slice desc)
-                const previous = history[1]; // El anterior
+                const latest = history[0];
+                const previous = history[1];
 
                 if (previous > 0) {
                     const diff = ((latest - previous) / previous) * 100;
@@ -262,12 +236,22 @@ export async function getStrengthProgress(userId?: string) {
             }
         });
 
-        const finalProgress = comparableExercisesCount > 0
+        return comparableExercisesCount > 0
             ? parseFloat((totalProgress / comparableExercisesCount).toFixed(1))
             : 0;
+    },
+    ["strength-progress"],
+    { revalidate: 60, tags: ["strength-progress", "training-logs"] }
+);
 
-        return { success: true, progress: finalProgress };
+export async function getStrengthProgress(userId?: string) {
+    const session = await auth();
+    if (!session?.user?.id) return { success: false, error: "No autorizado" };
+    const targetUserId = userId || session.user.id;
 
+    try {
+        const progress = await getCachedStrengthProgress(targetUserId);
+        return { success: true, progress };
     } catch (error) {
         console.error("Error calculating strength progress:", error);
         return { success: false, error: "Error al calcular progreso" };
@@ -294,9 +278,6 @@ export async function getStrengthHistory(userId?: string) {
     const session = await auth();
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
     const targetUserId = userId || session.user.id;
-    if (targetUserId !== session.user.id && !await verifyCoachAccess(session.user.id, targetUserId)) {
-        return { success: false, error: "No autorizado" };
-    }
 
     try {
         const logsSnapshot = await adminDb.collection("training_logs")
@@ -394,8 +375,8 @@ import { getGroqClient, DEFAULT_AI_MODEL } from "@/lib/ai";
 
 export async function analyzeAthleteProgress(userId: string) {
     const session = await auth();
-    if (!session?.user?.id || session.user.role !== "coach") return { success: false, error: "No autorizado" };
-    if (!await verifyCoachAccess(session.user.id, userId)) return { success: false, error: "No autorizado" };
+    if (!session?.user?.id) return { success: false, error: "No autorizado" };
+    if (userId !== session.user.id) return { success: false, error: "No autorizado" };
 
     try {
         // 1. Obtener perfil del atleta para contexto de salud

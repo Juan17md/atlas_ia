@@ -53,10 +53,8 @@ export async function registerUser(data: z.infer<typeof RegisterInputSchemaServe
             onboardingCompleted: false,
         };
 
-        // Generar código de invitación único si es coach
-        if (role === "coach") {
-            newUserData.inviteCode = generarCodigoInvitacion();
-        }
+        // Generar código de invitación único
+        newUserData.inviteCode = generarCodigoInvitacion();
 
         try {
             await adminDb.collection("users").doc(firebaseUser.uid).set(newUserData);
@@ -106,50 +104,11 @@ export async function completeOnboarding(data: z.infer<typeof OnboardingInputSch
     const { password, ...profileData } = validation.data;
 
     try {
-        // Si el usuario proporcionó una contraseña (para usuarios de Google), la validamos y actualizamos en Auth
-        if (password && password.length >= 6) {
-            // Validar complejidad de contraseña
-            const hasUpperCase = /[A-Z]/.test(password);
-            const hasLowerCase = /[a-z]/.test(password);
-            const hasNumber = /\d/.test(password);
-            const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-            
-            const complexityScore = [hasUpperCase, hasLowerCase, hasNumber, hasSpecialChar].filter(Boolean).length;
-            
-            // Validar: mínimo 6 caracteres Y al menos 2 de los 4 criterios de complejidad
-            // O mínimo 8 caracteres sin requisitos de complejidad
-            const isValidPassword = password.length >= 8 || complexityScore >= 2;
-            
-            if (!isValidPassword) {
-                return { 
-                    success: false, 
-                    error: "La contraseña debe tener al menos 8 caracteres, o 6 caracteres con al menos 2 de: mayúscula, número, carácter especial" 
-                };
-            }
-
-            try {
-                await adminAuth.updateUser(session.user.id, {
-                    password: password
-                });
-            } catch (authError) {
-                console.error("Error actualizando contraseña:", authError);
-                return { success: false, error: "Error al establecer la contraseña. Intenta otra." };
-            }
-        }
-
-        // Usamos set con { merge: true } para crear el documento si no existe 
-        // o actualizarlo si ya existe, evitando el error NOT_FOUND.
-        // Si el usuario estableció contraseña, marcar hasPassword como true
         const updateData: Record<string, unknown> = {
             ...profileData,
             onboardingCompleted: true,
             updatedAt: new Date(),
         };
-
-        // Si el usuario de Google estableció contraseña, ahora puede acceder con ambos métodos
-        if (password && password.length >= 6) {
-            updateData.hasPassword = true;
-        }
 
         await adminDb.collection("users").doc(session.user.id).set(updateData, { merge: true });
 

@@ -26,12 +26,16 @@ export default async function ProfilePage() {
     const session = await auth();
     if (!session?.user?.id) redirect("/login");
 
-    // Fetch fresh user data
-    const userDoc = await adminDb.collection("users").doc(session.user.id).get();
-    const rawData = userDoc.data() || {};
+    // Fetch user data and measurement history in parallel
+    const [userDocSnap, historyResult] = await Promise.all([
+        adminDb.collection("users").doc(session.user.id).get(),
+        getBodyMeasurementsHistory(session.user.id),
+    ]);
+
+    const rawData = userDocSnap.data() || {};
 
     const userData = {
-        id: userDoc.id,
+        id: userDocSnap.id,
         name: rawData.name,
         email: rawData.email,
         image: rawData.image,
@@ -45,42 +49,14 @@ export default async function ProfilePage() {
         measurements: Object.fromEntries(
             Object.entries(rawData.measurements || {}).filter(([_, v]) => typeof v === "number")
         ) as Record<string, number>,
-        // Explicitly converting dates if needed, though ProfileForm currently doesn't use them directly
         emailVerified: rawData.emailVerified?.toDate?.()?.toISOString() || null,
     };
 
-    // Fetch measurement history if athlete
-    let historyData: Array<{
-        id: string;
-        date: Date;
-        weight?: number;
-        chest?: number;
-        waist?: number;
-        hips?: number;
-        shoulders?: number;
-        neck?: number;
-        abdomen?: number;
-        glutes?: number;
-        bicepsLeft?: number;
-        bicepsRight?: number;
-        forearmsLeft?: number;
-        forearmsRight?: number;
-        quadsLeft?: number;
-        quadsRight?: number;
-        calvesLeft?: number;
-        calvesRight?: number;
-    }> = [];
-    const isCoach = session.user.role === "coach";
-
-    if (!isCoach) {
-        const historyResult = await getBodyMeasurementsHistory(session.user.id);
-        const rawData = historyResult.success && historyResult.data ? historyResult.data : [];
-        // Convertir strings a Dates para el componente MeasurementChart
-        historyData = rawData.map(item => ({
-            ...item,
-            date: new Date(item.date)
-        }));
-    }
+    const historyRawData = historyResult.success && historyResult.data ? historyResult.data : [];
+    const historyData = historyRawData.map(item => ({
+        ...item,
+        date: new Date(item.date)
+    }));
 
     return (
         <div className="max-w-4xl mx-auto space-y-12 pb-32 relative">
@@ -115,7 +91,7 @@ export default async function ProfilePage() {
             <Tabs defaultValue="details" className="w-full">
                 <TabsList className={cn(
                     "grid w-full bg-neutral-900/20 backdrop-blur-xl border border-white/5 mb-12 rounded-3xl p-1.5 h-14 shadow-2xl",
-                    isCoach ? "grid-cols-1" : "grid-cols-3"
+                    "grid-cols-3"
                 )}>
                     <TabsTrigger value="details" className="rounded-2xl data-[state=active]:bg-white data-[state=active]:text-black transition-all text-neutral-500 font-black uppercase italic tracking-widest h-full text-[10px] px-1">
                         <div className="flex items-center justify-center gap-3">
@@ -123,22 +99,18 @@ export default async function ProfilePage() {
                             <span>Datos</span>
                         </div>
                     </TabsTrigger>
-                    {!isCoach && (
-                        <>
-                            <TabsTrigger value="measurements" className="rounded-2xl data-[state=active]:bg-white data-[state=active]:text-black transition-all text-neutral-500 font-black uppercase italic tracking-widest h-full text-[10px] px-1">
-                                <div className="flex items-center justify-center gap-3">
-                                    <Ruler className="w-4 h-4 hidden sm:inline" />
-                                    <span>Progreso</span>
-                                </div>
-                            </TabsTrigger>
-                            <TabsTrigger value="health" className="rounded-2xl data-[state=active]:bg-white data-[state=active]:text-black transition-all text-neutral-500 font-black uppercase italic tracking-widest h-full text-[10px] px-1">
-                                <div className="flex items-center justify-center gap-3">
-                                    <HeartPulse className="w-4 h-4 hidden sm:inline" />
-                                    <span>Salud</span>
-                                </div>
-                            </TabsTrigger>
-                        </>
-                    )}
+                    <TabsTrigger value="measurements" className="rounded-2xl data-[state=active]:bg-white data-[state=active]:text-black transition-all text-neutral-500 font-black uppercase italic tracking-widest h-full text-[10px] px-1">
+                        <div className="flex items-center justify-center gap-3">
+                            <Ruler className="w-4 h-4 hidden sm:inline" />
+                            <span>Progreso</span>
+                        </div>
+                    </TabsTrigger>
+                    <TabsTrigger value="health" className="rounded-2xl data-[state=active]:bg-white data-[state=active]:text-black transition-all text-neutral-500 font-black uppercase italic tracking-widest h-full text-[10px] px-1">
+                        <div className="flex items-center justify-center gap-3">
+                            <HeartPulse className="w-4 h-4 hidden sm:inline" />
+                            <span>Salud</span>
+                        </div>
+                    </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="details">
@@ -154,8 +126,7 @@ export default async function ProfilePage() {
                     </ClientMotionDiv>
                 </TabsContent>
 
-                {!isCoach && (
-                    <TabsContent value="measurements" className="space-y-10">
+                <TabsContent value="measurements" className="space-y-10">
                         <ClientMotionDiv
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
@@ -214,19 +185,17 @@ export default async function ProfilePage() {
                             />
                         </div>
                     </TabsContent>
-                )}
 
-                {!isCoach && (
-                    <TabsContent value="health" className="space-y-10">
-                        <ClientMotionDiv
-                            initial={{ opacity: 0, scale: 0.98 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="bg-neutral-900/20 backdrop-blur-xl border border-white/5 rounded-4xl p-10 md:p-12 shadow-2xl relative overflow-hidden"
-                        >
-                            <div className="absolute inset-0 bg-linear-to-b from-blue-600/5 to-transparent pointer-events-none" />
+                <TabsContent value="health" className="space-y-10">
+                    <ClientMotionDiv
+                        initial={{ opacity: 0, scale: 0.98 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-neutral-900/20 backdrop-blur-xl border border-white/5 rounded-4xl p-10 md:p-12 shadow-2xl relative overflow-hidden"
+                    >
+                        <div className="absolute inset-0 bg-linear-to-b from-blue-600/5 to-transparent pointer-events-none" />
 
-                            <div className="flex items-center justify-between mb-12 relative z-10">
-                                <div className="flex items-center gap-6">
+                        <div className="flex items-center justify-between mb-12 relative z-10">
+                            <div className="flex items-center gap-6">
                                     <div className="w-14 h-14 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center justify-center shadow-xl">
                                         <HeartPulse className="w-8 h-8 text-red-500" />
                                     </div>
@@ -293,7 +262,6 @@ export default async function ProfilePage() {
                             </div>
                         </ClientMotionDiv>
                     </TabsContent>
-                )}
             </Tabs>
         </div>
     );

@@ -1,6 +1,5 @@
 import { auth } from "@/lib/auth";
 import { getRoutines } from "@/actions/routine-actions";
-import { getAllAthletes } from "@/actions/coach-actions";
 import { Button } from "@/components/ui/button";
 import { Plus, ClipboardList, ChevronRight, Zap } from "lucide-react";
 import Link from "next/link";
@@ -13,24 +12,13 @@ export default async function RoutinesPage() {
 
     // Verificación de autenticación
     if (!session?.user?.id) redirect("/login");
-    const role = session.user.role as string;
-    if (role !== "coach" && role !== "advanced_athlete") redirect("/dashboard");
 
-    // Cargar datos en paralelo desde el servidor
-    const [routinesRes, athletesRes] = await Promise.all([
-        getRoutines(),
-        role === "coach" ? getAllAthletes() : Promise.resolve({ success: true, athletes: [] })
-    ]);
-
+    const routinesRes = await getRoutines();
     const routinesRaw = routinesRes.success ? routinesRes.routines || [] : [];
-    const athletesRaw = athletesRes.success ? athletesRes.athletes || [] : [];
 
     // Asegurar que no haya duplicados por ID y minimizar serialización enviada a Client Components (server-serialization)
     const routines = Array.from(new Map(routinesRaw.map(r => [r.id, r])).values());
-    const athletes = Array.from(new Map(athletesRaw.map(a => [
-        a.id,
-        { id: a.id, name: a.name, email: a.email, image: a.image } // Solo campos usados por el diálogo
-    ])).values());
+    const athletes: Array<{ id: string; name: string; email: string; image: string | null }> = [];
 
     return (
         <div className="space-y-12 pb-24 md:pb-10 relative">

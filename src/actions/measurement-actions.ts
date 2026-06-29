@@ -2,9 +2,10 @@
 
 import { adminDb } from "@/lib/firebase-admin";
 import { auth } from "@/lib/auth";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { z } from "zod";
 import { BodyMeasurementLogSchema } from "@/lib/schemas";
+import { calcularGrasaCorporal } from "@/lib/body-fat";
 
 type BodyMeasurementInput = Partial<Omit<z.input<typeof BodyMeasurementLogSchema>, "date">> & { date?: Date | string };
 
@@ -16,16 +17,9 @@ export async function logBodyMeasurements(data: BodyMeasurementInput, targetUser
 
     const userId = targetUserId || session.user.id;
 
-    // Si un coach intenta guardar para un atleta, verificar que sea SU atleta
+    // Solo permitir editar el propio perfil
     if (targetUserId && targetUserId !== session.user.id) {
-        if (session.user.role !== "coach") {
-            return { success: false, error: "No autorizado para editar otros perfiles" };
-        }
-        // Verificar relación coach-atleta
-        const athleteDoc = await adminDb.collection("users").doc(targetUserId).get();
-        if (!athleteDoc.exists || athleteDoc.data()?.coachId !== session.user.id) {
-            return { success: false, error: "Este atleta no está vinculado a tu cuenta" };
-        }
+        return { success: false, error: "No autorizado para editar otros perfiles" };
     }
 
     try {
@@ -37,48 +31,9 @@ export async function logBodyMeasurements(data: BodyMeasurementInput, targetUser
 
         // ... resto de la lógica usando userId ...
 
-        // Calcular porcentaje de grasa corporal si es posible (Método Oficial US Navy)
-        let calculatedBodyFat: number | undefined = undefined;
-        let bodyFatWarning: string | undefined = undefined;
-
-        if (height && data.waist && data.neck) {
-            // Fórmula Navy (Versión Métrica)
-            // Hombres: BF = 495 / (1.0324 - 0.19077 * log10(cintura - cuello) + 0.15456 * log10(altura)) - 450
-            // Mujeres: BF = 495 / (1.29579 - 0.35004 * log10(cintura + cadera - cuello) + 0.22100 * log10(altura)) - 450
-
-            const log10 = Math.log10;
-            const h = height;
-            const w = data.waist;
-            const n = data.neck;
-
-            // Validar medidas fisiológicamente posibles
-            if (w <= n) {
-                bodyFatWarning = "La cintura debe ser mayor que el cuello para calcular grasa corporal";
-            } else if (gender === "male" || (gender !== "female")) { // Por defecto usar masculino si se desconoce
-                const diff = w - n;
-                if (diff > 0 && h > 0) {
-                    const denom = 1.0324 - 0.19077 * log10(diff) + 0.15456 * log10(h);
-                    if (denom !== 0 && !isNaN(denom)) {
-                        calculatedBodyFat = (495 / denom) - 450;
-                    }
-                }
-            } else if (gender === "female" && data.hips) {
-                const hip = data.hips;
-                const diff = (w + hip) - n;
-                if (diff > 0 && h > 0) {
-                    const denom = 1.29579 - 0.35004 * log10(diff) + 0.22100 * log10(h);
-                    if (denom !== 0 && !isNaN(denom)) {
-                        calculatedBodyFat = (495 / denom) - 450;
-                    }
-                }
-            }
-        }
-
-        if (calculatedBodyFat !== undefined && !isNaN(calculatedBodyFat)) {
-            // Clamp value between 2 and 60% for sanity
-            calculatedBodyFat = Math.max(2, Math.min(60, calculatedBodyFat));
-            calculatedBodyFat = parseFloat(calculatedBodyFat.toFixed(1));
-        }
+        const { bodyFat: calculatedBodyFat, warning: bodyFatWarning } = height && data.waist && data.neck
+            ? calcularGrasaCorporal({ height, waist: data.waist, neck: data.neck, hips: data.hips, gender })
+            : { bodyFat: undefined, warning: undefined };
 
         const logData = {
             ...data,
@@ -99,11 +54,9 @@ export async function logBodyMeasurements(data: BodyMeasurementInput, targetUser
         await syncUserLatestMeasurements(userId);
 
         revalidatePath("/profile");
-        revalidatePath("/analytics");
-        revalidatePath(`/progress`);
-        if (targetUserId) {
-            revalidatePath(`/progress?athleteId=${targetUserId}`);
-        }
+        revalidatePath("/progress");
+        revalidatePath("/progress/history");
+        revalidateTag("body-measurements", "default");
 
         return { 
             success: true, 
@@ -155,13 +108,6 @@ export async function deleteBodyMeasurement(measurementId: string, targetUserId:
     const session = await auth();
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
 
-    const isCoach = session.user.role === "coach";
-    const isAdvancedAthlete = session.user.role === "advanced_athlete";
-
-    if (!isCoach && !isAdvancedAthlete) {
-        return { success: false, error: "No tienes permisos para borrar registros" };
-    }
-
     try {
         const docRef = adminDb.collection("body_measurements").doc(measurementId);
         const doc = await docRef.get();
@@ -169,7 +115,7 @@ export async function deleteBodyMeasurement(measurementId: string, targetUserId:
         if (!doc.exists) return { success: false, error: "Registro no encontrado" };
 
         const data = doc.data();
-        if (!isCoach && data?.userId !== session.user.id) {
+        if (data?.userId !== session.user.id) {
             return { success: false, error: "No puedes borrar registros de otros usuarios" };
         }
 
@@ -192,13 +138,6 @@ export async function updateBodyMeasurement(measurementId: string, targetUserId:
     const session = await auth();
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
 
-    const isCoach = session.user.role === "coach";
-    const isAdvancedAthlete = session.user.role === "advanced_athlete";
-
-    if (!isCoach && !isAdvancedAthlete) {
-        return { success: false, error: "No tienes permisos para editar registros" };
-    }
-
     try {
         const docRef = adminDb.collection("body_measurements").doc(measurementId);
         const doc = await docRef.get();
@@ -206,7 +145,7 @@ export async function updateBodyMeasurement(measurementId: string, targetUserId:
         if (!doc.exists) return { success: false, error: "Registro no encontrado" };
 
         const existingData = doc.data();
-        if (!isCoach && existingData?.userId !== session.user.id) {
+        if (existingData?.userId !== session.user.id) {
             return { success: false, error: "No puedes editar registros de otros usuarios" };
         }
 
@@ -257,27 +196,15 @@ export async function updateBodyMeasurement(measurementId: string, targetUserId:
     }
 }
 
-export async function getBodyMeasurementsHistory(userId?: string) {
-    const session = await auth();
-    if (!session?.user?.id) {
-        return { success: false, error: "No autorizado" };
-    }
-
-    const targetId = userId || session.user.id;
-
-    // Verificar acceso si se consultan datos de otro usuario (debe ser coach)
-    if (userId && userId !== session.user.id && session.user.role !== "coach") {
-        return { success: false, error: "No autorizado para ver estos datos" };
-    }
-
-    try {
+const getCachedBodyMeasurementsHistory = unstable_cache(
+    async (userId: string) => {
         const snapshot = await adminDb
             .collection("body_measurements")
-            .where("userId", "==", targetId)
+            .where("userId", "==", userId)
             .orderBy("date", "asc")
             .get();
 
-        const data = snapshot.docs.map(doc => {
+        return snapshot.docs.map(doc => {
             const d = doc.data();
             return {
                 id: doc.id,
@@ -301,11 +228,24 @@ export async function getBodyMeasurementsHistory(userId?: string) {
                 quadsRight: d.quadsRight,
                 calvesLeft: d.calvesLeft,
                 calvesRight: d.calvesRight,
-
                 notes: d.notes
             };
         });
+    },
+    ["body-measurements"],
+    { revalidate: 300, tags: ["body-measurements"] }
+);
 
+export async function getBodyMeasurementsHistory(userId?: string) {
+    const session = await auth();
+    if (!session?.user?.id) {
+        return { success: false, error: "No autorizado" };
+    }
+
+    const targetId = userId || session.user.id;
+
+    try {
+        const data = await getCachedBodyMeasurementsHistory(targetId);
         return { success: true, data };
     } catch (error) {
         console.error("Error fetching measurement history:", error);

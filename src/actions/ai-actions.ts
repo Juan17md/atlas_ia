@@ -136,7 +136,7 @@ export async function suggestSubstitute(exerciseName: string, reason: "busy" | "
 
 export async function generateRoutinePlan(goal: string, level: string, days: string, type: "weekly" | "daily" = "weekly") {
     const session = await auth();
-    if (!session?.user?.id || session.user.role !== "coach") {
+    if (!session?.user?.id) {
         return { success: false, error: "No autorizado" };
     }
 

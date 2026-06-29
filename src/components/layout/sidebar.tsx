@@ -8,10 +8,7 @@ import {
     LayoutDashboard,
     Dumbbell,
     BarChart2,
-    Users,
     LogOut,
-    Target,
-    UserCircle,
     ClipboardList,
     History
 } from "lucide-react";
@@ -31,38 +28,15 @@ interface SidebarProps {
 export function Sidebar({ role, user }: SidebarProps) {
     const pathname = usePathname();
 
-    const commonItems = [
+    const menuItems = [
         { label: "DASHBOARD", href: "/dashboard", icon: LayoutDashboard, prefetch: true },
-    ];
-
-    const coachItems = [
-        ...commonItems,
-        { label: "ATLETAS", href: "/athletes", icon: Users, prefetch: true },
-        { label: "RUTINAS", href: "/routines", icon: ClipboardList, prefetch: true },
-        { label: "EJERCICIOS", href: "/exercises", icon: Dumbbell, prefetch: false },
-        { label: "PROGRESO", href: "/progress", icon: BarChart2, prefetch: false },
-        { label: "USUARIOS", href: "/users", icon: Users, prefetch: true },
-    ];
-
-    const athleteItems = [
-        ...commonItems,
         { label: "ENTRENAR", href: "/train", icon: Dumbbell, prefetch: true },
         { label: "MI RUTINA", href: "/my-routine", icon: ClipboardList, prefetch: true },
-        { label: "HISTORIAL", href: "/history", icon: History, prefetch: false },
-        { label: "ANÁLISIS", href: "/progress", icon: BarChart2, prefetch: false },
-    ];
-
-    const advancedAthleteItems = [
-        ...athleteItems,
         { label: "RUTINAS", href: "/routines", icon: ClipboardList, prefetch: true },
         { label: "EJERCICIOS", href: "/exercises", icon: Dumbbell, prefetch: false },
+        { label: "HISTORIAL", href: "/history", icon: History, prefetch: false },
+        { label: "PROGRESO", href: "/progress", icon: BarChart2, prefetch: false },
     ];
-
-    const menuItems = role === "coach"
-        ? coachItems
-        : role === "advanced_athlete"
-            ? advancedAthleteItems
-            : athleteItems;
 
 
     return (

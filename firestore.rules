@@ -7,49 +7,18 @@ service cloud.firestore {
     // FUNCIONES DE AYUDA
     // ============================================
     
-    // Verifica si el usuario está autenticado
     function isAuthenticated() {
       return request.auth != null;
     }
 
-    // Verifica si el usuario es el propietario del documento
     function isOwner(userId) {
       return request.auth.uid == userId;
     }
     
-    // Verifica si el usuario tiene rol de coach (usando Custom Claims)
-    function isCoach() {
-      return isAuthenticated() && request.auth.token.role == 'coach';
-    }
-    
-    // Verifica si el usuario tiene rol de atleta
-    function isAthlete() {
-      return isAuthenticated() && request.auth.token.role == 'athlete';
-    }
-    
-    // Verifica si el usuario tiene rol de atleta avanzado
-    function isAdvancedAthlete() {
-      return isAuthenticated() && request.auth.token.role == 'advanced_athlete';
-    }
-    
-    // Verifica si el usuario es coach o atleta avanzado
-    function isCoachOrAdvanced() {
-      return isCoach() || isAdvancedAthlete();
-    }
-    
-    // Verifica si el coach tiene asignado a un atleta específico
-    function isCoachOfAthlete(athleteId) {
-      return isCoach() && (
-        get(/databases/$(database)/documents/users/$(athleteId)).data.coachId == request.auth.uid
-      );
-    }
-    
-    // Verifica que los datos de entrada contengan un campo específico
     function hasField(field) {
       return field in request.resource.data;
     }
     
-    // Verifica el tamaño máximo de una cadena
     function isValidString(field, maxLength) {
       return request.resource.data[field] is string && 
              request.resource.data[field].size() <= maxLength;
@@ -62,30 +31,16 @@ service cloud.firestore {
     // ----------------------------------------
     // USERS (Perfiles de usuarios)
     // ----------------------------------------
-    // - Solo se pueden leer campos públicos (name, role, photoUrl/image)
-    // - El propietario puede leer/escribir todos sus campos
-    // - Los coaches pueden leer datos básicos de sus atletas
-    // - Nadie puede eliminar (solo admin desde consola)
     match /users/{userId} {
-      // Permitir lectura completa solo al propietario
       allow read: if isAuthenticated() && isOwner(userId);
       
-      // Permitir lectura de campos públicos a coaches (para ver sus atletas)
-      allow read: if isCoach() && (
-        resource.data.coachId == request.auth.uid ||
-        resource.data.role == 'coach'
-      );
-
       allow create: if isAuthenticated()
                     && isOwner(userId)
                     && hasField('role')
-                    && request.resource.data.role in ['coach', 'athlete', 'advanced_athlete'];
+                    && request.resource.data.role == 'advanced_athlete';
 
       allow update: if isAuthenticated()
-                    && isOwner(userId)
-                    // No permitir cambiar el rol una vez establecido
-                    && (!('role' in request.resource.data) ||
-                        request.resource.data.role == resource.data.role);
+                    && isOwner(userId);
 
       allow delete: if false;
     }
@@ -94,73 +49,52 @@ service cloud.firestore {
     // EXERCISES (Biblioteca de ejercicios)
     // ----------------------------------------
     // - Cualquier autenticado puede leer
-    // - Coaches y atletas avanzados pueden crear/editar/eliminar
+    // - Cualquier autenticado puede crear/editar/eliminar sus propios ejercicios
     match /exercises/{exerciseId} {
       allow read: if isAuthenticated();
       
-      allow create: if isCoachOrAdvanced()
+      allow create: if isAuthenticated()
                     && hasField('name')
                     && hasField('muscleGroups')
                     && hasField('coachId')
                     && request.resource.data.coachId == request.auth.uid;
       
-      allow update: if isCoachOrAdvanced()
-                    // Creador o atleta avanzado del mismo coach
-                    && (resource.data.coachId == request.auth.uid || 
-                        !('coachId' in resource.data) ||
-                        (isAdvancedAthlete() && 
-                         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.coachId == resource.data.coachId));
+      allow update: if isAuthenticated()
+                    && resource.data.coachId == request.auth.uid;
       
-      allow delete: if isCoachOrAdvanced()
-                    && (resource.data.coachId == request.auth.uid ||
-                        (isAdvancedAthlete() && 
-                         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.coachId == resource.data.coachId));
+      allow delete: if isAuthenticated()
+                    && resource.data.coachId == request.auth.uid;
     }
 
     // ----------------------------------------
     // ROUTINES (Rutinas de entrenamiento)
     // ----------------------------------------
-    // - Atletas leen sus propias rutinas
-    // - Coaches leen/escriben rutinas que ellos crearon
-    // - Atletas avanzados tienen acceso completo a sus propias rutinas
     match /routines/{routineId} {
       allow read: if isAuthenticated() && (
-        // Atleta lee su rutina asignada
         resource.data.athleteId == request.auth.uid ||
-        // Coach lee rutinas que creó
-        resource.data.coachId == request.auth.uid ||
-        // Coach lee rutinas de sus atletas
-        isCoachOfAthlete(resource.data.athleteId) ||
-        // Atleta avanzado lee rutinas de su coach
-        (isAdvancedAthlete() && 
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.coachId == resource.data.coachId)
+        resource.data.coachId == request.auth.uid
       );
       
-      allow create: if isCoachOrAdvanced()
+      allow create: if isAuthenticated()
                     && hasField('coachId')
                     && request.resource.data.coachId == request.auth.uid
                     && hasField('athleteId')
                     && hasField('name');
       
-      allow update: if isCoachOrAdvanced()
+      allow update: if isAuthenticated()
                     && (resource.data.coachId == request.auth.uid ||
-                        (isAdvancedAthlete() && resource.data.athleteId == request.auth.uid));
+                        resource.data.athleteId == request.auth.uid);
       
-      allow delete: if isCoachOrAdvanced()
-                    && (resource.data.coachId == request.auth.uid ||
-                        (isAdvancedAthlete() && resource.data.athleteId == request.auth.uid));
+      allow delete: if isAuthenticated()
+                    && resource.data.coachId == request.auth.uid;
     }
 
     // ----------------------------------------
     // TRAINING_LOGS (Registros de entrenamientos)
     // ----------------------------------------
-    // - Atletas leen/escriben sus propios logs
-    // - Coaches leen los logs de sus atletas
     match /training_logs/{logId} {
       allow read: if isAuthenticated() && (
-        resource.data.athleteId == request.auth.uid ||
-        isCoachOfAthlete(resource.data.athleteId) ||
-        isCoach() // Coaches pueden ver todos para análisis global
+        resource.data.athleteId == request.auth.uid
       );
       
       allow create: if isAuthenticated()
@@ -178,12 +112,9 @@ service cloud.firestore {
     // ----------------------------------------
     // WORKOUTS (Entrenamientos completados)
     // ----------------------------------------
-    // Similar a training_logs
     match /workouts/{workoutId} {
       allow read: if isAuthenticated() && (
-        resource.data.athleteId == request.auth.uid ||
-        isCoachOfAthlete(resource.data.athleteId) ||
-        isCoach()
+        resource.data.athleteId == request.auth.uid
       );
       
       allow create: if isAuthenticated()
@@ -202,9 +133,7 @@ service cloud.firestore {
     // ----------------------------------------
     match /workout_sets/{setId} {
       allow read: if isAuthenticated() && (
-        resource.data.athleteId == request.auth.uid ||
-        isCoachOfAthlete(resource.data.athleteId) ||
-        isCoach()
+        resource.data.athleteId == request.auth.uid
       );
       
       allow create: if isAuthenticated()
@@ -223,18 +152,14 @@ service cloud.firestore {
     // ----------------------------------------
     // BODY_MEASUREMENTS (Medidas corporales)
     // ----------------------------------------
-    // - Atletas leen/escriben sus propias medidas
-    // - Coaches leen las medidas de sus atletas
     match /body_measurements/{measurementId} {
       allow read: if isAuthenticated() && (
-        resource.data.userId == request.auth.uid ||
-        isCoachOfAthlete(resource.data.userId)
+        resource.data.userId == request.auth.uid
       );
       
       allow create: if isAuthenticated()
                     && hasField('userId')
-                    && (request.resource.data.userId == request.auth.uid ||
-                        isCoachOfAthlete(request.resource.data.userId))
+                    && request.resource.data.userId == request.auth.uid
                     && hasField('date');
       
       allow update: if isAuthenticated()
@@ -247,8 +172,6 @@ service cloud.firestore {
     // ----------------------------------------
     // MEASUREMENTS — DEPRECADO
     // ----------------------------------------
-    // Colección legacy. Usar 'body_measurements' en su lugar.
-    // Se deniega todo acceso para forzar la migración.
     match /measurements/{measurementId} {
       allow read, write: if false;
     }
@@ -256,45 +179,36 @@ service cloud.firestore {
     // ----------------------------------------
     // NOTIFICATIONS (Notificaciones)
     // ----------------------------------------
-    // - Los usuarios leen sus propias notificaciones
-    // - Solo el servidor puede escribir (via Admin SDK)
     match /notifications/{notificationId} {
       allow read: if isAuthenticated() && (
-        resource.data.userId == request.auth.uid || 
-        resource.data.athleteId == request.auth.uid ||
-        resource.data.coachId == request.auth.uid
+        resource.data.userId == request.auth.uid
       );
       
-      // Permitir actualizar solo el campo 'read' para marcar como leída
       allow update: if isAuthenticated() 
-                    && (resource.data.userId == request.auth.uid ||
-                        resource.data.athleteId == request.auth.uid)
+                    && resource.data.userId == request.auth.uid
                     && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
       
-      allow create, delete: if false; // Solo servidor
+      allow create, delete: if false;
     }
     
     // ----------------------------------------
-    // AI_ANALYSIS (Análisis de IA - futuro)
+    // AI_ANALYSIS (Análisis de IA)
     // ----------------------------------------
     match /ai_analysis/{analysisId} {
       allow read: if isAuthenticated() && (
         resource.data.athleteId == request.auth.uid ||
-        resource.data.coachId == request.auth.uid ||
-        isCoachOfAthlete(resource.data.athleteId)
+        resource.data.coachId == request.auth.uid
       );
       
-      allow write: if false; // Solo servidor (Admin SDK)
+      allow write: if false;
     }
     
     // ----------------------------------------
-    // PROGRESS_RECORDS (Récords personales - futuro)
+    // PROGRESS_RECORDS (Récords personales)
     // ----------------------------------------
     match /progress_records/{recordId} {
       allow read: if isAuthenticated() && (
-        resource.data.athleteId == request.auth.uid ||
-        isCoachOfAthlete(resource.data.athleteId) ||
-        isCoach()
+        resource.data.athleteId == request.auth.uid
       );
       
       allow create, update: if isAuthenticated()
@@ -309,10 +223,7 @@ service cloud.firestore {
     // VIVI_INTELLIGENCE (Memorias e insights de IA)
     // ----------------------------------------
     match /vivi_intelligence/{userId} {
-      allow read: if isAuthenticated() && (
-        userId == request.auth.uid ||
-        isCoachOfAthlete(userId)
-      );
+      allow read: if isAuthenticated() && userId == request.auth.uid;
       
       allow create, update: if isAuthenticated()
                              && userId == request.auth.uid;

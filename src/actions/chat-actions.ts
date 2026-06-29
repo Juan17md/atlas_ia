@@ -19,7 +19,7 @@ export async function chatWithAI(messages: { role: string; content: string }[]) 
         const rl = rateLimit(`chat-ai:${session.user.id}`, 15, 60_000);
         if (!rl.allowed) return { success: false, error: `Demasiadas solicitudes. Espera ${rl.retryAfter}s` };
 
-        const role = session.user.role || "athlete";
+        const role = "advanced_athlete";
         const ultimoMensaje = messages[messages.length - 1]?.content || "";
 
         const { intencion } = clasificarIntencion(ultimoMensaje);
@@ -44,11 +44,7 @@ export async function chatWithAI(messages: { role: string; content: string }[]) 
             datosExtra = `HISTORIAL DE FUERZA (E1RM):\n${ejerciciosStr}\n\nREADINESS: ${viviIntel?.readinessScore || 75}/100`;
         }
 
-        const systemPrompt = role === "coach"
-            ? `Eres Atlas IA Copilot, un asistente experto para entrenadores de alto rendimiento.
-Tu conocimiento abarca biomecánica avanzada, fisiología del ejercicio, periodización y nutrición deportiva.
-Ayuda al entrenador con terminología técnica precisa. Sé directo y profesional.`
-            : generarPromptPorIntencion(intencion, athleteCtx, datosExtra);
+        const systemPrompt = generarPromptPorIntencion(intencion, athleteCtx, datosExtra);
 
         const groq = getGroqClient();
 

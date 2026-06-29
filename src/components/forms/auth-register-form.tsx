@@ -49,7 +49,7 @@ export function AuthRegisterForm() {
                 name: data.name,
                 email: data.email,
                 password: data.password,
-                role: "athlete",
+                role: "advanced_athlete",
             });
 
             if (result.success) {

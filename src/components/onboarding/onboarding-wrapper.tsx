@@ -3,7 +3,6 @@
 import dynamic from "next/dynamic";
 import { LoaderPremium } from "@/components/ui/loader-premium";
 
-// Carga dinámica sin SSR para evitar hydration mismatch de Radix UI Select
 const OnboardingWizard = dynamic(
     () => import("@/components/onboarding/onboarding-wizard").then((mod) => mod.OnboardingWizard),
     {
@@ -16,10 +15,6 @@ const OnboardingWizard = dynamic(
     }
 );
 
-interface OnboardingWrapperProps {
-    authProvider: "google" | "password";
-}
-
-export function OnboardingWrapper({ authProvider }: OnboardingWrapperProps) {
-    return <OnboardingWizard authProvider={authProvider} />;
+export function OnboardingWrapper() {
+    return <OnboardingWizard />;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Bell, Brain, ExternalLink, AlertCircle } from "lucide-react";
+import { Bell, ExternalLink } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -17,19 +17,14 @@ import { es } from "date-fns/locale";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
-export function NotificationBell({ role }: { role?: string }) {
+export function NotificationBell() {
     const [notifications, setNotifications] = useState<any[]>([]);
     const [hasUnread, setHasUnread] = useState(false);
     const [isMarking, setIsMarking] = useState(false);
 
     useEffect(() => {
         const fetchNotifications = async () => {
-            let res;
-            if (role === "coach") {
-                res = await getCoachNotifications();
-            } else {
-                res = await getAthleteNotifications();
-            }
+            const res = await getAthleteNotifications();
 
             if (res.success && res.notifications) {
                 setNotifications(res.notifications);
@@ -37,7 +32,7 @@ export function NotificationBell({ role }: { role?: string }) {
             }
         };
         fetchNotifications();
-    }, [role]);
+    }, []);
 
     const handleMarkAllRead = async () => {
         if (notifications.length === 0) return;
@@ -68,15 +63,9 @@ export function NotificationBell({ role }: { role?: string }) {
             <DropdownMenuContent align="end" className="w-[360px] bg-neutral-950/95 backdrop-blur-xl border-neutral-800 text-white rounded-3xl shadow-[0_0_40px_-10px_rgba(0,0,0,0.7)] p-0 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200">
                 <div className="p-5 bg-neutral-950/50 border-b border-neutral-800 flex items-center justify-between">
                     <DropdownMenuLabel className="font-black text-lg p-0 flex items-center gap-2.5 tracking-tight">
-                        {role === 'coach' ? (
-                            <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center border border-purple-500/20">
-                                <Brain className="w-4 h-4 text-purple-500" />
-                            </div>
-                        ) : (
-                            <div className="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center border border-red-500/20">
-                                <Bell className="w-4 h-4 text-red-500" />
-                            </div>
-                        )}
+                        <div className="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center border border-red-500/20">
+                            <Bell className="w-4 h-4 text-red-500" />
+                        </div>
                         Notificaciones
                     </DropdownMenuLabel>
                     <span className="bg-neutral-900 border border-neutral-800 text-neutral-400 px-2 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-widest">
@@ -103,8 +92,8 @@ export function NotificationBell({ role }: { role?: string }) {
                                 `}
                             >
                                 <Link
-                                    href={notif.link || (role === 'coach' ? `/athletes/${notif.athleteId}` : '#')}
-                                    className={`absolute inset-0 z-10 ${!notif.link && role !== 'coach' ? 'pointer-events-none' : ''}`}
+                                    href={notif.link || '#'}
+                                    className="absolute inset-0 z-10"
                                 />
 
                                 <div className="flex gap-4">
@@ -130,15 +119,10 @@ export function NotificationBell({ role }: { role?: string }) {
                                             {notif.message}
                                         </p>
 
-                                        {(notif.link || role === 'coach') && (
+                                        {notif.link && (
                                             <div className="pt-2 flex">
-                                                <span className={`
-                                                    inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider transition-all
-                                                    ${notif.link
-                                                        ? 'text-red-400 group-hover:text-red-300 group-hover:translate-x-1'
-                                                        : 'text-purple-400 group-hover:text-purple-300 group-hover:translate-x-1'}
-                                                `}>
-                                                    {notif.link ? 'Tomar Acción' : 'Ver Atleta'}
+                                                <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider transition-all text-red-400 group-hover:text-red-300 group-hover:translate-x-1">
+                                                    Tomar Acción
                                                     <ExternalLink className="w-3 h-3" />
                                                 </span>
                                             </div>

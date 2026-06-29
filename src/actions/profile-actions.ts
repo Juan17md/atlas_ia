@@ -37,11 +37,8 @@ export async function updateProfile(data: UpdateProfileInput, targetUserId?: str
 
     const userId = targetUserId || currentUserId;
 
-    // REGLA .cursorrules: Seguridad de Coach
     if (targetUserId && targetUserId !== currentUserId) {
-        if (session.user.role !== "coach") {
-            return { success: false, error: "Permiso denegado: Solo coaches pueden editar perfiles de atletas" };
-        }
+        return { success: false, error: "Permiso denegado: No puedes editar perfiles de otros usuarios" };
     }
 
     try {
@@ -54,11 +51,7 @@ export async function updateProfile(data: UpdateProfileInput, targetUserId?: str
             updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         }, { merge: true });
 
-        // Revalidación selectiva y profunda
         revalidatePath("/profile");
-        revalidatePath(`/athletes/${userId}`);
-
-        // Si el usuario es un atleta vinculado, refrescar también su dashboard
         revalidatePath("/dashboard");
 
         return { success: true };

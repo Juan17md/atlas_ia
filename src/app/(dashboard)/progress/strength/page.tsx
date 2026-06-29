@@ -1,6 +1,5 @@
 import { auth } from "@/lib/auth";
 import { getStrengthHistory, getStrengthProgress } from "@/actions/analytics-actions";
-import { getAllAthletes } from "@/actions/coach-actions";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, TrendingUp } from "lucide-react";
@@ -8,29 +7,11 @@ import { Button } from "@/components/ui/button";
 import { StrengthCharts } from "@/components/progress/strength-charts";
 import { ClientMotionDiv } from "@/components/ui/client-motion";
 
-interface StrengthPageProps {
-    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}
-
-export default async function StrengthPage({ searchParams }: StrengthPageProps) {
+export default async function StrengthPage() {
     const session = await auth();
     if (!session?.user?.id) redirect("/login");
 
-    const isCoach = session.user.role === "coach";
-    let targetUserId = session.user.id;
-
-    if (isCoach) {
-        const result = await getAllAthletes();
-        const athletes = result.athletes || [];
-        const params = await searchParams;
-        const requestedId = params?.athleteId as string;
-
-        if (requestedId) {
-            targetUserId = requestedId;
-        } else if (athletes.length > 0) {
-            targetUserId = athletes[0].id;
-        }
-    }
+    const targetUserId = session.user.id;
 
     const [historyResult, progressResult] = await Promise.all([
         getStrengthHistory(targetUserId),

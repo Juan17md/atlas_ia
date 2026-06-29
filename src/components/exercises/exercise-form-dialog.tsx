@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { MediaUpload } from "@/components/ui/media-upload";
+
 import { Loader2, Dumbbell, Tag, ImagePlay, Search, Eraser, Activity, ChevronRight, ChevronLeft, Sparkles, Youtube, Check, ExternalLink as ExternalLinkIcon, Timer, Repeat } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -445,22 +445,12 @@ export function ExerciseFormDialog({ exercise, trigger, open, onOpenChange }: Ex
                                 {step === 4 && (
                                     <div className="space-y-6">
                                         <Label className="text-[10px] font-black uppercase tracking-widest text-neutral-500 ml-1 flex items-center gap-2">
-                                            <ImagePlay className="w-3 h-3 text-red-500" /> Multimedia & Referencias
+                                            <ImagePlay className="w-3 h-3 text-red-500" /> Video Referencial
                                         </Label>
 
                                         <div className="p-5 md:p-8 bg-black/40 backdrop-blur-md rounded-2xl md:rounded-3xl border border-white/5 shadow-inner space-y-6">
                                             <div className="space-y-4">
-                                                <Label className="text-[9px] font-black uppercase tracking-widest text-neutral-600 ml-1">Video Demo</Label>
-                                                <MediaUpload
-                                                    value={watch("videoUrl") || ""}
-                                                    onChange={(url) => setValue("videoUrl", url)}
-                                                    onClear={() => setValue("videoUrl", "")}
-                                                    disabled={isSubmitting}
-                                                />
-                                            </div>
-
-                                            <div className="space-y-4">
-                                                <Label className="text-[9px] font-black uppercase tracking-widest text-neutral-600 ml-1">Enlace Externo</Label>
+                                                <Label className="text-[9px] font-black uppercase tracking-widest text-neutral-600 ml-1">URL del Video</Label>
                                                 <div className="relative group">
                                                     <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                                                         <Youtube className="w-4 h-4 text-neutral-700 group-focus-within:text-red-500 transition-colors" />

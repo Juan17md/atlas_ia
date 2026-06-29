@@ -30,26 +30,9 @@ export async function getRoutines() {
 
     try {
         const snapshots: FirebaseFirestore.QuerySnapshot[] = [];
-        if (session.user.role === "coach") {
-            const snap = await adminDb.collection("routines").where("coachId", "==", session.user.id).get();
-            snapshots.push(snap);
-        } else if (session.user.role === "advanced_athlete") {
-            // Atleta avanzado ve: rutinas asignadas, creadas por él, y las de su coach
-            const assignedSnap = await adminDb.collection("routines").where("athleteId", "==", session.user.id).where("active", "==", true).get();
-            const createdSnap = await adminDb.collection("routines").where("coachId", "==", session.user.id).get();
-            snapshots.push(assignedSnap, createdSnap);
-
-            // También ver rutinas del coach asignado
-            const userDoc = await adminDb.collection("users").doc(session.user.id).get();
-            const myCoachId = userDoc.data()?.coachId;
-            if (myCoachId) {
-                const coachSnap = await adminDb.collection("routines").where("coachId", "==", myCoachId).get();
-                snapshots.push(coachSnap);
-            }
-        } else {
-            const snap = await adminDb.collection("routines").where("athleteId", "==", session.user.id).where("active", "==", true).get();
-            snapshots.push(snap);
-        }
+        const assignedSnap = await adminDb.collection("routines").where("athleteId", "==", session.user.id).get();
+        const createdSnap = await adminDb.collection("routines").where("coachId", "==", session.user.id).get();
+        snapshots.push(assignedSnap, createdSnap);
 
         const routinesRaw = snapshots.flatMap(snap => snap.docs.map(doc => {
             return serializeFirestoreData({ id: doc.id, ...doc.data() });
@@ -65,10 +48,11 @@ export async function getRoutines() {
     }
 }
 
-// Get Athlete's Active Routine (for Coach)
+// Get Athlete's Active Routine
 export async function getAthleteRoutine(athleteId: string) {
     const session = await auth();
-    if (!session?.user?.id || session.user.role !== "coach") return null;
+    if (!session?.user?.id) return null;
+    if (athleteId !== session.user.id) return null;
 
     try {
         const snapshot = await adminDb.collection("routines")
@@ -93,7 +77,7 @@ export async function getAthleteRoutine(athleteId: string) {
 // Get Coach's Routines (for assigning to athletes)
 export async function getCoachRoutines() {
     const session = await auth();
-    if (!session?.user?.id || session.user.role !== "coach") {
+    if (!session?.user?.id) {
         return { success: false, error: "No autorizado" };
     }
 
@@ -117,12 +101,15 @@ export async function getCoachRoutines() {
 // Assign Routine to Athlete (creates a copy for the athlete)
 export async function assignRoutineToAthlete(athleteId: string, routineId: string) {
     const session = await auth();
-    if (!session?.user?.id || session.user.role !== "coach") {
+    if (!session?.user?.id) {
+        return { success: false, error: "No autorizado" };
+    }
+
+    if (athleteId !== session.user.id) {
         return { success: false, error: "No autorizado" };
     }
 
     try {
-        // 1. Verify routine ownership
         const routineRef = adminDb.collection("routines").doc(routineId);
         const routineSnap = await routineRef.get();
         if (!routineSnap.exists || routineSnap.data()?.coachId !== session.user.id) {
@@ -229,7 +216,11 @@ export async function assignRoutineToAthlete(athleteId: string, routineId: strin
 // Unassign/Deactivate Routine from Athlete
 export async function unassignRoutineFromAthlete(athleteId: string) {
     const session = await auth();
-    if (!session?.user?.id || session.user.role !== "coach") {
+    if (!session?.user?.id) {
+        return { success: false, error: "No autorizado" };
+    }
+
+    if (athleteId !== session.user.id) {
         return { success: false, error: "No autorizado" };
     }
 
@@ -254,8 +245,6 @@ export async function unassignRoutineFromAthlete(athleteId: string) {
 
         await batch.commit();
 
-        revalidatePath(`/athletes/${athleteId}`);
-        revalidatePath("/athletes");
         revalidatePath("/dashboard");
 
         return { success: true };
@@ -268,7 +257,7 @@ export async function unassignRoutineFromAthlete(athleteId: string) {
 // Get athletes assigned to a routine template
 export async function getAssignedAthletes(routineId: string) {
     const session = await auth();
-    if (!session?.user?.id || session.user.role !== "coach") {
+    if (!session?.user?.id) {
         return { success: false, error: "No autorizado" };
     }
 
@@ -314,13 +303,9 @@ export async function getRoutine(id: string) {
         if (!docSnap.exists) return { success: false, error: "Rutina no encontrada" };
 
         const data = docSnap.data();
-        const isOwner = data?.athleteId === session.user.id;
-        const isCoachOfAthlete = (session.user.role as string) === "coach" && data?.coachId === session.user.id;
+        const isOwner = data?.athleteId === session.user.id || data?.coachId === session.user.id;
 
-        if (!isOwner && !isCoachOfAthlete && (session.user.role as string) !== "coach") {
-            return { success: false, error: "No autorizado" };
-        }
-        if ((session.user.role as string) === "coach" && data?.coachId !== session.user.id) {
+        if (!isOwner) {
             return { success: false, error: "No autorizado" };
         }
 
@@ -339,9 +324,8 @@ export async function getRoutine(id: string) {
 // Create Routine
 export async function createRoutine(data: Partial<RoutineInput>) {
     const session = await auth();
-    const role = session?.user?.role as string;
-    if (!session?.user?.id || (role !== "coach" && role !== "advanced_athlete")) {
-        return { success: false, error: "Solo coaches y atletas avanzados pueden crear rutinas" };
+    if (!session?.user?.id) {
+        return { success: false, error: "No autorizado" };
     }
 
     // Validar campos requeridos con Zod
@@ -384,8 +368,7 @@ export async function createRoutine(data: Partial<RoutineInput>) {
 // Update Routine
 export async function updateRoutine(id: string, data: Partial<RoutineInput>) {
     const session = await auth();
-    const role = session?.user?.role as string;
-    if (!session?.user?.id || (role !== "coach" && role !== "advanced_athlete")) {
+    if (!session?.user?.id) {
         return { success: false, error: "No autorizado" };
     }
 
@@ -422,11 +405,8 @@ export async function updateRoutine(id: string, data: Partial<RoutineInput>) {
 export async function deleteRoutine(id: string) {
     const session = await auth();
     const userId = session?.user?.id;
-    const role = session?.user?.role as string;
     
-    console.log(`>>> [DELETE ROUTINE] User ${userId} (${role}) attempting to delete: ${id}`);
-    
-    if (!userId || (role !== "coach" && role !== "advanced_athlete")) {
+    if (!userId) {
         return { success: false, error: "No autorizado" };
     }
 
@@ -439,14 +419,13 @@ export async function deleteRoutine(id: string) {
         
         const routineData = docSnap.data();
         
-        const isCoachOwner = routineData?.coachId === userId;
-        const isAthleteOwner = routineData?.athleteId === userId && role === "advanced_athlete";
+        const isOwner = routineData?.coachId === userId || routineData?.athleteId === userId;
 
-        if (!isCoachOwner && !isAthleteOwner) {
+        if (!isOwner) {
             return { success: false, error: "No tienes permisos para eliminar esta rutina" };
         }
         
-        if (isCoachOwner && !routineData?.athleteId) {
+        if (routineData?.coachId === userId && !routineData?.athleteId) {
             const assignedCopies = await adminDb.collection("routines")
                 .where("originalRoutineId", "==", id)
                 .get();
@@ -477,8 +456,7 @@ export async function deleteRoutine(id: string) {
 // Duplicate Routine
 export async function duplicateRoutine(id: string) {
     const session = await auth();
-    const role = session?.user?.role as string;
-    if (!session?.user?.id || (role !== "coach" && role !== "advanced_athlete")) {
+    if (!session?.user?.id) {
         return { success: false, error: "No autorizado" };
     }
 
@@ -510,7 +488,7 @@ export async function duplicateRoutine(id: string) {
 
 export async function generateRoutineWithAI(data: z.infer<typeof GenerateRoutineSchema>) {
     const session = await auth();
-    if (!session?.user?.id || session.user.role !== "coach") {
+    if (!session?.user?.id) {
         return { success: false, error: "No autorizado" };
     }
 

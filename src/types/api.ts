@@ -227,7 +227,7 @@ export interface DashboardUser {
     name?: string | null;
     email?: string | null;
     image?: string | null;
-    role?: "athlete" | "coach" | "advanced_athlete";
+    role?: "advanced_athlete";
     onboardingCompleted?: boolean;
 }
 

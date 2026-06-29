@@ -17,25 +17,7 @@ export default async function MeasurementHistoryPage({ searchParams }: HistoryPa
     const session = await auth();
     if (!session?.user?.id) return null;
 
-    const isCoach = session.user.role === "coach";
-    let targetUserId = session.user.id;
-    let athleteName = "Mi Historial";
-
-    if (isCoach) {
-        const params = await searchParams;
-        const requestedId = params?.athleteId as string;
-        if (requestedId) {
-            targetUserId = requestedId;
-            try {
-                const userDoc = await adminDb.collection("users").doc(requestedId).get();
-                if (userDoc.exists) {
-                     athleteName = `Historial de ${userDoc.data()?.name || 'Atleta'}`;
-                }
-            } catch (e) {
-                console.error("Error fetching athlete name", e);
-            }
-        }
-    }
+    const targetUserId = session.user.id;
 
     const historyResult = await getBodyMeasurementsHistory(targetUserId);
     const history = historyResult.success && historyResult.data ? historyResult.data : [];
@@ -43,7 +25,7 @@ export default async function MeasurementHistoryPage({ searchParams }: HistoryPa
     // Sort descending by date
     const sortedHistory = [...history].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-    const canEditGlobal = isCoach || session.user.role === "advanced_athlete";
+    const canEditGlobal = true;
 
     const measurementKeys = [
         "chest", "waist", "abdomen", "hips", "shoulders", "glutes", "neck",
@@ -69,7 +51,7 @@ export default async function MeasurementHistoryPage({ searchParams }: HistoryPa
                 animate={{ opacity: 1, y: 0 }}
                 className="flex items-center gap-6 px-2"
             >
-                <Link href={`/progress${isCoach && targetUserId !== session.user.id ? `?athleteId=${targetUserId}` : ''}`}>
+                <Link href="/progress">
                     <Button variant="ghost" size="icon" className="h-12 w-12 rounded-xl bg-neutral-900/40 border border-white/5 text-neutral-400 hover:text-white hover:bg-white/5 transition-all shadow-xl">
                         <ArrowLeft className="w-6 h-6" />
                     </Button>
@@ -80,7 +62,7 @@ export default async function MeasurementHistoryPage({ searchParams }: HistoryPa
                         <span className="text-[10px] font-black text-red-500 uppercase tracking-[0.4em] italic">Bitácora Métrica</span>
                     </div>
                     <h1 className="text-4xl md:text-5xl font-black text-white uppercase italic tracking-tighter leading-none">
-                        {athleteName}
+                        {session.user.name || "Mi Historial"}
                     </h1>
                 </div>
             </ClientMotionDiv>
@@ -117,7 +99,7 @@ export default async function MeasurementHistoryPage({ searchParams }: HistoryPa
                                                     <MeasurementHistoryActions 
                                                         measurement={item} 
                                                         targetUserId={targetUserId}
-                                                        canEdit={isCoach || (session.user.role === "advanced_athlete" && item.userId === session.user.id)}
+                                                        canEdit={true}
                                                     />
                                                 </div>
                                             )}
