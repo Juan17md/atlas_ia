@@ -25,7 +25,7 @@ interface SidebarProps {
     };
 }
 
-export function Sidebar({ role, user }: SidebarProps) {
+export function Sidebar({ user }: SidebarProps) {
     const pathname = usePathname();
 
     const menuItems = [

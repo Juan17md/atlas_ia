@@ -15,8 +15,6 @@ import {
 import { signOut } from "next-auth/react";
 import { LogOut } from "lucide-react";
 import { OptimizedAvatar } from "@/components/ui/optimized-avatar";
-import { ROLE_CONFIG } from "@/components/layout/user-nav";
-
 interface MobileNavProps {
     role?: string;
     user?: any;
@@ -25,8 +23,6 @@ interface MobileNavProps {
 export function MobileNav({ role, user }: MobileNavProps) {
     const [isOpen, setIsOpen] = React.useState(false);
     const pathname = usePathname();
-    const userRoleKey = (user?.role || "athlete").toLowerCase();
-    const roleInfo = ROLE_CONFIG[userRoleKey] || ROLE_CONFIG.athlete;
 
     const items = [
         { label: "Inicio", href: "/dashboard", icon: LayoutDashboard },
@@ -89,9 +85,6 @@ export function MobileNav({ role, user }: MobileNavProps) {
                             <OptimizedAvatar src={user?.image} alt={user?.name || "Juan"} size={50} className="border-2 border-red-500/30" />
                             <div>
                                 <h3 className="text-lg font-black text-white uppercase italic tracking-tighter leading-none">{user?.name || "Premium User"}</h3>
-                                <div className={`mt-1.5 inline-flex items-center px-2 py-0.5 rounded-full border text-[8px] uppercase font-black tracking-widest ${roleInfo.color}`}>
-                                    {roleInfo.label}
-                                </div>
                             </div>
                             <Link
                                 href="/profile"

@@ -225,11 +225,13 @@ body {
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
-input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 1000px #0a0a0a inset !important;
+input:-webkit-autofill:active,
+input:autofill {
+  -webkit-box-shadow: 0 0 0 1000px rgb(23 23 23) inset !important;
+  box-shadow: 0 0 0 1000px rgb(23 23 23) inset !important;
   -webkit-text-fill-color: white !important;
   caret-color: white !important;
-  background-color: #0a0a0a !important;
+  background-color: rgb(23 23 23) !important;
   color: white !important;
   transition: background-color 5000s ease-in-out 0s;
 }

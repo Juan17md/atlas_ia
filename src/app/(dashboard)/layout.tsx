@@ -32,7 +32,7 @@ export default async function DashboardLayout({
     return (
         <div className="flex min-h-screen w-full bg-black">
             {/* Sidebar */}
-            <Sidebar role={role} user={user} />
+            <Sidebar user={user} />
 
             {/* Main Content Area */}
             <div className="flex flex-1 flex-col relative overflow-hidden md:ml-[220px]">
