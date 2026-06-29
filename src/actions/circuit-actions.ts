@@ -61,8 +61,7 @@ export async function getCircuito(id: string) {
 
 export async function createCircuito(data: CircuitInput) {
     const session = await auth();
-    const role = session?.user?.role as string;
-    if (!session?.user?.id || (role !== "coach" && role !== "advanced_athlete")) {
+    if (!session?.user?.id) {
         return { success: false, error: "No autorizado" };
     }
 

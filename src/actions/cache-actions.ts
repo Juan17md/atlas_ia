@@ -7,9 +7,9 @@ import { revalidateTag } from "next/cache";
  * Usar estas constantes para mantener consistencia.
  */
 export const CACHE_TAGS = {
-    // Coach
-    COACH_STATS: "coach-stats",
-    COACH_NOTIFICATIONS: "coach-notifications",
+    // Owner
+    OWNER_STATS: "owner-stats",
+    ACTIVITY_NOTIFICATIONS: "activity-notifications",
 
     // Athletes
     ATHLETES: "athletes",
@@ -38,7 +38,7 @@ export type CacheTag = typeof CACHE_TAGS[keyof typeof CACHE_TAGS];
  * @example
  * ```ts
  * // Después de crear una rutina
- * await revalidateCacheTags(["routines", "coach-stats"]);
+ * await revalidateCacheTags(["routines", "owner-stats"]);
  * ```
  */
 export async function revalidateCacheTags(tags: CacheTag[]) {
@@ -48,25 +48,24 @@ export async function revalidateCacheTags(tags: CacheTag[]) {
 }
 
 /**
- * Revalida todos los datos del coach (stats, atletas, rutinas).
+ * Revalida datos del propietario (stats, rutinas, ejercicios).
  * Usar cuando hay cambios que afectan múltiples secciones.
  */
-export async function revalidateCoachData() {
+export async function revalidateDashboardData() {
     await revalidateCacheTags([
-        CACHE_TAGS.COACH_STATS,
-        CACHE_TAGS.ATHLETES,
+        CACHE_TAGS.OWNER_STATS,
         CACHE_TAGS.ROUTINES,
         CACHE_TAGS.EXERCISES,
     ]);
 }
 
 /**
- * Revalida datos del atleta después de un entrenamiento.
+ * Revalida datos después de un entrenamiento.
  */
-export async function revalidateAthleteData() {
+export async function revalidateTrainingData() {
     await revalidateCacheTags([
         CACHE_TAGS.TRAINING_LOGS,
         CACHE_TAGS.ATHLETE_NOTIFICATIONS,
-        CACHE_TAGS.COACH_STATS, // Para que el coach vea la actividad
+        CACHE_TAGS.OWNER_STATS,
     ]);
 }

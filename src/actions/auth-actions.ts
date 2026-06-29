@@ -13,15 +13,6 @@ import { adminDb, adminAuth } from "@/lib/firebase-admin";
  * 2. Crea el usuario en Firebase Auth (Admin SDK)
  * 3. Crea el documento del usuario en Firestore (Admin SDK)
  */
-function generarCodigoInvitacion(): string {
-    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-    let code = "";
-    for (let i = 0; i < 8; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return code;
-}
-
 export async function registerUser(data: z.infer<typeof RegisterInputSchemaServer>) {
     const validation = RegisterInputSchemaServer.safeParse(data);
 
@@ -52,9 +43,6 @@ export async function registerUser(data: z.infer<typeof RegisterInputSchemaServe
             updatedAt: new Date(),
             onboardingCompleted: false,
         };
-
-        // Generar código de invitación único
-        newUserData.inviteCode = generarCodigoInvitacion();
 
         try {
             await adminDb.collection("users").doc(firebaseUser.uid).set(newUserData);

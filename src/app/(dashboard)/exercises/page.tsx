@@ -13,9 +13,8 @@ export default async function ExercisesPage() {
     // Auth Check
     if (!session?.user?.id) redirect("/login");
 
-    // Access Check: Coaches and Advanced Athletes can manage their library
-    const role = session.user.role as string;
-    if (role !== "coach" && role !== "advanced_athlete") {
+    // Access Check: Solo usuarios autenticados pueden gestionar su biblioteca
+    if (!session.user.id) {
         redirect("/dashboard");
     }
 

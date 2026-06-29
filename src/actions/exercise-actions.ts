@@ -28,8 +28,7 @@ const QuickExerciseSchema = z.object({
 
 export async function createQuickExercise(data: z.infer<typeof QuickExerciseSchema>) {
     const session = await auth();
-    const role = session?.user?.role as string;
-    if (!session?.user?.id || (role !== "coach" && role !== "advanced_athlete")) {
+    if (!session?.user?.id) {
         return { success: false, error: "No autorizado" };
     }
 
@@ -61,8 +60,7 @@ export async function createQuickExercise(data: z.infer<typeof QuickExerciseSche
 
 export async function getExercises() {
     const session = await auth();
-    const role = session?.user?.role as string;
-    if (!session?.user?.id || (role !== "coach" && role !== "advanced_athlete")) {
+    if (!session?.user?.id) {
         return { success: false, error: "No autorizado" };
     }
 
@@ -91,8 +89,7 @@ export async function getExercises() {
 
 export async function createExercise(data: ExerciseInput) {
     const session = await auth();
-    const role = session?.user?.role as string;
-    if (!session?.user?.id || (role !== "coach" && role !== "advanced_athlete")) {
+    if (!session?.user?.id) {
         return { success: false, error: "No autorizado" };
     }
 
@@ -114,7 +111,6 @@ export async function createExercise(data: ExerciseInput) {
         revalidatePath("/exercises");
         revalidatePath("/dashboard");
         revalidateTag("exercises", "default");
-        revalidateTag("coach-stats", "default");
 
         return { success: true, id: docRef.id };
     } catch (error) {
@@ -125,8 +121,7 @@ export async function createExercise(data: ExerciseInput) {
 
 export async function updateExercise(id: string, data: ExerciseInput) {
     const session = await auth();
-    const role = session?.user?.role as string;
-    if (!session?.user?.id || (role !== "coach" && role !== "advanced_athlete")) {
+    if (!session?.user?.id) {
         return { success: false, error: "No autorizado" };
     }
 
@@ -146,15 +141,7 @@ export async function updateExercise(id: string, data: ExerciseInput) {
         const exerciseCoachId = docSnap.data()?.coachId;
         const isCreator = exerciseCoachId === session.user.id;
 
-        // Atleta avanzado puede editar ejercicios de su coach
-        let isAdvancedWithAccess = false;
-        if (!isCreator && role === 'advanced_athlete') {
-            const userDoc = await adminDb.collection('users').doc(session.user.id).get();
-            const myCoachId = userDoc.data()?.coachId;
-            isAdvancedWithAccess = !!myCoachId && exerciseCoachId === myCoachId;
-        }
-
-        if (!isCreator && !isAdvancedWithAccess) {
+        if (!isCreator) {
             return { success: false, error: "No tienes permiso para editar este ejercicio" };
         }
 
@@ -166,7 +153,6 @@ export async function updateExercise(id: string, data: ExerciseInput) {
         revalidatePath("/exercises");
         revalidatePath("/dashboard");
         revalidateTag("exercises", "default");
-        revalidateTag("coach-stats", "default");
 
         return { success: true };
     } catch (error) {
@@ -177,8 +163,7 @@ export async function updateExercise(id: string, data: ExerciseInput) {
 
 export async function deleteExercise(id: string) {
     const session = await auth();
-    const role = session?.user?.role as string;
-    if (!session?.user?.id || (role !== "coach" && role !== "advanced_athlete")) {
+    if (!session?.user?.id) {
         return { success: false, error: "No autorizado" };
     }
 
@@ -193,15 +178,7 @@ export async function deleteExercise(id: string) {
         const exerciseCoachId = docSnap.data()?.coachId;
         const isCreator = exerciseCoachId === session.user.id;
 
-        // Atleta avanzado puede eliminar ejercicios de su coach
-        let isAdvancedWithAccess = false;
-        if (!isCreator && role === 'advanced_athlete') {
-            const userDoc = await adminDb.collection('users').doc(session.user.id).get();
-            const myCoachId = userDoc.data()?.coachId;
-            isAdvancedWithAccess = !!myCoachId && exerciseCoachId === myCoachId;
-        }
-
-        if (!isCreator && !isAdvancedWithAccess) {
+        if (!isCreator) {
             return { success: false, error: "No tienes permiso para eliminar este ejercicio" };
         }
 
@@ -239,7 +216,6 @@ export async function deleteExercise(id: string) {
         revalidatePath("/exercises");
         revalidatePath("/dashboard");
         revalidateTag("exercises", "default");
-        revalidateTag("coach-stats", "default");
 
         return { success: true };
     } catch (error) {
@@ -247,6 +223,7 @@ export async function deleteExercise(id: string) {
         return { success: false, error: "Error al eliminar ejercicio" };
     }
 }
+
 export async function getExerciseNames(ids: string[]) {
     if (!ids || ids.length === 0) return { success: true, names: {} };
 

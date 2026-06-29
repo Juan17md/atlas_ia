@@ -74,8 +74,8 @@ export async function getAthleteRoutine(athleteId: string) {
     }
 }
 
-// Get Coach's Routines (for assigning to athletes)
-export async function getCoachRoutines() {
+// Get User's Own Routines (created by them)
+export async function getMyRoutines() {
     const session = await auth();
     if (!session?.user?.id) {
         return { success: false, error: "No autorizado" };
@@ -93,7 +93,7 @@ export async function getCoachRoutines() {
 
         return { success: true, routines };
     } catch (error) {
-        console.error("Error fetching coach routines:", error);
+        console.error("Error fetching own routines:", error);
         return { success: false, error: "Error al cargar rutinas" };
     }
 }
@@ -357,7 +357,7 @@ export async function createRoutine(data: Partial<RoutineInput>) {
         revalidatePath("/routines");
         revalidatePath("/dashboard");
         revalidateTag("routines", "default");
-        revalidateTag("coach-stats", "default");
+        revalidateTag("owner-stats", "default");
         return { success: true, id: docRef.id };
     } catch (error) {
         console.error("Error creating routine:", error);

@@ -177,7 +177,7 @@ export function AthleteDashboardUI({ user, activityData, weeklyCompleted, weekly
                             ) : (
                                 <>
                                     <h3 className="text-2xl font-black mb-1 text-neutral-500 uppercase italic">Sin Rutina</h3>
-                                    <p className="text-xs text-neutral-600 font-medium mb-8">Contacta a tu coach para recibir tu plan personalizado.</p>
+                                    <p className="text-xs text-neutral-600 font-medium mb-8">Crea tu rutina personalizada con el asistente IA.</p>
                                     <Button disabled className="w-full rounded-2xl bg-neutral-900 text-neutral-700 font-black uppercase tracking-[0.2em] text-[10px] py-6 grayscale">
                                         No disponible
                                     </Button>

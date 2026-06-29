@@ -24,8 +24,8 @@ interface TrainingLog {
     exercises?: TrainingExercise[];
 }
 
-// Caché para notificaciones del coach (revalida cada 2 minutos)
-const getCachedCoachNotifications = unstable_cache(
+// Caché para notificaciones de actividad (revalida cada 2 minutos)
+const getCachedActivityNotifications = unstable_cache(
     async () => {
         const logsSnapshot = await adminDb.collection("training_logs")
             .orderBy("date", "desc")
@@ -112,20 +112,20 @@ const getCachedCoachNotifications = unstable_cache(
 
         return notifications;
     },
-    ["coach-notifications"],
-    { revalidate: 120, tags: ["notifications", "coach-notifications"] }
+    ["activity-notifications"],
+    { revalidate: 120, tags: ["notifications", "activity-notifications"] }
 );
 
-export async function getCoachNotifications() {
+export async function getActivityNotifications() {
     const session = await auth();
     if (!session?.user?.id) {
         return { success: false, error: "No autorizado" };
     }
 
     try {
-        const notifications = await getCachedCoachNotifications();
+        const notifications = await getCachedActivityNotifications();
 
-        // Obtener fecha de última lectura del coach
+        // Obtener fecha de última lectura
         const userDoc = await adminDb.collection("users").doc(session.user.id).get();
         const lastRead = userDoc.data()?.lastReadNotificationsAt?.toDate() || new Date(0);
 

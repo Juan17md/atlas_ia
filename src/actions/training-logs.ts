@@ -291,7 +291,7 @@ export async function getLastSessionExerciseData(exerciseId: string) {
 function revalidateAllTags() {
     revalidateTag("training-logs", "default");
     revalidateTag("weekly-activity", "default");
-    revalidateTag("coach-stats", "default");
+    revalidateTag("owner-stats", "default");
     revalidateTag("recent-activity", "default");
     revalidatePath("/train");
     revalidatePath("/history");

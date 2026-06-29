@@ -10,7 +10,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { getCoachNotifications, getAthleteNotifications, markAllNotificationsAsRead } from "@/actions/notification-actions";
+import { getAthleteNotifications, markAllNotificationsAsRead } from "@/actions/notification-actions";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
