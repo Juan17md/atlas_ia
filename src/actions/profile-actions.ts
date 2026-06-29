@@ -37,10 +37,6 @@ export async function updateProfile(data: UpdateProfileInput, targetUserId?: str
 
     const userId = targetUserId || currentUserId;
 
-    if (targetUserId && targetUserId !== currentUserId) {
-        return { success: false, error: "Permiso denegado: No puedes editar perfiles de otros usuarios" };
-    }
-
     try {
         const userRef = adminDb.collection("users").doc(userId).withConverter(createAdminConverter<UpdateProfileInput>());
 

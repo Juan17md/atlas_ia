@@ -376,7 +376,6 @@ import { getGroqClient, DEFAULT_AI_MODEL } from "@/lib/ai";
 export async function analyzeAthleteProgress(userId: string) {
     const session = await auth();
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
-    if (userId !== session.user.id) return { success: false, error: "No autorizado" };
 
     try {
         // 1. Obtener perfil del atleta para contexto de salud

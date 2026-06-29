@@ -135,13 +135,6 @@ export async function updateExercise(id: string, data: ExerciseInput) {
             return { success: false, error: "Ejercicio no encontrado" };
         }
 
-        const exerciseCoachId = docSnap.data()?.coachId;
-        const isCreator = exerciseCoachId === session.user.id;
-
-        if (!isCreator) {
-            return { success: false, error: "No tienes permiso para editar este ejercicio" };
-        }
-
         await docRef.update({
             ...validation.data,
             updatedAt: new Date(),
@@ -170,13 +163,6 @@ export async function deleteExercise(id: string) {
 
         if (!docSnap.exists) {
             return { success: false, error: "Ejercicio no encontrado" };
-        }
-
-        const exerciseCoachId = docSnap.data()?.coachId;
-        const isCreator = exerciseCoachId === session.user.id;
-
-        if (!isCreator) {
-            return { success: false, error: "No tienes permiso para eliminar este ejercicio" };
         }
 
         // Verificar si el ejercicio está siendo usado en cualquier rutina

@@ -34,8 +34,7 @@ export async function getRoutines() {
         const routines = (snapshot.docs.map(doc => {
             return serializeFirestoreData({ id: doc.id, ...doc.data() });
         }) as Routine[])
-            .filter(r => !r.deletedAt && r.active !== false)
-            .filter(r => !r.athleteId || r.athleteId === session.user.id);
+            .filter(r => !r.deletedAt && r.active !== false);
 
         return { success: true, routines };
     } catch (error) {
@@ -48,7 +47,6 @@ export async function getRoutines() {
 export async function getAthleteRoutine(athleteId: string) {
     const session = await auth();
     if (!session?.user?.id) return null;
-    if (athleteId !== session.user.id) return null;
 
     try {
         const snapshot = await adminDb.collection("routines")
@@ -100,15 +98,11 @@ export async function assignRoutineToAthlete(athleteId: string, routineId: strin
         return { success: false, error: "No autorizado" };
     }
 
-    if (athleteId !== session.user.id) {
-        return { success: false, error: "No autorizado" };
-    }
-
     try {
         const routineRef = adminDb.collection("routines").doc(routineId);
         const routineSnap = await routineRef.get();
-        if (!routineSnap.exists || routineSnap.data()?.coachId !== session.user.id) {
-            return { success: false, error: "Rutina no encontrada o sin permisos" };
+        if (!routineSnap.exists) {
+            return { success: false, error: "Rutina no encontrada" };
         }
 
         // 2. Check if this routine is already assigned to this athlete
@@ -215,10 +209,6 @@ export async function unassignRoutineFromAthlete(athleteId: string) {
         return { success: false, error: "No autorizado" };
     }
 
-    if (athleteId !== session.user.id) {
-        return { success: false, error: "No autorizado" };
-    }
-
     try {
         const snapshot = await adminDb.collection("routines")
             .where("athleteId", "==", athleteId)
@@ -298,13 +288,6 @@ export async function getRoutine(id: string) {
         if (!docSnap.exists) return { success: false, error: "Rutina no encontrada" };
 
         const data = docSnap.data();
-        const isOwner = data?.athleteId === session.user.id
-            || data?.coachId === session.user.id
-            || !data?.athleteId;
-
-        if (!isOwner) {
-            return { success: false, error: "No autorizado" };
-        }
 
         return {
             success: true,
@@ -379,14 +362,6 @@ export async function updateRoutine(id: string, data: Partial<RoutineInput>) {
             return { success: false, error: "Rutina no encontrada" };
         }
         
-        const routineData = docSnap.data();
-        const isOwner = routineData?.coachId === session.user.id;
-        const isAssignedAthlete = routineData?.athleteId === session.user.id;
-        
-        if (!isOwner && !isAssignedAthlete) {
-            return { success: false, error: "No autorizado: no eres el propietario de esta rutina" };
-        }
-
         await adminDb.collection("routines").doc(id).update({
             ...validated,
             updatedAt: new Date(),
@@ -416,13 +391,7 @@ export async function deleteRoutine(id: string) {
         
         const routineData = docSnap.data();
         
-        const isOwner = routineData?.coachId === userId || routineData?.athleteId === userId;
-
-        if (!isOwner) {
-            return { success: false, error: "No tienes permisos para eliminar esta rutina" };
-        }
-        
-        if (routineData?.coachId === userId && !routineData?.athleteId) {
+        if (!routineData?.athleteId) {
             const assignedCopies = await adminDb.collection("routines")
                 .where("originalRoutineId", "==", id)
                 .get();

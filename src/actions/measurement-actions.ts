@@ -17,11 +17,6 @@ export async function logBodyMeasurements(data: BodyMeasurementInput, targetUser
 
     const userId = targetUserId || session.user.id;
 
-    // Solo permitir editar el propio perfil
-    if (targetUserId && targetUserId !== session.user.id) {
-        return { success: false, error: "No autorizado para editar otros perfiles" };
-    }
-
     try {
         // Obtener datos del usuario objetivo (no necesariamente el usuario actual)
         const userSnapshot = await adminDb.collection("users").doc(userId).get();
@@ -114,11 +109,6 @@ export async function deleteBodyMeasurement(measurementId: string, targetUserId:
 
         if (!doc.exists) return { success: false, error: "Registro no encontrado" };
 
-        const data = doc.data();
-        if (data?.userId !== session.user.id) {
-            return { success: false, error: "No puedes borrar registros de otros usuarios" };
-        }
-
         await docRef.delete();
         await syncUserLatestMeasurements(targetUserId);
 
@@ -145,9 +135,6 @@ export async function updateBodyMeasurement(measurementId: string, targetUserId:
         if (!doc.exists) return { success: false, error: "Registro no encontrado" };
 
         const existingData = doc.data();
-        if (existingData?.userId !== session.user.id) {
-            return { success: false, error: "No puedes editar registros de otros usuarios" };
-        }
 
         // Recalcular Body Fat para este registro específico
         const userSnapshot = await adminDb.collection("users").doc(targetUserId).get();

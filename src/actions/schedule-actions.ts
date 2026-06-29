@@ -114,10 +114,6 @@ export async function assignRoutineDay(data: AssignmentInput, confirmReplace: bo
         return { success: false, error: "No autorizado" };
     }
 
-    if (data.athleteId !== session.user.id) {
-        return { success: false, error: "No autorizado" };
-    }
-
     try {
         // 1. Check Conflicts
         const conflictCheck = await checkAssignmentConflict(data.athleteId, data.date);
@@ -166,10 +162,6 @@ export async function assignRoutineDay(data: AssignmentInput, confirmReplace: bo
 export async function assignRoutineWeek(data: BatchAssignmentInput, confirmReplace: boolean = false) {
     const session = await auth();
     if (!session?.user?.id) {
-        return { success: false, error: "No autorizado" };
-    }
-
-    if (data.athleteId !== session.user.id) {
         return { success: false, error: "No autorizado" };
     }
 

@@ -180,10 +180,6 @@ export async function analyzeViviIntelligence(userId?: string) {
 
     const targetUserId = userId || session.user.id;
 
-    if (targetUserId !== session.user.id) {
-        return { success: false, error: "No autorizado" };
-    }
-
     try {
         const groq = getGroqClient();
 
@@ -374,10 +370,6 @@ export async function getViviIntelligence(userId?: string) {
     if (!session?.user?.id) return null;
 
     const targetUserId = userId || session.user.id;
-
-    if (targetUserId !== session.user.id) {
-        return null;
-    }
 
     try {
         const doc = await adminDb.collection("vivi_intelligence").doc(targetUserId).get();

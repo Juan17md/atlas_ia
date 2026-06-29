@@ -115,7 +115,6 @@ export async function getTrainingLogs(userId?: string) {
     const session = await auth();
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
     const targetId = userId || session.user.id;
-    if (targetId !== session.user.id) return { success: false, error: "No autorizado" };
 
     try {
         const snapshot = await adminDb.collection("training_logs").where("athleteId", "==", targetId).orderBy("date", "desc").limit(20).get();
