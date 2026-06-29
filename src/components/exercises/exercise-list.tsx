@@ -15,7 +15,7 @@ import { deleteExercise } from "@/actions/exercise-actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
+
 import type { ExerciseListItem } from "@/types";
 
 interface ExerciseListProps {
@@ -85,11 +85,7 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
     return (
         <div className="space-y-6">
             {/* Controls */}
-            <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="sticky top-2 md:top-6 z-20 bg-black/40 backdrop-blur-2xl border border-white/5 rounded-3xl md:rounded-4xl p-1 md:p-2 shadow-2xl shadow-black/50 mx-1 md:mx-0"
-            >
+            <div className="sticky top-2 md:top-6 z-20 bg-black/40 backdrop-blur-2xl border border-white/5 rounded-3xl md:rounded-4xl p-1 md:p-2 shadow-2xl shadow-black/50 mx-1 md:mx-0">
                 <div className="flex flex-col gap-2">
                     <div className="relative flex-1 group">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-500 group-focus-within:text-white transition-colors" />
@@ -144,7 +140,7 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
                         ))}
                     </div>
                 </div>
-            </motion.div>
+            </div>
 
             {/* Floating Action Button for Mobile */}
             <div className="fixed bottom-24 right-6 z-50 md:hidden">
@@ -159,7 +155,7 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
 
             {/* Grid Grouped by Muscle */}
             <div className="space-y-12 pb-10">
-                <AnimatePresence mode="sync">
+                
                     {(() => {
                         const groupsToDisplay = filterGroup
                             ? [filterGroup]
@@ -167,12 +163,7 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
 
                         if (groupsToDisplay.length === 0 && filteredExercises.length === 0) {
                             return (
-                                <motion.div
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.95 }}
-                                    className="flex flex-col items-center justify-center py-20 text-center bg-neutral-900/20 backdrop-blur-xl rounded-[3rem] border border-dashed border-white/5 shadow-2xl"
-                                >
+                                <div className="flex flex-col items-center justify-center py-20 text-center bg-neutral-900/20 backdrop-blur-xl rounded-[3rem] border border-dashed border-white/5 shadow-2xl">
                                     <div className="w-20 h-20 bg-neutral-800/50 rounded-full flex items-center justify-center mb-6 border border-white/5">
                                         <Dumbbell className="h-10 w-10 text-neutral-600" />
                                     </div>
@@ -185,7 +176,7 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
                                     >
                                         Limpiar filtros
                                     </Button>
-                                </motion.div>
+                                </div>
                             );
                         }
 
@@ -195,11 +186,8 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
                             if (groupExercises.length === 0) return null;
 
                             return (
-                                <motion.div
+                                <div
                                     key={group}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: gIdx * 0.1 }}
                                     className="space-y-6"
                                 >
                                     {/* Section Header */}
@@ -215,21 +203,13 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
                                     {/* Exercises Grid for this Group */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                         {groupExercises.map((exercise, eIdx) => (
-                                            <motion.div
-                                                key={`${group}-${exercise.id}`}
-                                                initial={{ opacity: 0, scale: 0.95 }}
-                                                animate={{ opacity: 1, scale: 1 }}
-                                                transition={{ delay: (gIdx * 0.1) + (eIdx * 0.05) }}
-                                                whileHover={{ y: -5 }}
-                                                className="group flex flex-col bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-3xl md:rounded-[2.5rem] p-3.5 md:p-6 hover:border-red-500/30 transition-all duration-500 relative overflow-hidden h-full shadow-2xl"
-                                            >
+                                            <div className="group flex flex-col bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-3xl md:rounded-[2.5rem] p-3.5 md:p-6 hover:border-red-500/30 transition-colors relative overflow-hidden h-full shadow-2xl">
                                                 {/* Gradient Blob Overlay */}
-                                                <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/5 rounded-full blur-xl -mr-12 -mt-12 pointer-events-none group-hover:bg-red-600/15 transition-all duration-700"></div>
+                                                <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/5 rounded-full blur-xl -mr-12 -mt-12 pointer-events-none"></div>
 
                                                 {/* Header Actions */}
-                                                <div className="flex justify-between items-start mb-4 md:mb-6 relative z-10 transition-transform duration-500 group-hover:-translate-y-1">
-                                                    <div className="h-10 w-10 md:h-14 md:w-14 bg-neutral-950 rounded-xl md:rounded-2xl flex items-center justify-center text-red-500 group-hover:scale-110 transition-transform duration-500 shadow-2xl border border-white/5 relative overflow-hidden">
-                                                        <div className="absolute inset-0 bg-red-600/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                                <div className="flex justify-between items-start mb-4 md:mb-6 relative z-10">
+                                                    <div className="h-10 w-10 md:h-14 md:w-14 bg-neutral-950 rounded-xl md:rounded-2xl flex items-center justify-center text-red-500 shadow-2xl border border-white/5 relative overflow-hidden">
                                                         <Dumbbell className="h-6 w-6 md:h-7 md:w-7 relative z-10" />
                                                     </div>
                                                     <DropdownMenu>
@@ -284,7 +264,7 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
 
                                                     <div className="space-y-1">
                                                         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-600">Enfoque específico</p>
-                                                        <p className="text-[11px] text-neutral-400 line-clamp-2 font-medium leading-relaxed italic opacity-80 group-hover:opacity-100 transition-opacity">
+                                                        <p className="text-[11px] text-neutral-400 line-clamp-2 font-medium leading-relaxed italic opacity-80">
                                                             {exercise.specificMuscles && exercise.specificMuscles.length > 0
                                                                 ? exercise.specificMuscles.join(" • ")
                                                                 : "Base técnica general"}
@@ -299,13 +279,13 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
                                                             href={exercise.videoUrl}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className="flex items-center justify-between text-[9px] md:text-[10px] text-white font-black bg-neutral-950 hover:bg-red-600 px-4 md:px-5 py-3 md:py-4 rounded-xl md:rounded-2xl transition-all duration-300 w-full group/btn border border-white/5 hover:border-transparent uppercase tracking-[0.2em] shadow-xl"
+                                                                className="flex items-center justify-between text-[9px] md:text-[10px] text-white font-black bg-neutral-950 hover:bg-red-600 px-4 md:px-5 py-3 md:py-4 rounded-xl md:rounded-2xl transition-colors w-full group/btn border border-white/5 hover:border-transparent uppercase tracking-[0.2em] shadow-xl"
                                                         >
                                                             <div className="flex items-center gap-2 md:gap-3">
                                                                 <PlayCircle className="h-4 w-4 md:h-5 md:w-5 text-red-500 group-hover/btn:text-white transition-colors" />
                                                                 <span>Ver Ejecución</span>
                                                             </div>
-                                                            <ExternalLink className="h-3 w-3 md:h-4 md:w-4 opacity-30 group-hover/btn:opacity-100 transition-all duration-300 group-hover/btn:translate-x-1" />
+                                                            <ExternalLink className="h-3 w-3 md:h-4 md:w-4 opacity-30" />
                                                         </a>
                                                     ) : (
                                                         <div className="flex items-center justify-center gap-2 md:gap-3 text-[9px] md:text-[10px] text-neutral-600 font-black bg-neutral-950/30 px-4 md:px-5 py-3 md:py-4 rounded-xl md:rounded-2xl w-full border border-white/5 border-dashed cursor-not-allowed uppercase tracking-[0.2em]">
@@ -314,14 +294,13 @@ export function ExerciseList({ exercises }: ExerciseListProps) {
                                                         </div>
                                                     )}
                                                 </div>
-                                            </motion.div>
+                                            </div>
                                         ))}
                                     </div>
-                                </motion.div>
+                                </div>
                             );
                         });
                     })()}
-                </AnimatePresence>
             </div>
 
             {/* Diálogo de Edición Controlado */}

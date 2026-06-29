@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { Dumbbell, Activity, PlayCircle, TrendingUp, Plus } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -35,11 +34,7 @@ export function AthleteDashboardUI({ user, activityData, weeklyCompleted, weekly
             <div className="absolute top-0 left-1/4 w-96 h-96 bg-red-600/5 rounded-full blur-[50px] pointer-events-none -z-10" />
             <div className="absolute bottom-1/4 right-0 w-64 h-64 bg-blue-600/5 rounded-full blur-[40px] pointer-events-none -z-10" />
 
-            <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex flex-col gap-6 md:flex-row md:justify-between md:items-end mb-2"
-            >
+            <div className="flex flex-col gap-6 md:flex-row md:justify-between md:items-end mb-2">
                 <div className="space-y-1">
                     <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tighter uppercase italic leading-tight">Dashboard</h2>
                     <p className="text-neutral-500 font-bold uppercase tracking-[0.3em] text-[10px] ml-1 flex items-center gap-2">
@@ -57,12 +52,12 @@ export function AthleteDashboardUI({ user, activityData, weeklyCompleted, weekly
                     </Link>
                     <Link href="/train" className="w-full md:w-auto">
                         <Button className="w-full rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black h-11 md:h-14 px-10 shadow-2xl shadow-red-900/40 uppercase tracking-widest text-[10px] transition-all active:scale-95 group">
-                            <PlayCircle className="w-5 h-5 mr-3 group-hover:scale-110 transition-transform" />
+                            <PlayCircle className="w-5 h-5 mr-3" />
                             Entrenar
                         </Button>
                     </Link>
                 </div>
-            </motion.div>
+            </div>
 
             {/* KPI Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
@@ -107,12 +102,7 @@ export function AthleteDashboardUI({ user, activityData, weeklyCompleted, weekly
             {/* Charts Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Main Activity Chart */}
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="lg:col-span-2 bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-3xl md:rounded-4xl p-5 md:p-10 flex flex-col shadow-2xl"
-                >
+                <div className="lg:col-span-2 bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-3xl md:rounded-4xl p-5 md:p-10 flex flex-col shadow-2xl">
                     <div className="flex justify-between items-start mb-10">
                         <div className="space-y-1">
                             <h3 className="text-xl md:text-2xl font-black text-white uppercase tracking-tight">Actividad Reciente</h3>
@@ -125,30 +115,20 @@ export function AthleteDashboardUI({ user, activityData, weeklyCompleted, weekly
                     <div className="flex-1 min-h-[300px]">
                         <ActivityChart data={activityData} />
                     </div>
-                </motion.div>
+                </div>
 
                     {/* Progress & Next Routine */}
                 <div className="space-y-8">
-                    <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-3xl md:rounded-4xl p-5 md:p-8 shadow-2xl"
-                    >
+                    <div className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-3xl md:rounded-4xl p-5 md:p-8 shadow-2xl">
                         <div className="mb-px">
                             <h3 className="text-lg md:text-xl font-black text-white uppercase tracking-tight">Objetivo</h3>
                             <p className="text-[10px] text-neutral-500 font-black uppercase tracking-widest">Regularidad Semanal</p>
                         </div>
                         <ProgressChart completed={weeklyCompleted} target={weeklyTarget} />
-                    </motion.div>
+                    </div>
 
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true }}
-                        className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-3xl md:rounded-4xl overflow-hidden group hover:border-red-500/30 transition-all duration-500 shadow-2xl relative"
-                    >
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:bg-red-600/20 transition-all duration-700" />
+                    <div className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-3xl md:rounded-4xl overflow-hidden group hover:border-red-500/30 transition-colors shadow-2xl relative">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none" />
 
                         <div className="relative z-10 p-6 md:p-8">
                             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 mb-2">
@@ -184,18 +164,13 @@ export function AthleteDashboardUI({ user, activityData, weeklyCompleted, weekly
                                 </>
                             )}
                         </div>
-                    </motion.div>
+                    </div>
                 </div>
             </div>
 
             {/* AI Insight Card - Re-Stylized */}
-            <motion.div
-                initial={{ opacity: 0, scale: 0.98 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                className="bg-linear-to-br from-neutral-900 via-neutral-900 to-red-900/20 border border-white/5 rounded-3xl md:rounded-4xl p-6 md:p-10 relative overflow-hidden group shadow-3xl"
-            >
-                <div className="absolute top-0 right-0 p-12 opacity-5 group-hover:opacity-10 transition-opacity duration-1000">
+            <div className="bg-linear-to-br from-neutral-900 via-neutral-900 to-red-900/20 border border-white/5 rounded-3xl md:rounded-4xl p-6 md:p-10 relative overflow-hidden group shadow-3xl">
+                <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
                     <Activity className="w-64 h-64 text-red-500 rotate-12" />
                 </div>
 
@@ -223,7 +198,7 @@ export function AthleteDashboardUI({ user, activityData, weeklyCompleted, weekly
                         </Link>
                     </div>
                 </div>
-            </motion.div>
+            </div>
         </div>
     );
 }

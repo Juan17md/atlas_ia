@@ -126,7 +126,7 @@ export default async function TrainPage(props: {
                         >
                             <div className="absolute inset-0 bg-linear-to-r from-blue-600/0 via-blue-600/10 to-blue-600/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                             <div className="flex items-center gap-3 relative z-10">
-                                <Moon className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+                                <Moon className="w-5 h-5" />
                                 <span>Descanso</span>
                             </div>
                             <span className="text-[10px] font-bold text-blue-500/70 mt-1.5 relative z-10">
@@ -170,9 +170,9 @@ export default async function TrainPage(props: {
                 {/* Background decorative elements */}
                 <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-red-600/5 rounded-full blur-[120px] pointer-events-none -z-10" />
 
-                <div className="relative space-y-12 max-w-md w-full animate-in fade-in zoom-in duration-700">
+                <div className="relative space-y-12 max-w-md w-full">
                     <div className="relative mx-auto w-32 h-32 flex items-center justify-center group">
-                        <div className="absolute inset-0 bg-neutral-900/40 backdrop-blur-3xl border border-white/5 rounded-3xl rotate-12 group-hover:rotate-0 transition-transform duration-500" />
+                        <div className="absolute inset-0 bg-neutral-900/40 backdrop-blur-3xl border border-white/5 rounded-3xl" />
                         <AlertCircle className="w-12 h-12 text-red-500 relative z-10 drop-shadow-[0_0_15px_rgba(239,68,68,0.4)]" />
                     </div>
 

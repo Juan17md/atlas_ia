@@ -143,8 +143,7 @@ export default async function MeasurementHistoryPage({ searchParams }: HistoryPa
                                                     </div>
                                                     <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-4 md:gap-6">
                                                         {loggedMeasurements.map(key => (
-                                                            <div key={key} className="bg-neutral-900/60 border border-white/5 rounded-[1.25rem] p-5 flex flex-col justify-between items-start group/card hover:bg-neutral-800 hover:border-red-500/40 hover:-translate-y-1 transition-all duration-300 shadow-xl relative overflow-hidden">
-                                                                <div className="absolute inset-0 bg-linear-to-br from-red-500/0 via-transparent to-red-500/0 group-hover/card:to-red-500/5 pointer-events-none transition-colors duration-500" />
+                                                            <div key={key} className="bg-neutral-900/60 border border-white/5 rounded-[1.25rem] p-5 flex flex-col justify-between items-start group/card hover:bg-neutral-800 hover:border-red-500/40 transition-colors shadow-xl relative overflow-hidden">
                                                                 <span className="text-[10px] text-neutral-500 font-black uppercase tracking-[0.15em] mb-3 italic">{labels[key] || key}</span>
                                                                 <div className="flex items-baseline gap-1 mt-auto">
                                                                     <span className="text-3xl font-black text-white italic group-hover/card:text-red-400 transition-colors uppercase tracking-tight">

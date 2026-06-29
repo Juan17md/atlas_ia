@@ -81,7 +81,7 @@ export default async function HistoryPage() {
                     >
                         <div className={cn("absolute top-0 right-0 w-24 h-24 rounded-full blur-3xl -mr-12 -mt-12 pointer-events-none transition-colors duration-500 opacity-0 group-hover:opacity-100", stat.glow)}></div>
                         <div className="flex flex-col relative z-10">
-                            <div className="w-12 h-12 bg-neutral-950 border border-white/5 rounded-2xl flex items-center justify-center mb-6 shadow-2xl group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
+                            <div className="w-12 h-12 bg-neutral-950 border border-white/5 rounded-2xl flex items-center justify-center mb-6 shadow-2xl">
                                 <stat.icon className={cn("w-6 h-6", stat.color)} />
                             </div>
                             <p className="text-2xl sm:text-3xl md:text-4xl font-black text-white italic tracking-tighter mb-1">{stat.value}</p>

@@ -303,10 +303,9 @@ export function Chatbot() {
       ) : (
         <Button
           size="lg"
-          className="h-16 w-16 rounded-full shadow-[0_0_30px_-5px_rgba(220,38,38,0.5)] p-0 bg-linear-to-br from-red-600 to-red-800 hover:scale-110 transition-all duration-300 border-2 border-white/10 group"
+          className="h-16 w-16 rounded-full shadow-[0_0_30px_-5px_rgba(220,38,38,0.5)] p-0 bg-linear-to-br from-red-600 to-red-800 transition-all duration-300 border-2 border-white/10 group"
           onClick={() => setIsOpen(true)}
         >
-          <div className="absolute inset-0 bg-red-500 rounded-full animate-ping opacity-20 group-hover:opacity-40 duration-1000" />
           <Bot className="h-8 w-8 text-white relative z-10" />
           <span className="absolute top-0 right-0 h-4 w-4 bg-green-500 border-2 border-neutral-900 rounded-full z-20" />
         </Button>

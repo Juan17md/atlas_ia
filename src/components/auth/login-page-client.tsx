@@ -55,14 +55,10 @@ export function LoginPageClient() {
                         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                         className="flex w-full flex-col items-center mb-6 lg:mb-12 cursor-default"
                     >
-                        <motion.div
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.98 }}
-                            className="relative mb-4 rounded-full bg-linear-to-b from-white to-neutral-300 p-[18px] shadow-[0_0_50px_-12px_rgba(255,255,255,0.4)]"
-                        >
+                        <div className="relative mb-4 rounded-full bg-linear-to-b from-white to-neutral-300 p-[18px] shadow-[0_0_50px_-12px_rgba(255,255,255,0.4)]">
                             <Isotipo className="h-8 w-8 shrink-0 relative z-10 drop-shadow-md brightness-0" />
                             <div className="absolute inset-0 rounded-full border border-white/40 shadow-[inset_0_2px_10px_rgba(255,255,255,0.8)] pointer-events-none" />
-                        </motion.div>
+                        </div>
 
                         <AnimatePresence mode="wait">
                             <motion.div

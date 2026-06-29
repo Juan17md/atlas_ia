@@ -42,7 +42,7 @@ export function CancelWorkoutDialog({ open, onOpenChange, onConfirm }: CancelWor
                         onClick={onConfirm}
                         className="w-full h-12 bg-red-600 hover:bg-red-500 text-white rounded-2xl font-black italic text-sm shadow-lg shadow-red-900/40 transition-all active:scale-[0.98] group"
                     >
-                        <XCircle className="w-4 h-4 mr-2 group-hover:rotate-90 transition-transform" />
+                        <XCircle className="w-4 h-4 mr-2" />
                         SÍ, CANCELAR RUTINA
                     </Button>
 

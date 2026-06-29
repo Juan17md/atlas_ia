@@ -35,10 +35,10 @@ export function RestDayView({ dayName }: RestDayViewProps) {
             >
                 {/* Visual Anchor */}
                 <div className="relative mx-auto w-24 h-24 md:w-32 md:h-32 flex items-center justify-center group">
-                    <div className="absolute inset-0 bg-neutral-900/40 backdrop-blur-3xl border border-white/5 rounded-full shadow-2xl group-hover:scale-110 transition-transform duration-700" />
+                    <div className="absolute inset-0 bg-neutral-900/40 backdrop-blur-3xl border border-white/5 rounded-full shadow-2xl" />
                     <div className="absolute inset-2 md:inset-3 border border-blue-500/20 rounded-full border-dashed animate-[spin_15s_linear_infinite]" />
-                    <div className="absolute inset-5 md:inset-6 bg-blue-500/5 rounded-full blur-xl group-hover:bg-blue-500/10 transition-colors duration-500" />
-                    <Moon className="w-10 h-10 md:w-14 md:h-14 text-blue-400 relative z-10 drop-shadow-[0_0_20px_rgba(96,165,250,0.4)] group-hover:rotate-12 transition-transform duration-500" />
+                    <div className="absolute inset-5 md:inset-6 bg-blue-500/5 rounded-full blur-xl" />
+                    <Moon className="w-10 h-10 md:w-14 md:h-14 text-blue-400 relative z-10 drop-shadow-[0_0_20px_rgba(96,165,250,0.4)]" />
                 </div>
 
                 <div className="space-y-3 md:space-y-6">

@@ -10,7 +10,6 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { AssignRoutineDialog } from "@/components/routines/assign-routine-dialog";
 import { AssignedAthletesDialog } from "@/components/routines/assigned-athletes-dialog";
-import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import {
     Dialog,
@@ -85,17 +84,8 @@ export function RoutineCard({ routine, athletes }: RoutineCardProps) {
 
     return (
         <>
-            <motion.div
-                layout
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                whileHover={{ y: -5 }}
-                className="group relative h-full"
-            >
-                <div className="absolute inset-0 bg-red-600/10 rounded-4xl blur-xl opacity-0 group-hover:opacity-40 transition-opacity duration-700 pointer-events-none" />
-
-                <Card className="relative h-full bg-neutral-900/20 backdrop-blur-xl border border-white/5 hover:border-red-600/30 transition-all duration-500 rounded-4xl overflow-hidden shadow-2xl flex flex-col">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-linear-to-bl from-red-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+            <div className="group relative h-full">
+                <Card className="relative h-full bg-neutral-900/20 backdrop-blur-xl border border-white/5 hover:border-red-600/30 transition-colors rounded-4xl overflow-hidden shadow-2xl flex flex-col">
 
                     <CardHeader className="p-4 md:p-6 pb-2 md:pb-4 relative z-10">
                         <div className="flex justify-between items-start gap-4 mb-4">
@@ -144,7 +134,7 @@ export function RoutineCard({ routine, athletes }: RoutineCardProps) {
                             </div>
                         </div>
 
-                        <CardTitle className="text-xl md:text-2xl font-black text-white leading-tight uppercase tracking-tighter italic group-hover:text-red-500 transition-colors duration-500">
+                        <CardTitle className="text-xl md:text-2xl font-black text-white leading-tight uppercase tracking-tighter italic transition-colors">
                             {cleanName}
                         </CardTitle>
                         <p className="text-xs text-neutral-500 line-clamp-2 mt-3 font-bold uppercase tracking-wider opacity-60">
@@ -174,7 +164,7 @@ export function RoutineCard({ routine, athletes }: RoutineCardProps) {
 
                         <div className="flex gap-3">
                             <Link href={`/routines/${routine.id}`} className="flex-[1.5]">
-                                <Button className="w-full bg-white text-black hover:bg-neutral-200 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] h-12 shadow-xl transition-all hover:-translate-y-1 active:scale-95">
+                                <Button className="w-full bg-white text-black hover:bg-neutral-200 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] h-12 shadow-xl transition-all active:scale-95">
                                     <Edit className="w-3.5 h-3.5 mr-2" /> Programar
                                 </Button>
                             </Link>
@@ -184,7 +174,7 @@ export function RoutineCard({ routine, athletes }: RoutineCardProps) {
                         </div>
                     </CardContent>
                 </Card>
-            </motion.div>
+            </div>
 
             <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
                 <DialogContent className="bg-neutral-900 border-red-600/20 text-white rounded-3xl sm:max-w-[500px]">

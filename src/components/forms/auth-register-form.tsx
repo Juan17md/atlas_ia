@@ -215,7 +215,7 @@ export function AuthRegisterForm() {
                         ) : (
                             <>
                                 Crear cuenta
-                                <Sparkles className="h-5 w-5 transition-transform group-hover:rotate-12" />
+                                <Sparkles className="h-5 w-5" />
                             </>
                         )}
                     </span>

@@ -54,7 +54,7 @@ export default async function MyRoutinePage() {
                     className="relative space-y-12 max-w-md w-full"
                 >
                     <div className="relative mx-auto w-32 h-32 flex items-center justify-center group">
-                        <div className="absolute inset-0 bg-neutral-900/40 backdrop-blur-3xl border border-white/5 rounded-3xl -rotate-6 group-hover:rotate-0 transition-transform duration-500" />
+                        <div className="absolute inset-0 bg-neutral-900/40 backdrop-blur-3xl border border-white/5 rounded-3xl" />
                         <Dumbbell className="w-12 h-12 text-neutral-600 relative z-10 group-hover:text-red-500 transition-colors" />
                     </div>
 

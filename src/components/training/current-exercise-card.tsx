@@ -167,7 +167,7 @@ export function ExerciseCardContent({
                             <Sheet>
                                 <SheetTrigger asChild>
                                     <Button variant="outline" className="h-9 text-[10px] font-black uppercase tracking-[0.2em] bg-red-600/10 border-red-600/20 text-red-500 w-fit px-4 rounded-xl hover:bg-red-600/20 transition-all shadow-lg shadow-red-950/20 group">
-                                        <Dumbbell className="w-3 h-3 group-hover:rotate-12 transition-transform mr-2" />
+                                        <Dumbbell className="w-3 h-3 mr-2" />
                                         Máquina Ocupada
                                     </Button>
                                 </SheetTrigger>

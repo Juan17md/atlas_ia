@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
 import { Quote, Zap, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -69,13 +68,10 @@ export const ViviAnalysisModal = React.memo(function ViviAnalysisModal() {
                     <div className="absolute bottom-0 left-0 w-full h-1/2 bg-linear-to-t from-neutral-950 to-transparent" />
                     
                     <div className="relative z-10 flex flex-col items-center">
-                        <motion.div 
-                            initial={{ scale: 0.8, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-xl flex items-center justify-center border border-white/20 shadow-2xl"
+                        <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-xl flex items-center justify-center border border-white/20 shadow-2xl"
                         >
                             <Zap className="w-8 h-8 text-white fill-white shadow-[0_0_20px_rgba(255,255,255,0.5)]" />
-                        </motion.div>
+                        </div>
                         <p className="text-[10px] font-black uppercase tracking-[0.3em] text-red-500 mt-3 drop-shadow-md">Coach Intelligence</p>
                     </div>
                 </div>
@@ -83,29 +79,21 @@ export const ViviAnalysisModal = React.memo(function ViviAnalysisModal() {
                 <div className="p-5 md:p-8 space-y-6 md:space-y-8">
                     {/* Status Cards */}
                     <div className="grid grid-cols-2 gap-4">
-                        <motion.div 
-                            initial={{ x: -20, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            transition={{ delay: 0.3 }}
-                            className="bg-neutral-900/50 border border-neutral-800 p-4 rounded-2xl flex flex-col items-center justify-center group hover:bg-red-950/20 transition-colors"
+                        <div className="bg-neutral-900/50 border border-neutral-800 p-4 rounded-2xl flex flex-col items-center justify-center hover:bg-red-950/20 transition-colors"
                         >
                             <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Carga Local</span>
                             <div className="flex items-baseline gap-1">
                                 <span className="text-2xl font-black text-white">{sessionRpe}</span>
                                 <span className="text-xs text-neutral-500">/10</span>
                             </div>
-                        </motion.div>
-                        <motion.div 
-                            initial={{ x: 20, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            transition={{ delay: 0.4 }}
-                            className="bg-neutral-900/50 border border-neutral-800 p-4 rounded-2xl flex flex-col items-center justify-center group hover:bg-neutral-900 transition-colors"
+                        </div>
+                        <div className="bg-neutral-900/50 border border-neutral-800 p-4 rounded-2xl flex flex-col items-center justify-center hover:bg-neutral-900 transition-colors"
                         >
                             <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Estado</span>
                             <span className={cn("text-xs font-black uppercase tracking-tighter", getRpeColor(sessionRpe))}>
                                 {getRpeLabel(sessionRpe)}
                             </span>
-                        </motion.div>
+                        </div>
                     </div>
 
                     {/* Analysis Content */}
@@ -120,10 +108,7 @@ export const ViviAnalysisModal = React.memo(function ViviAnalysisModal() {
                                 <p className="text-xs font-bold text-neutral-500 uppercase tracking-widest animate-pulse">Analizando rendimiento...</p>
                             </div>
                         ) : (
-                            <motion.div 
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                className="space-y-4"
+                            <div className="space-y-4"
                             >
                                 <div className="text-sm md:text-base text-neutral-300 leading-relaxed font-medium italic relative z-10">
                                     {aiFeedback ? (
@@ -138,18 +123,13 @@ export const ViviAnalysisModal = React.memo(function ViviAnalysisModal() {
                                     <div className="w-1.5 h-1.5 rounded-full bg-red-600" />
                                     <span className="text-[10px] font-black text-neutral-500 uppercase tracking-widest">Feedback Final de Vivi</span>
                                 </div>
-                            </motion.div>
+                            </div>
                         )}
                     </div>
 
                     {/* CTA */}
                     {!isAnalyzing && (
-                        <motion.div
-                            initial={{ y: 20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            transition={{ delay: 0.6 }}
-                            className="pt-2"
-                        >
+                        <div className="pt-2">
                             <Button 
                                 onClick={() => router.push("/dashboard")}
                                 className="w-full bg-white text-black hover:bg-neutral-200 font-black uppercase tracking-widest h-12 md:h-14 rounded-2xl transition-all active:scale-95 shadow-[0_10px_40px_rgba(255,255,255,0.1)] group overflow-hidden relative text-xs md:text-sm"
@@ -157,7 +137,7 @@ export const ViviAnalysisModal = React.memo(function ViviAnalysisModal() {
                                 <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
                                 Continuar al Dashboard
                             </Button>
-                        </motion.div>
+                        </div>
                     )}
                 </div>
             </AlertDialogContent>

@@ -198,9 +198,9 @@ export function TrainingHistoryList({ logs }: TrainingHistoryListProps) {
     if (!logs || logs.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-16 md:py-32 text-center bg-neutral-900/20 backdrop-blur-3xl rounded-4xl border border-white/5 shadow-2xl relative overflow-hidden group">
-                <div className="absolute inset-0 bg-red-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-[100px] pointer-events-none" />
-                <div className="w-24 h-24 bg-neutral-950 border border-white/10 rounded-3xl flex items-center justify-center mb-8 shadow-2xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-                    <Dumbbell className="w-10 h-10 text-neutral-700 group-hover:text-red-500 transition-colors" />
+                <div className="absolute inset-0 bg-red-600/5 blur-[100px] pointer-events-none" />
+                <div className="w-24 h-24 bg-neutral-950 border border-white/10 rounded-3xl flex items-center justify-center mb-8 shadow-2xl">
+                    <Dumbbell className="w-10 h-10 text-neutral-700" />
                 </div>
                 <h3 className="text-3xl font-black text-white px-2 uppercase italic tracking-tighter mb-4">Núcleo Vacío</h3>
                 <p className="text-neutral-500 font-medium text-sm max-w-sm px-4 leading-relaxed tracking-tight">

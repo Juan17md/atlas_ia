@@ -41,11 +41,10 @@ export function StatCard({
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            whileHover={{ y: -4 }}
             transition={{ duration: 0.3 }}
             className={cn(
-                "p-4 md:p-6 rounded-4xl bg-neutral-900/40 backdrop-blur-xl border border-white/5 flex flex-col justify-between h-32 md:h-44 group transition-all relative overflow-hidden shadow-2xl",
-                "hover:border-white/20 hover:bg-neutral-900/60",
+                "p-4 md:p-6 rounded-4xl bg-neutral-900/40 backdrop-blur-xl border border-white/5 flex flex-col justify-between h-32 md:h-44 group relative overflow-hidden shadow-2xl",
+                "hover:border-white/20 hover:bg-neutral-900/60 transition-colors",
                 className
             )}
         >
@@ -58,7 +57,7 @@ export function StatCard({
                     <h3 className="text-2xl md:text-3xl font-black text-white tracking-tighter leading-none">{value}</h3>
                 </div>
                 <div className={cn(
-                    "w-10 h-10 md:w-12 md:h-12 rounded-2xl flex items-center justify-center transition-all duration-500 group-hover:rotate-12 group-hover:scale-110 shadow-lg",
+                    "w-10 h-10 md:w-12 md:h-12 rounded-2xl flex items-center justify-center shadow-lg",
                     colorStyles[color],
                     "border border-white/5"
                 )}>

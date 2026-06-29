@@ -7,7 +7,7 @@ import { Users, Loader2, ChevronRight, Activity } from "lucide-react";
 import { getAssignedAthletes } from "@/actions/routine-actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { motion, AnimatePresence } from "framer-motion";
+
 
 interface Athlete {
     id: string;
@@ -69,14 +69,10 @@ export function AssignedAthletesDialog({ routineId, routineName }: { routineId: 
                             </div>
                         ) : athletes.length > 0 ? (
                             <div className="space-y-2">
-                                <AnimatePresence>
-                                    {athletes.map((athlete, index) => (
-                                        <motion.div
+                                    {athletes.map((athlete) => (
+                                        <div
                                             key={athlete.id}
-                                            initial={{ opacity: 0, x: -10 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: index * 0.05 }}
-                                            className="group flex items-center gap-4 p-4 bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 rounded-2xl transition-all"
+                                            className="flex items-center gap-4 p-4 bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 rounded-2xl transition-colors"
                                         >
                                             <Avatar className="h-12 w-12 border-2 border-white/5 group-hover:border-red-600/20 transition-colors">
                                                 <AvatarImage src={athlete.image || undefined} />
@@ -88,10 +84,9 @@ export function AssignedAthletesDialog({ routineId, routineName }: { routineId: 
                                                 <h4 className="font-black text-white text-sm uppercase tracking-tight italic group-hover:text-red-500 transition-colors">{athlete.name}</h4>
                                                 <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest mt-0.5">{athlete.email}</p>
                                             </div>
-                                            <ChevronRight className="w-4 h-4 text-neutral-700 group-hover:text-red-500 group-hover:translate-x-1 transition-all" />
-                                        </motion.div>
+                                            <ChevronRight className="w-4 h-4 text-neutral-700" />
+                                        </div>
                                     ))}
-                                </AnimatePresence>
                             </div>
                         ) : (
                             <div className="text-center py-24 border-2 border-dashed border-white/5 rounded-4xl bg-white/5 flex flex-col items-center gap-4">
