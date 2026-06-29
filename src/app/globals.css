@@ -3,6 +3,9 @@
 @plugin "tailwindcss-animate";
 
 :root {
+  /* Dark color scheme para inputs/autofill en Chromium */
+  color-scheme: dark;
+
   /* Safe area insets para iOS PWA */
   --safe-area-inset-top: env(safe-area-inset-top, 0px);
   --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
@@ -230,8 +233,11 @@ input:autofill {
   -webkit-box-shadow: 0 0 0 1000px rgb(23 23 23) inset !important;
   box-shadow: 0 0 0 1000px rgb(23 23 23) inset !important;
   -webkit-text-fill-color: white !important;
+  -webkit-background-clip: unset !important;
   caret-color: white !important;
   background-color: rgb(23 23 23) !important;
+  background-clip: unset !important;
   color: white !important;
   transition: background-color 5000s ease-in-out 0s;
+  color-scheme: dark;
 }
