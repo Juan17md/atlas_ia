@@ -29,17 +29,13 @@ export async function getRoutines() {
     if (!session?.user?.id) return { success: false, error: "No autorizado" };
 
     try {
-        const snapshots: FirebaseFirestore.QuerySnapshot[] = [];
-        const assignedSnap = await adminDb.collection("routines").where("athleteId", "==", session.user.id).get();
-        const createdSnap = await adminDb.collection("routines").where("coachId", "==", session.user.id).get();
-        snapshots.push(assignedSnap, createdSnap);
+        const snapshot = await adminDb.collection("routines").get();
 
-        const routinesRaw = snapshots.flatMap(snap => snap.docs.map(doc => {
+        const routines = (snapshot.docs.map(doc => {
             return serializeFirestoreData({ id: doc.id, ...doc.data() });
-        }));
-
-        const routines = Array.from(new Map((routinesRaw as Routine[]).map(r => [r.id, r])).values())
-            .filter(r => !r.deletedAt && r.active !== false);
+        }) as Routine[])
+            .filter(r => !r.deletedAt && r.active !== false)
+            .filter(r => !r.athleteId || r.athleteId === session.user.id);
 
         return { success: true, routines };
     } catch (error) {
@@ -83,7 +79,6 @@ export async function getMyRoutines() {
 
     try {
         const snapshot = await adminDb.collection("routines")
-            .where("coachId", "==", session.user.id)
             .where("deletedAt", "==", null)
             .get();
 
@@ -303,7 +298,9 @@ export async function getRoutine(id: string) {
         if (!docSnap.exists) return { success: false, error: "Rutina no encontrada" };
 
         const data = docSnap.data();
-        const isOwner = data?.athleteId === session.user.id || data?.coachId === session.user.id;
+        const isOwner = data?.athleteId === session.user.id
+            || data?.coachId === session.user.id
+            || !data?.athleteId;
 
         if (!isOwner) {
             return { success: false, error: "No autorizado" };

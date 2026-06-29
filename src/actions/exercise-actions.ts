@@ -65,10 +65,7 @@ export async function getExercises() {
     }
 
     try {
-        let exercisesQuery: FirebaseFirestore.Query = adminDb.collection("exercises");
-
-        // Ver ejercicios propios
-        exercisesQuery = exercisesQuery.where("coachId", "==", session.user.id);
+        const exercisesQuery: FirebaseFirestore.Query = adminDb.collection("exercises");
 
         const snapshot = await exercisesQuery.get();
 

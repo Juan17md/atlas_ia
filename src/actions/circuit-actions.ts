@@ -28,7 +28,6 @@ export async function getCircuitos() {
 
     try {
         const snapshot = await adminDb.collection("circuits")
-            .where("coachId", "==", session.user.id)
             .orderBy("createdAt", "desc")
             .get();
 
